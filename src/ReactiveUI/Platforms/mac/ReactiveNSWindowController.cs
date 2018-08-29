@@ -4,8 +4,8 @@
 
 using System;
 using System.ComponentModel;
-using System.Reactive.Subjects;
 using System.Reactive;
+using System.Reactive.Subjects;
 using AppKit;
 using Foundation;
 
@@ -13,20 +13,48 @@ namespace ReactiveUI
 {
     public class ReactiveWindowController : NSWindowController, IReactiveNotifyPropertyChanged<ReactiveWindowController>, IHandleObservableErrors, IReactiveObject, ICanActivate
     {
-        protected ReactiveWindowController(NSWindow window) : base(window) { setupRxObj(); }
-        protected ReactiveWindowController(string windowNibName) : base(windowNibName) { setupRxObj(); }
-        protected ReactiveWindowController(string windowNibName, NSObject owner) : base(windowNibName, owner) { setupRxObj(); }
-        protected ReactiveWindowController(NSCoder coder) : base(coder) { setupRxObj(); }
-        protected ReactiveWindowController(NSObjectFlag t) : base(t) { setupRxObj(); }
-        protected ReactiveWindowController(IntPtr handle) : base(handle) { setupRxObj(); }
-        protected ReactiveWindowController() { setupRxObj(); }
+        protected ReactiveWindowController(NSWindow window) : base(window)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactiveWindowController(string windowNibName) : base(windowNibName)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactiveWindowController(string windowNibName, NSObject owner) : base(windowNibName, owner)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactiveWindowController(NSCoder coder) : base(coder)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactiveWindowController(NSObjectFlag t) : base(t)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactiveWindowController(IntPtr handle) : base(handle)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactiveWindowController()
+        {
+            SetupRxObj();
+        }
 
         public event PropertyChangingEventHandler PropertyChanging;
 
         void IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args)
         {
             var handler = PropertyChanging;
-            if (handler != null) {
+            if (handler != null)
+            {
                 handler(this, args);
             }
         }
@@ -36,29 +64,35 @@ namespace ReactiveUI
         void IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args)
         {
             var handler = PropertyChanged;
-            if (handler != null) {
+            if (handler != null)
+            {
                 handler(this, args);
             }
         }
 
         /// <summary>
         /// Represents an Observable that fires *before* a property is about to
-        /// be changed.         
+        /// be changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveWindowController>> Changing {
-            get { return this.getChangingObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveWindowController>> Changing
+        {
+            get { return this.GetChangingObservable(); }
         }
 
         /// <summary>
         /// Represents an Observable that fires *after* a property has changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveWindowController>> Changed {
-            get { return this.getChangedObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveWindowController>> Changed
+        {
+            get { return this.GetChangedObservable(); }
         }
 
-        public IObservable<Exception> ThrownExceptions { get { return this.getThrownExceptionsObservable(); } }
+        public IObservable<Exception> ThrownExceptions
+        {
+            get { return this.GetThrownExceptionsObservable(); }
+        }
 
-        void setupRxObj()
+        private void SetupRxObj()
         {
         }
 
@@ -71,13 +105,22 @@ namespace ReactiveUI
         /// notifications.</returns>
         public IDisposable SuppressChangeNotifications()
         {
-            return this.suppressChangeNotifications();
+            return IReactiveObjectExtensions.SuppressChangeNotifications(this);
         }
 
-        readonly Subject<Unit> activated = new Subject<Unit>();
-        public IObservable<Unit> Activated { get { return activated; } }
-        readonly Subject<Unit> deactivated = new Subject<Unit>();
-        public IObservable<Unit> Deactivated { get { return deactivated; } }
+        private readonly Subject<Unit> _activated = new Subject<Unit>();
+
+        public IObservable<Unit> Activated
+        {
+            get { return _activated; }
+        }
+
+        private readonly Subject<Unit> _deactivated = new Subject<Unit>();
+
+        public IObservable<Unit> Deactivated
+        {
+            get { return _deactivated; }
+        }
 
         public override void WindowDidLoad()
         {
@@ -87,9 +130,9 @@ namespace ReactiveUI
             // notification to support (de)activation
             NSNotificationCenter
                 .DefaultCenter
-                .AddObserver(NSWindow.WillCloseNotification, _ => deactivated.OnNext(Unit.Default), this.Window);
+                .AddObserver(NSWindow.WillCloseNotification, _ => _deactivated.OnNext(Unit.Default), Window);
 
-            activated.OnNext(Unit.Default);
+            _activated.OnNext(Unit.Default);
         }
     }
 }

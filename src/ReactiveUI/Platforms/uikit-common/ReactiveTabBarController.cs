@@ -5,8 +5,8 @@
 using System;
 using System.ComponentModel;
 using System.Reactive;
-using System.Reactive.Subjects;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Foundation;
 using UIKit;
 
@@ -15,13 +15,33 @@ namespace ReactiveUI
     public abstract class ReactiveTabBarController : UITabBarController,
     IReactiveNotifyPropertyChanged<ReactiveTabBarController>, IHandleObservableErrors, IReactiveObject, ICanActivate
     {
-        protected ReactiveTabBarController(string nibName, NSBundle bundle) : base(nibName, bundle) { setupRxObj(); }
-        protected ReactiveTabBarController(IntPtr handle) : base(handle) { setupRxObj(); }
-        protected ReactiveTabBarController(NSObjectFlag t) : base(t) { setupRxObj(); }
-        protected ReactiveTabBarController(NSCoder coder) : base(coder) { setupRxObj(); }
-        protected ReactiveTabBarController() { setupRxObj(); }
+        protected ReactiveTabBarController(string nibName, NSBundle bundle) : base(nibName, bundle)
+        {
+            SetupRxObj();
+        }
 
-        public event PropertyChangingEventHandler PropertyChanging {
+        protected ReactiveTabBarController(IntPtr handle) : base(handle)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactiveTabBarController(NSObjectFlag t) : base(t)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactiveTabBarController(NSCoder coder) : base(coder)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactiveTabBarController()
+        {
+            SetupRxObj();
+        }
+
+        public event PropertyChangingEventHandler PropertyChanging
+        {
             add { PropertyChangingEventManager.AddHandler(this, value); }
             remove { PropertyChangingEventManager.RemoveHandler(this, value); }
         }
@@ -31,7 +51,8 @@ namespace ReactiveUI
             PropertyChangingEventManager.DeliverEvent(this, args);
         }
 
-        public event PropertyChangedEventHandler PropertyChanged {
+        public event PropertyChangedEventHandler PropertyChanged
+        {
             add { PropertyChangedEventManager.AddHandler(this, value); }
             remove { PropertyChangedEventManager.RemoveHandler(this, value); }
         }
@@ -43,22 +64,27 @@ namespace ReactiveUI
 
         /// <summary>
         /// Represents an Observable that fires *before* a property is about to
-        /// be changed.         
+        /// be changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveTabBarController>> Changing {
-            get { return this.getChangingObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveTabBarController>> Changing
+        {
+            get { return this.GetChangingObservable(); }
         }
 
         /// <summary>
         /// Represents an Observable that fires *after* a property has changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveTabBarController>> Changed {
-            get { return this.getChangedObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveTabBarController>> Changed
+        {
+            get { return this.GetChangedObservable(); }
         }
 
-        public IObservable<Exception> ThrownExceptions { get { return this.getThrownExceptionsObservable(); } }
+        public IObservable<Exception> ThrownExceptions
+        {
+            get { return this.GetThrownExceptionsObservable(); }
+        }
 
-        void setupRxObj()
+        private void SetupRxObj()
         {
         }
 
@@ -71,25 +97,34 @@ namespace ReactiveUI
         /// notifications.</returns>
         public IDisposable SuppressChangeNotifications()
         {
-            return this.suppressChangeNotifications();
+            return IReactiveObjectExtensions.SuppressChangeNotifications(this);
         }
 
-        Subject<Unit> activated = new Subject<Unit>();
-        public IObservable<Unit> Activated { get { return activated.AsObservable(); } }
-        Subject<Unit> deactivated = new Subject<Unit>();
-        public IObservable<Unit> Deactivated { get { return deactivated.AsObservable(); } }
+        private Subject<Unit> _activated = new Subject<Unit>();
+
+        public IObservable<Unit> Activated
+        {
+            get { return _activated.AsObservable(); }
+        }
+
+        private Subject<Unit> _deactivated = new Subject<Unit>();
+
+        public IObservable<Unit> Deactivated
+        {
+            get { return _deactivated.AsObservable(); }
+        }
 
         public override void ViewWillAppear(bool animated)
         {
             base.ViewWillAppear(animated);
-            activated.OnNext(Unit.Default);
+            _activated.OnNext(Unit.Default);
             this.ActivateSubviews(true);
         }
 
         public override void ViewDidDisappear(bool animated)
         {
             base.ViewDidDisappear(animated);
-            deactivated.OnNext(Unit.Default);
+            _deactivated.OnNext(Unit.Default);
             this.ActivateSubviews(false);
         }
     }
@@ -97,22 +132,38 @@ namespace ReactiveUI
     public abstract class ReactiveTabBarController<TViewModel> : ReactiveTabBarController, IViewFor<TViewModel>
         where TViewModel : class
     {
-        protected ReactiveTabBarController(string nibName, NSBundle bundle) : base(nibName, bundle) { }
-        protected ReactiveTabBarController(IntPtr handle) : base(handle) { }
-        protected ReactiveTabBarController(NSObjectFlag t) : base(t) { }
-        protected ReactiveTabBarController(NSCoder coder) : base(coder) { }
-        protected ReactiveTabBarController() { }
+        protected ReactiveTabBarController(string nibName, NSBundle bundle) : base(nibName, bundle)
+        {
+        }
 
-        TViewModel _viewModel;
-        public TViewModel ViewModel {
+        protected ReactiveTabBarController(IntPtr handle) : base(handle)
+        {
+        }
+
+        protected ReactiveTabBarController(NSObjectFlag t) : base(t)
+        {
+        }
+
+        protected ReactiveTabBarController(NSCoder coder) : base(coder)
+        {
+        }
+
+        protected ReactiveTabBarController()
+        {
+        }
+
+        private TViewModel _viewModel;
+
+        public TViewModel ViewModel
+        {
             get { return _viewModel; }
             set { this.RaiseAndSetIfChanged(ref _viewModel, value); }
         }
 
-        object IViewFor.ViewModel {
+        object IViewFor.ViewModel
+        {
             get { return ViewModel; }
             set { ViewModel = (TViewModel)value; }
         }
     }
 }
-

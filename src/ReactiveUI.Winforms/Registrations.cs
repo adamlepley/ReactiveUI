@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Splat;
 using System;
 using System.Reactive.Concurrency;
 using System.Windows.Forms;
+using Splat;
 
 namespace ReactiveUI.Winforms
 {
@@ -19,7 +19,8 @@ namespace ReactiveUI.Winforms
             registerFunction(() => new WinformsCreatesObservableForProperty(), typeof(ICreatesObservableForProperty));
             registerFunction(() => new ActivationForViewFetcher(), typeof(IActivationForViewFetcher));
 
-            if (!ModeDetector.InUnitTestRunner()) {
+            if (!ModeDetector.InUnitTestRunner())
+            {
                 WindowsFormsSynchronizationContext.AutoInstall = true;
                 RxApp.MainThreadScheduler = new WaitForDispatcherScheduler(() => new SynchronizationContextScheduler(new WindowsFormsSynchronizationContext()));
             }

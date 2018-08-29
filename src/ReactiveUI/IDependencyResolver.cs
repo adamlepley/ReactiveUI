@@ -15,27 +15,28 @@ namespace ReactiveUI
         /// <summary>
         /// This method allows you to initialize resolvers with the default
         /// ReactiveUI types. All resolvers used as the default
-        /// Locator.Current
+        /// Locator.Current.
         /// </summary>
         /// <param name="resolver">The resolver to initialize.</param>
         public static void InitializeReactiveUI(this IMutableDependencyResolver resolver)
         {
-            var extraNs = new[] {
+            var extraNs = new[]
+            {
                 "ReactiveUI.XamForms",
                 "ReactiveUI.Winforms",
                 "ReactiveUI.Wpf"
             };
 
             // Set up the built-in registration
-            (new Registrations()).Register((f,t) => resolver.RegisterConstant(f(), t));
-            (new PlatformRegistrations()).Register((f,t) => resolver.RegisterConstant(f(), t));
+            (new Registrations()).Register((f, t) => resolver.RegisterConstant(f(), t));
+            (new PlatformRegistrations()).Register((f, t) => resolver.RegisterConstant(f(), t));
 
             var fdr = typeof(DependencyResolverMixins);
 
             var assmName = new AssemblyName(
                 fdr.AssemblyQualifiedName.Replace(fdr.FullName + ", ", ""));
 
-            extraNs.ForEach(ns => processRegistrationForNamespace(ns, assmName, resolver));
+            extraNs.ForEach(ns => ProcessRegistrationForNamespace(ns, assmName, resolver));
         }
 
         public static void RegisterViewsForViewModels(this IMutableDependencyResolver resolver, Assembly assembly)
@@ -49,19 +50,20 @@ namespace ReactiveUI
                 var ivf = ti.ImplementedInterfaces.FirstOrDefault(t => t.GetTypeInfo().ImplementedInterfaces.Contains(typeof(IViewFor)));
 
                 // need to check for null because some classes may implement IViewFor but not IViewFor<T> - we don't care about those
-                if (ivf != null) {
+                if (ivf != null)
+                {
                     // my kingdom for c# 6!
                     var contractSource = ti.GetCustomAttribute<ViewContractAttribute>();
                     var contract = contractSource != null ? contractSource.Contract : string.Empty;
 
-                    registerType(resolver, ti, ivf, contract);
+                    RegisterType(resolver, ti, ivf, contract);
                 }
             }
         }
 
-        static void registerType(IMutableDependencyResolver resolver, TypeInfo ti, Type serviceType, string contract)
+        private static void RegisterType(IMutableDependencyResolver resolver, TypeInfo ti, Type serviceType, string contract)
         {
-            var factory = typeFactory(ti);
+            var factory = TypeFactory(ti);
             if (ti.GetCustomAttribute<SingleInstanceViewAttribute>() != null)
             {
                 resolver.RegisterLazySingleton(factory, serviceType, contract);
@@ -72,7 +74,7 @@ namespace ReactiveUI
             }
         }
 
-        static Func<object> typeFactory(TypeInfo typeInfo)
+        private static Func<object> TypeFactory(TypeInfo typeInfo)
         {
 #if PORTABLE
             throw new Exception("You are referencing the Portable version of ReactiveUI in an App. Reference the platform-specific version.");
@@ -82,13 +84,14 @@ namespace ReactiveUI
 #endif
         }
 
-        static void processRegistrationForNamespace(string ns, AssemblyName assmName, IMutableDependencyResolver resolver)
+        private static void ProcessRegistrationForNamespace(string ns, AssemblyName assmName, IMutableDependencyResolver resolver)
         {
             var targetType = ns + ".Registrations";
             var fullName = targetType + ", " + assmName.FullName.Replace(assmName.Name, ns);
 
             var registerTypeClass = Reflection.ReallyFindType(fullName, false);
-            if (registerTypeClass != null) {
+            if (registerTypeClass != null)
+            {
             var registerer = (IWantsToRegisterStuff)Activator.CreateInstance(registerTypeClass);
             registerer.Register((f, t) => resolver.RegisterConstant(f(), t));
         }

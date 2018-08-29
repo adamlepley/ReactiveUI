@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -17,31 +17,41 @@ namespace ReactiveUI
         /// <summary>
         ///
         /// </summary>
-        /// <param name="This"></param>
+        /// <param name="this">The expression.</param>
         /// <returns></returns>
-        public static IEnumerable<Expression> GetExpressionChain(this Expression This)
+        public static IEnumerable<Expression> GetExpressionChain(this Expression @this)
         {
             var expressions = new List<Expression>();
-            var node = This;
+            var node = @this;
 
-            while (node.NodeType != ExpressionType.Parameter) {
-                switch (node.NodeType) {
+            while (node.NodeType != ExpressionType.Parameter)
+            {
+                switch (node.NodeType)
+                {
                 case ExpressionType.Index:
                     var indexExpr = (IndexExpression)node;
-                    if (indexExpr.Object.NodeType != ExpressionType.Parameter) {
+                    if (indexExpr.Object.NodeType != ExpressionType.Parameter)
+                    {
                         expressions.Add(indexExpr.Update(Expression.Parameter(indexExpr.GetParent().Type), indexExpr.Arguments));
-                    } else {
+                    }
+                    else
+                    {
                         expressions.Add(indexExpr);
                     }
+
                     node = indexExpr.Object;
                     break;
                 case ExpressionType.MemberAccess:
                     var memberExpr = (MemberExpression)node;
-                    if (memberExpr.Expression.NodeType != ExpressionType.Parameter) {
+                    if (memberExpr.Expression.NodeType != ExpressionType.Parameter)
+                    {
                         expressions.Add(memberExpr.Update(Expression.Parameter(memberExpr.GetParent().Type)));
-                    } else {
+                    }
+                    else
+                    {
                         expressions.Add(memberExpr);
                     }
+
                     node = memberExpr.Expression;
                     break;
                 default:
@@ -56,12 +66,13 @@ namespace ReactiveUI
         /// <summary>
         ///
         /// </summary>
-        /// <param name="expression"></param>
+        /// <param name="this">The expression.</param>
         /// <returns></returns>
         public static MemberInfo GetMemberInfo(this Expression expression)
         {
             MemberInfo info = null;
-            switch (expression.NodeType) {
+            switch (expression.NodeType)
+            {
             case ExpressionType.Index:
                 info = ((IndexExpression)expression).Indexer;
                 break;
@@ -81,11 +92,12 @@ namespace ReactiveUI
         /// <summary>
         ///
         /// </summary>
-        /// <param name="expression"></param>
+        /// <param name="this">The expression.</param>
         /// <returns></returns>
         public static Expression GetParent(this Expression expression)
         {
-            switch (expression.NodeType) {
+            switch (expression.NodeType)
+            {
             case ExpressionType.Index:
                 return ((IndexExpression)expression).Object;
             case ExpressionType.MemberAccess:
@@ -98,15 +110,16 @@ namespace ReactiveUI
         /// <summary>
         ///
         /// </summary>
-        /// <param name="expression"></param>
+        /// <param name="this">The expression.</param>
         /// <returns></returns>
         public static object[] GetArgumentsArray(this Expression expression)
         {
-            if (expression.NodeType == ExpressionType.Index) {
+            if (expression.NodeType == ExpressionType.Index)
+            {
                 return ((IndexExpression)expression).Arguments.Cast<ConstantExpression>().Select(c => c.Value).ToArray();
-            } else {
-                return null;
             }
+
+            return null;
         }
     }
 }

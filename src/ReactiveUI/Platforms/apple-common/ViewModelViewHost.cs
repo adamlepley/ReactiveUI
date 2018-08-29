@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Reactive.Linq;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 
 #if UIKIT
 using UIKit;
@@ -18,45 +18,50 @@ namespace ReactiveUI
 {
     public class ViewModelViewHost : ReactiveViewController
     {
-        private readonly SerialDisposable currentView;
-        private readonly ObservableAsPropertyHelper<string> viewContract;
-        private IViewLocator viewLocator;
-        private NSViewController defaultContent;
-        private IReactiveObject viewModel;
-        private IObservable<string> viewContractObservable;
+        private readonly SerialDisposable _currentView;
+        private readonly ObservableAsPropertyHelper<string> _viewContract;
+        private IViewLocator _viewLocator;
+        private NSViewController _defaultContent;
+        private IReactiveObject _viewModel;
+        private IObservable<string> _viewContractObservable;
 
         public ViewModelViewHost()
         {
-            this.currentView = new SerialDisposable();
-            this.viewContract = this
+            _currentView = new SerialDisposable();
+            _viewContract = this
                 .WhenAnyObservable(x => x.ViewContractObservable)
                 .ToProperty(this, x => x.ViewContract, scheduler: RxApp.MainThreadScheduler);
 
-            this.Initialize();
+            Initialize();
         }
 
-        public IViewLocator ViewLocator {
-            get { return viewLocator; }
-            set { this.RaiseAndSetIfChanged(ref viewLocator, value); }
+        public IViewLocator ViewLocator
+        {
+            get { return _viewLocator; }
+            set { this.RaiseAndSetIfChanged(ref _viewLocator, value); }
         }
 
-        public NSViewController DefaultContent {
-            get { return defaultContent; }
-            set { this.RaiseAndSetIfChanged(ref defaultContent, value); }
+        public NSViewController DefaultContent
+        {
+            get { return _defaultContent; }
+            set { this.RaiseAndSetIfChanged(ref _defaultContent, value); }
         }
 
-        public IReactiveObject ViewModel {
-            get { return viewModel; }
-            set { this.RaiseAndSetIfChanged(ref viewModel, value); }
+        public IReactiveObject ViewModel
+        {
+            get { return _viewModel; }
+            set { this.RaiseAndSetIfChanged(ref _viewModel, value); }
         }
 
-        public IObservable<string> ViewContractObservable {
-            get { return viewContractObservable; }
-            set { this.RaiseAndSetIfChanged(ref viewContractObservable, value); }
+        public IObservable<string> ViewContractObservable
+        {
+            get { return _viewContractObservable; }
+            set { this.RaiseAndSetIfChanged(ref _viewContractObservable, value); }
         }
 
-        public string ViewContract {
-            get { return this.viewContract.Value; }
+        public string ViewContract
+        {
+            get { return _viewContract.Value; }
             set { ViewContractObservable = Observable.Return(value); }
         }
 
@@ -80,14 +85,17 @@ namespace ReactiveUI
             viewChange
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(
-                    x => {
+                    x =>
+                    {
                         var viewLocator = ViewLocator ?? ReactiveUI.ViewLocator.Current;
                         var view = viewLocator.ResolveView(x.ViewModel, x.Contract);
 
-                        if (view == null) {
+                        if (view == null)
+                        {
                             var message = string.Format("Unable to resolve view for \"{0}\"", x.ViewModel.GetType());
 
-                            if (x.Contract != null) {
+                            if (x.Contract != null)
+                            {
                                 message += string.Format(" and contract \"{0}\"", x.Contract.GetType());
                             }
 
@@ -97,7 +105,8 @@ namespace ReactiveUI
 
                         var viewController = view as NSViewController;
 
-                        if (viewController == null) {
+                        if (viewController == null)
+                        {
                             throw new Exception(
                                 string.Format(
                                     "Resolved view type '{0}' is not a '{1}'.",
@@ -111,7 +120,7 @@ namespace ReactiveUI
                         var disposables = new CompositeDisposable();
                         disposables.Add(viewController);
                         disposables.Add(Disposable.Create(() => Disown(viewController)));
-                        currentView.Disposable = disposables;
+                        _currentView.Disposable = disposables;
                     });
 
             defaultViewChange
@@ -123,9 +132,10 @@ namespace ReactiveUI
         {
             base.Dispose(disposing);
 
-            if (disposing) {
-                this.currentView.Dispose();
-                this.viewContract.Dispose();
+            if (disposing)
+            {
+                _currentView.Dispose();
+                _viewContract.Dispose();
             }
         }
 
@@ -173,8 +183,6 @@ namespace ReactiveUI
         }
     }
 
-
-
     /// <summary>
     /// ViewModelViewHost is a helper class that will connect a ViewModel
     /// to an arbitrary NSView and attempt to load the View for the current
@@ -195,7 +203,10 @@ namespace ReactiveUI
 
         public ViewModelViewHostLegacy(NSView targetView)
         {
-            if (targetView == null) throw new ArgumentNullException("targetView");
+            if (targetView == null)
+            {
+                throw new ArgumentNullException(nameof(targetView));
+            }
 
             NSView viewLastAdded = null;
             ViewContractObservable = Observable<string>.Default;
@@ -205,11 +216,20 @@ namespace ReactiveUI
                 this.WhenAnyObservable(x => x.ViewContractObservable),
                 (vm, contract) => new { ViewModel = vm, Contract = contract, });
 
-            vmAndContract.Subscribe(x => {
-                if (viewLastAdded != null) viewLastAdded.RemoveFromSuperview();
+            vmAndContract.Subscribe(x =>
+            {
+                if (viewLastAdded != null)
+                {
+                    viewLastAdded.RemoveFromSuperview();
+                }
 
-                if (ViewModel == null) {
-                    if (DefaultContent != null) targetView.AddSubview(DefaultContent.View);
+                if (ViewModel == null)
+                {
+                    if (DefaultContent != null)
+                    {
+                        targetView.AddSubview(DefaultContent.View);
+                    }
+
                     return;
                 }
 
@@ -218,11 +238,13 @@ namespace ReactiveUI
                 var viewController = viewLocator.ResolveView(x.ViewModel, x.Contract);
 
                 // if not found, throw
-                if (viewController == null) {
-                    var message = String.Format("Unable to resolve view for \"{0}\"", x.ViewModel.GetType());
+                if (viewController == null)
+                {
+                    var message = string.Format("Unable to resolve view for \"{0}\"", x.ViewModel.GetType());
 
-                    if (x.Contract != null) {
-                        message += String.Format(" and contract \"{0}\"", x.Contract.GetType());
+                    if (x.Contract != null)
+                    {
+                        message += string.Format(" and contract \"{0}\"", x.Contract.GetType());
                     }
 
                     message += ".";
@@ -234,48 +256,57 @@ namespace ReactiveUI
                 viewLastAdded = ((NSViewController)viewController).View;
 
                 // sanity check, view controllers are expect to have a view
-                if (viewLastAdded == null) {
+                if (viewLastAdded == null)
+                {
                     var message = string.Format("No view associated with view controller {0}.", viewController.GetType());
                     throw new Exception(message);
                 }
 
-                if (AddAutoLayoutConstraintsToSubView) {
+                if (AddAutoLayoutConstraintsToSubView)
+                {
                     // see https://developer.apple.com/library/ios/documentation/userexperience/conceptual/AutolayoutPG/AdoptingAutoLayout/AdoptingAutoLayout.html
                     viewLastAdded.TranslatesAutoresizingMaskIntoConstraints = false;
                 }
 
                 targetView.AddSubview(viewLastAdded);
 
-                if (AddAutoLayoutConstraintsToSubView) {
+                if (AddAutoLayoutConstraintsToSubView)
+                {
                     // Add edge constraints so that subview trails changes in parent
-                    addEdgeConstraint(NSLayoutAttribute.Left, targetView, viewLastAdded);
-                    addEdgeConstraint(NSLayoutAttribute.Right, targetView, viewLastAdded);
-                    addEdgeConstraint(NSLayoutAttribute.Top, targetView, viewLastAdded);
-                    addEdgeConstraint(NSLayoutAttribute.Bottom, targetView, viewLastAdded);
+                    AddEdgeConstraint(NSLayoutAttribute.Left, targetView, viewLastAdded);
+                    AddEdgeConstraint(NSLayoutAttribute.Right, targetView, viewLastAdded);
+                    AddEdgeConstraint(NSLayoutAttribute.Top, targetView, viewLastAdded);
+                    AddEdgeConstraint(NSLayoutAttribute.Bottom, targetView, viewLastAdded);
                 }
             });
         }
 
-        void addEdgeConstraint(NSLayoutAttribute edge, NSView parentView, NSView subView)
+        private void AddEdgeConstraint(NSLayoutAttribute edge, NSView parentView, NSView subView)
         {
             var constraint = NSLayoutConstraint.Create(subView, edge, NSLayoutRelation.Equal, parentView, edge, 1, 0);
             parentView.AddConstraint(constraint);
         }
 
-        NSViewController _DefaultContent;
-        public NSViewController DefaultContent {
+        private NSViewController _DefaultContent;
+
+        public NSViewController DefaultContent
+        {
             get { return _DefaultContent; }
             set { this.RaiseAndSetIfChanged(ref _DefaultContent, value); }
         }
 
-        IReactiveObject _ViewModel;
-        public IReactiveObject ViewModel {
+        private IReactiveObject _ViewModel;
+
+        public IReactiveObject ViewModel
+        {
             get { return _ViewModel; }
             set { this.RaiseAndSetIfChanged(ref _ViewModel, value); }
         }
 
-        IObservable<string> _ViewContractObservable;
-        public IObservable<string> ViewContractObservable {
+        private IObservable<string> _ViewContractObservable;
+
+        public IObservable<string> ViewContractObservable
+        {
             get { return _ViewContractObservable; }
             set { this.RaiseAndSetIfChanged(ref _ViewContractObservable, value); }
         }

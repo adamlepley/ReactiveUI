@@ -20,20 +20,20 @@ namespace ReactiveUI.XamForms
 
         public TViewModel ViewModel
         {
-            get { return (TViewModel)GetValue(ViewModelProperty); }
-            set { SetValue(ViewModelProperty, value); }
+            get => (TViewModel)GetValue(ViewModelProperty);
+            set => SetValue(ViewModelProperty, value);
         }
 
         object IViewFor.ViewModel
         {
-            get { return this.ViewModel; }
-            set { this.ViewModel = (TViewModel)value; }
+            get => ViewModel;
+            set => ViewModel = (TViewModel)value;
         }
 
         protected override void OnBindingContextChanged()
         {
             base.OnBindingContextChanged();
-            this.ViewModel = this.BindingContext as TViewModel;
+            ViewModel = BindingContext as TViewModel;
         }
 
         private static void OnViewModelChanged(BindableObject bindableObject, object oldValue, object newValue)

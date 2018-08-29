@@ -4,22 +4,26 @@
 
 using System;
 using System.ComponentModel;
-using System.Reactive.Subjects;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace ReactiveUI.AndroidSupport
 {
     /// <summary>
-    /// This is a DialogFragment that is both a DialogFragment and has ReactiveObject powers 
-    /// (i.e. you can call RaiseAndSetIfChanged)
+    /// This is a DialogFragment that is both a DialogFragment and has ReactiveObject powers
+    /// (i.e. you can call RaiseAndSetIfChanged).
     /// </summary>
+    /// <typeparam name="TViewModel"></typeparam>
     public class ReactiveDialogFragment<TViewModel> : ReactiveDialogFragment, IViewFor<TViewModel>, ICanActivate
         where TViewModel : class
     {
-        protected ReactiveDialogFragment() { }
+        protected ReactiveDialogFragment()
+        {
+        }
 
-        TViewModel _ViewModel;
+        private TViewModel _ViewModel;
+
         public TViewModel ViewModel
         {
             get => _ViewModel;
@@ -34,12 +38,14 @@ namespace ReactiveUI.AndroidSupport
     }
 
     /// <summary>
-    /// This is a Fragment that is both an Activity and has ReactiveObject powers 
-    /// (i.e. you can call RaiseAndSetIfChanged)
+    /// This is a Fragment that is both an Activity and has ReactiveObject powers
+    /// (i.e. you can call RaiseAndSetIfChanged).
     /// </summary>
     public class ReactiveDialogFragment : global::Android.Support.V4.App.DialogFragment, IReactiveNotifyPropertyChanged<ReactiveDialogFragment>, IReactiveObject, IHandleObservableErrors
     {
-        protected ReactiveDialogFragment() { }
+        protected ReactiveDialogFragment()
+        {
+        }
 
         public event PropertyChangingEventHandler PropertyChanging
         {
@@ -65,14 +71,14 @@ namespace ReactiveUI.AndroidSupport
 
         /// <summary>
         /// Represents an Observable that fires *before* a property is about to
-        /// be changed.         
+        /// be changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveDialogFragment>> Changing => this.getChangingObservable();
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveDialogFragment>> Changing => this.GetChangingObservable();
 
         /// <summary>
         /// Represents an Observable that fires *after* a property has changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveDialogFragment>> Changed => this.getChangedObservable();
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveDialogFragment>> Changed => this.GetChangedObservable();
 
         /// <summary>
         /// When this method is called, an object will not fire change
@@ -83,27 +89,29 @@ namespace ReactiveUI.AndroidSupport
         /// notifications.</returns>
         public IDisposable SuppressChangeNotifications()
         {
-            return this.suppressChangeNotifications();
+            return IReactiveObjectExtensions.SuppressChangeNotifications(this);
         }
 
-        public IObservable<Exception> ThrownExceptions => this.getThrownExceptionsObservable();
+        public IObservable<Exception> ThrownExceptions => this.GetThrownExceptionsObservable();
 
-        readonly Subject<Unit> activated = new Subject<Unit>();
-        public IObservable<Unit> Activated => activated.AsObservable();
+        private readonly Subject<Unit> _activated = new Subject<Unit>();
 
-        readonly Subject<Unit> deactivated = new Subject<Unit>();
-        public IObservable<Unit> Deactivated => deactivated.AsObservable();
+        public IObservable<Unit> Activated => _activated.AsObservable();
+
+        private readonly Subject<Unit> _deactivated = new Subject<Unit>();
+
+        public IObservable<Unit> Deactivated => _deactivated.AsObservable();
 
         public override void OnPause()
         {
             base.OnPause();
-            deactivated.OnNext(Unit.Default);
+            _deactivated.OnNext(Unit.Default);
         }
 
         public override void OnResume()
         {
             base.OnResume();
-            activated.OnNext(Unit.Default);
+            _activated.OnNext(Unit.Default);
         }
     }
 }

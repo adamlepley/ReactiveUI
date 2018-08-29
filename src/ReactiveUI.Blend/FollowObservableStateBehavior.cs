@@ -5,14 +5,13 @@
 using System;
 using System.Reactive.Linq;
 
-
 #if NETFX_CORE
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 #else
 using System.Windows;
-using System.Windows.Interactivity;
 using System.Windows.Controls;
+using System.Windows.Interactivity;
 #endif
 
 namespace ReactiveUI.Blend
@@ -25,11 +24,12 @@ namespace ReactiveUI.Blend
     {
         public IObservable<string> StateObservable
         {
-            get { return (IObservable<string>)GetValue(StateObservableProperty); }
-            set { SetValue(StateObservableProperty, value); }
+            get => (IObservable<string>)GetValue(StateObservableProperty);
+            set => SetValue(StateObservableProperty, value);
         }
+
         public static readonly DependencyProperty StateObservableProperty =
-            DependencyProperty.Register("StateObservable", typeof(IObservable<string>), typeof(FollowObservableStateBehavior), new PropertyMetadata(null, onStateObservableChanged));
+            DependencyProperty.Register("StateObservable", typeof(IObservable<string>), typeof(FollowObservableStateBehavior), new PropertyMetadata(null, OnStateObservableChanged));
 
 #if NETFX_CORE
         public Control TargetObject
@@ -37,55 +37,69 @@ namespace ReactiveUI.Blend
             get { return (Control)GetValue(TargetObjectProperty); }
             set { SetValue(TargetObjectProperty, value); }
         }
+
         public static readonly DependencyProperty TargetObjectProperty =
             DependencyProperty.Register("TargetObject", typeof(Control), typeof(FollowObservableStateBehavior), new PropertyMetadata(null));
 #else
-        public FrameworkElement TargetObject {
-            get { return (FrameworkElement)GetValue(TargetObjectProperty); }
-            set { SetValue(TargetObjectProperty, value); }
+        public FrameworkElement TargetObject
+        {
+            get => (FrameworkElement)GetValue(TargetObjectProperty);
+            set => SetValue(TargetObjectProperty, value);
         }
+
         public static readonly DependencyProperty TargetObjectProperty =
             DependencyProperty.Register("TargetObject", typeof(FrameworkElement), typeof(FollowObservableStateBehavior), new PropertyMetadata(null));
 #endif
 
         public bool AutoResubscribeOnError { get; set; }
 
-        IDisposable watcher;
+        private IDisposable _watcher;
 
         protected override void OnDetaching()
         {
-            if (watcher != null) {
-                watcher.Dispose();
-                watcher = null;
+            if (_watcher != null)
+            {
+                _watcher.Dispose();
+                _watcher = null;
             }
+
             base.OnDetaching();
         }
 
-        protected static void onStateObservableChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        protected static void OnStateObservableChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             var This = (FollowObservableStateBehavior)sender;
-            if (This.watcher != null) {
-                This.watcher.Dispose();
-                This.watcher = null;
+            if (This._watcher != null)
+            {
+                This._watcher.Dispose();
+                This._watcher = null;
             }
 
-            This.watcher = ((IObservable<string>)e.NewValue).ObserveOn(RxApp.MainThreadScheduler).Subscribe(
-                x => {
+            This._watcher = ((IObservable<string>)e.NewValue).ObserveOn(RxApp.MainThreadScheduler).Subscribe(
+                x =>
+                {
                     var target = This.TargetObject ?? This.AssociatedObject;
 #if NETFX_CORE
                     VisualStateManager.GoToState(target, x, true);
 #else
-                    if (target is Control) {
+                    if (target is Control)
+                    {
                         VisualStateManager.GoToState(target, x, true);
-                    } else {
+                    }
+                    else
+                    {
                         VisualStateManager.GoToElementState(target, x, true);
                     }
 #endif
                 },
-                ex => {
+                ex =>
+                {
                     if (!This.AutoResubscribeOnError)
+                    {
                         return;
-                    onStateObservableChanged(This, e);
+                    }
+
+                    OnStateObservableChanged(This, e);
                 });
         }
     }

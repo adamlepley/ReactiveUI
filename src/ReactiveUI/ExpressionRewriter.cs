@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -16,23 +16,24 @@ namespace ReactiveUI
     {
         public override Expression Visit(Expression node)
         {
-            switch (node.NodeType) {
+            switch (node.NodeType)
+            {
             case ExpressionType.ArrayIndex:
-                return this.VisitBinary((BinaryExpression)node);
+                return VisitBinary((BinaryExpression)node);
             case ExpressionType.ArrayLength:
-                return this.VisitUnary((UnaryExpression)node);
+                return VisitUnary((UnaryExpression)node);
             case ExpressionType.Call:
-                return this.VisitMethodCall((MethodCallExpression)node);
+                return VisitMethodCall((MethodCallExpression)node);
             case ExpressionType.Index:
-                return this.VisitIndex((IndexExpression)node);
+                return VisitIndex((IndexExpression)node);
             case ExpressionType.MemberAccess:
-                return this.VisitMember((MemberExpression)node);
+                return VisitMember((MemberExpression)node);
             case ExpressionType.Parameter:
-                return this.VisitParameter((ParameterExpression)node);
+                return VisitParameter((ParameterExpression)node);
             case ExpressionType.Constant:
-                return this.VisitConstant((ConstantExpression)node);
+                return VisitConstant((ConstantExpression)node);
             case ExpressionType.Convert:
-                return this.VisitUnary((UnaryExpression)node);
+                return VisitUnary((UnaryExpression)node);
             default:
                 throw new NotSupportedException(string.Format("Unsupported expression type: '{0}'", node.NodeType));
             }
@@ -40,39 +41,47 @@ namespace ReactiveUI
 
         protected override Expression VisitBinary(BinaryExpression node)
         {
-            if (!(node.Right is ConstantExpression)) {
+            if (!(node.Right is ConstantExpression))
+            {
                 throw new NotSupportedException("Array index expressions are only supported with constants.");
             }
 
-            Expression left = this.Visit(node.Left);
-            Expression right = this.Visit(node.Right);
+            Expression left = Visit(node.Left);
+            Expression right = Visit(node.Right);
 
             // Translate arrayindex into normal index expression
-            return Expression.MakeIndex(left, left.Type.GetRuntimeProperty("Item"), new[] {right });
+            return Expression.MakeIndex(left, left.Type.GetRuntimeProperty("Item"), new[] { right });
         }
 
         protected override Expression VisitUnary(UnaryExpression node)
         {
-            if (node.NodeType == ExpressionType.ArrayLength) {
-                Expression expression = this.Visit(node.Operand);
-                //translate arraylength into normal member expression
+            if (node.NodeType == ExpressionType.ArrayLength)
+            {
+                Expression expression = Visit(node.Operand);
+
+                // translate arraylength into normal member expression
                 return Expression.MakeMemberAccess(expression, expression.Type.GetRuntimeProperty("Length"));
-            } else if (node.NodeType == ExpressionType.Convert) {
-                return this.Visit(node.Operand);
-            } else {
-                return node.Update(this.Visit(node.Operand));
+            }
+            else if (node.NodeType == ExpressionType.Convert)
+            {
+                return Visit(node.Operand);
+            }
+            else
+            {
+                return node.Update(Visit(node.Operand));
             }
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
             // Rewrite a method call to an indexer as an index expression
-            if (node.Arguments.Any(e => !(e is ConstantExpression)) || !node.Method.IsSpecialName) {
+            if (node.Arguments.Any(e => !(e is ConstantExpression)) || !node.Method.IsSpecialName)
+            {
                 throw new NotSupportedException("Index expressions are only supported with constants.");
             }
 
-            Expression instance = this.Visit(node.Object);
-            IEnumerable<Expression> arguments = this.Visit(node.Arguments);
+            Expression instance = Visit(node.Object);
+            IEnumerable<Expression> arguments = Visit(node.Arguments);
 
             // Translate call to get_Item into normal index expression
             return Expression.MakeIndex(instance, instance.Type.GetRuntimeProperty("Item"), arguments);
@@ -80,7 +89,8 @@ namespace ReactiveUI
 
         protected override Expression VisitIndex(IndexExpression node)
         {
-            if (node.Arguments.Any(e => !(e is ConstantExpression))) {
+            if (node.Arguments.Any(e => !(e is ConstantExpression)))
+            {
                 throw new NotSupportedException("Index expressions are only supported with constants.");
             }
 

@@ -16,18 +16,38 @@ namespace ReactiveUI
     public abstract class ReactiveCollectionReusableView : UICollectionReusableView,
         IReactiveNotifyPropertyChanged<ReactiveCollectionReusableView>, IHandleObservableErrors, IReactiveObject, ICanActivate
     {
-        protected ReactiveCollectionReusableView(CGRect frame) : base(frame) { setupRxObj(); }
-        protected ReactiveCollectionReusableView() : base() { setupRxObj(); }
-        protected ReactiveCollectionReusableView(IntPtr handle) : base(handle) { setupRxObj(); }
-        protected ReactiveCollectionReusableView(NSObjectFlag t) : base(t) { setupRxObj(); }
-        protected ReactiveCollectionReusableView(NSCoder coder) : base(coder) { setupRxObj(); }
+        protected ReactiveCollectionReusableView(CGRect frame) : base(frame)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactiveCollectionReusableView() : base()
+        {
+            SetupRxObj();
+        }
+
+        protected ReactiveCollectionReusableView(IntPtr handle) : base(handle)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactiveCollectionReusableView(NSObjectFlag t) : base(t)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactiveCollectionReusableView(NSCoder coder) : base(coder)
+        {
+            SetupRxObj();
+        }
 
         public event PropertyChangingEventHandler PropertyChanging;
 
         void IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args)
         {
             var handler = PropertyChanging;
-            if (handler != null) {
+            if (handler != null)
+            {
                 handler(this, args);
             }
         }
@@ -37,7 +57,8 @@ namespace ReactiveUI
         void IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args)
         {
             var handler = PropertyChanged;
-            if (handler != null) {
+            if (handler != null)
+            {
                 handler(this, args);
             }
         }
@@ -46,20 +67,25 @@ namespace ReactiveUI
         /// Represents an Observable that fires *before* a property is about to
         /// be changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveCollectionReusableView>> Changing {
-            get { return this.getChangingObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveCollectionReusableView>> Changing
+        {
+            get { return this.GetChangingObservable(); }
         }
 
         /// <summary>
         /// Represents an Observable that fires *after* a property has changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveCollectionReusableView>> Changed {
-            get { return this.getChangedObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveCollectionReusableView>> Changed
+        {
+            get { return this.GetChangedObservable(); }
         }
 
-        public IObservable<Exception> ThrownExceptions { get { return this.getThrownExceptionsObservable(); } }
+        public IObservable<Exception> ThrownExceptions
+        {
+            get { return this.GetThrownExceptionsObservable(); }
+        }
 
-        void setupRxObj()
+        private void SetupRxObj()
         {
         }
 
@@ -72,43 +98,69 @@ namespace ReactiveUI
         /// notifications.</returns>
         public IDisposable SuppressChangeNotifications()
         {
-            return this.suppressChangeNotifications();
+            return IReactiveObjectExtensions.SuppressChangeNotifications(this);
         }
 
-        Subject<Unit> activated = new Subject<Unit>();
-        public IObservable<Unit> Activated { get { return activated.AsObservable(); } }
-        Subject<Unit> deactivated = new Subject<Unit>();
-        public IObservable<Unit> Deactivated { get { return deactivated.AsObservable(); } }
+        private Subject<Unit> _activated = new Subject<Unit>();
+
+        public IObservable<Unit> Activated
+        {
+            get { return _activated.AsObservable(); }
+        }
+
+        private Subject<Unit> _deactivated = new Subject<Unit>();
+
+        public IObservable<Unit> Deactivated
+        {
+            get { return _deactivated.AsObservable(); }
+        }
 
         public override void WillMoveToSuperview(UIView newsuper)
         {
             base.WillMoveToSuperview(newsuper);
-            activated.OnNext(Unit.Default);
+            _activated.OnNext(Unit.Default);
         }
 
         public override void RemoveFromSuperview()
         {
             base.RemoveFromSuperview();
-            deactivated.OnNext(Unit.Default);
+            _deactivated.OnNext(Unit.Default);
         }
     }
 
     public abstract class ReactiveCollectionReusableView<TViewModel> : ReactiveCollectionReusableView, IViewFor<TViewModel>
         where TViewModel : class
     {
-        protected ReactiveCollectionReusableView() { }
-        protected ReactiveCollectionReusableView(IntPtr handle) : base(handle) { }
-        protected ReactiveCollectionReusableView(NSObjectFlag t) : base(t) { }
-        protected ReactiveCollectionReusableView(NSCoder coder) : base(coder) { }
-        protected ReactiveCollectionReusableView(CGRect frame) : base(frame) { }
+        protected ReactiveCollectionReusableView()
+        {
+        }
 
-        TViewModel _viewModel;
-        public TViewModel ViewModel {
+        protected ReactiveCollectionReusableView(IntPtr handle) : base(handle)
+        {
+        }
+
+        protected ReactiveCollectionReusableView(NSObjectFlag t) : base(t)
+        {
+        }
+
+        protected ReactiveCollectionReusableView(NSCoder coder) : base(coder)
+        {
+        }
+
+        protected ReactiveCollectionReusableView(CGRect frame) : base(frame)
+        {
+        }
+
+        private TViewModel _viewModel;
+
+        public TViewModel ViewModel
+        {
             get { return _viewModel; }
             set { this.RaiseAndSetIfChanged(ref _viewModel, value); }
         }
 
-        object IViewFor.ViewModel {
+        object IViewFor.ViewModel
+        {
             get { return ViewModel; }
             set { ViewModel = (TViewModel)value; }
         }

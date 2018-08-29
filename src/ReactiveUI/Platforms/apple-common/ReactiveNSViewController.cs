@@ -5,34 +5,49 @@
 using System;
 using System.ComponentModel;
 using System.Reactive;
-using System.Reactive.Subjects;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Foundation;
 
 #if UIKIT
 using UIKit;
-using NSViewController = UIKit.UIViewController;
 using NSView = UIKit.UIView;
+using NSViewController = UIKit.UIViewController;
 #else
-using AppKit; 
+using AppKit;
 #endif
 
 namespace ReactiveUI
 {
     /// <summary>
-    /// This is an View that is both an NSViewController and has ReactiveObject powers 
-    /// (i.e. you can call RaiseAndSetIfChanged)
+    /// This is an View that is both an NSViewController and has ReactiveObject powers
+    /// (i.e. you can call RaiseAndSetIfChanged).
     /// </summary>
     public class ReactiveViewController : NSViewController,
         IReactiveNotifyPropertyChanged<ReactiveViewController>, IHandleObservableErrors, IReactiveObject, ICanActivate
     {
-        protected ReactiveViewController() { }
-        protected ReactiveViewController(NSCoder c) : base(c) { }
-        protected ReactiveViewController(NSObjectFlag f) : base(f) { }
-        protected ReactiveViewController(IntPtr handle) : base(handle) { }
-        protected ReactiveViewController(string nibNameOrNull, NSBundle nibBundleOrNull) : base(nibNameOrNull, nibBundleOrNull) { }
+        protected ReactiveViewController()
+        {
+        }
 
-        public event PropertyChangingEventHandler PropertyChanging {
+        protected ReactiveViewController(NSCoder c) : base(c)
+        {
+        }
+
+        protected ReactiveViewController(NSObjectFlag f) : base(f)
+        {
+        }
+
+        protected ReactiveViewController(IntPtr handle) : base(handle)
+        {
+        }
+
+        protected ReactiveViewController(string nibNameOrNull, NSBundle nibBundleOrNull) : base(nibNameOrNull, nibBundleOrNull)
+        {
+        }
+
+        public event PropertyChangingEventHandler PropertyChanging
+        {
             add { PropertyChangingEventManager.AddHandler(this, value); }
             remove { PropertyChangingEventManager.RemoveHandler(this, value); }
         }
@@ -42,7 +57,8 @@ namespace ReactiveUI
             PropertyChangingEventManager.DeliverEvent(this, args);
         }
 
-        public event PropertyChangedEventHandler PropertyChanged {
+        public event PropertyChangedEventHandler PropertyChanged
+        {
             add { PropertyChangedEventManager.AddHandler(this, value); }
             remove { PropertyChangedEventManager.RemoveHandler(this, value); }
         }
@@ -54,20 +70,25 @@ namespace ReactiveUI
 
         /// <summary>
         /// Represents an Observable that fires *before* a property is about to
-        /// be changed.         
+        /// be changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveViewController>> Changing {
-            get { return this.getChangingObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveViewController>> Changing
+        {
+            get { return this.GetChangingObservable(); }
         }
 
         /// <summary>
         /// Represents an Observable that fires *after* a property has changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveViewController>> Changed {
-            get { return this.getChangedObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveViewController>> Changed
+        {
+            get { return this.GetChangedObservable(); }
         }
 
-        public IObservable<Exception> ThrownExceptions { get { return this.getThrownExceptionsObservable(); } }
+        public IObservable<Exception> ThrownExceptions
+        {
+            get { return this.GetThrownExceptionsObservable(); }
+        }
 
         /// <summary>
         /// When this method is called, an object will not fire change
@@ -78,40 +99,49 @@ namespace ReactiveUI
         /// notifications.</returns>
         public IDisposable SuppressChangeNotifications()
         {
-            return this.suppressChangeNotifications();
+            return IReactiveObjectExtensions.SuppressChangeNotifications(this);
         }
 
-        Subject<Unit> activated = new Subject<Unit>();
-        public IObservable<Unit> Activated { get { return activated.AsObservable(); } }
-        Subject<Unit> deactivated = new Subject<Unit>();
-        public IObservable<Unit> Deactivated { get { return deactivated.AsObservable(); } }
+        private Subject<Unit> _activated = new Subject<Unit>();
+
+        public IObservable<Unit> Activated
+        {
+            get { return _activated.AsObservable(); }
+        }
+
+        private Subject<Unit> _deactivated = new Subject<Unit>();
+
+        public IObservable<Unit> Deactivated
+        {
+            get { return _deactivated.AsObservable(); }
+        }
 
 #if UIKIT
         public override void ViewWillAppear(bool animated)
         {
             base.ViewWillAppear(animated);
-            activated.OnNext(Unit.Default);
+            _activated.OnNext(Unit.Default);
             this.ActivateSubviews(true);
         }
 
         public override void ViewDidDisappear(bool animated)
         {
             base.ViewDidDisappear(animated);
-            deactivated.OnNext(Unit.Default);
+            _deactivated.OnNext(Unit.Default);
             this.ActivateSubviews(false);
         }
 #else
         public override void ViewWillAppear()
         {
             base.ViewWillAppear();
-            activated.OnNext(Unit.Default);
+            _activated.OnNext(Unit.Default);
             this.ActivateSubviews(true);
         }
 
         public override void ViewDidDisappear()
         {
             base.ViewDidDisappear();
-            deactivated.OnNext(Unit.Default);
+            _deactivated.OnNext(Unit.Default);
             this.ActivateSubviews(false);
         }
 #endif
@@ -120,37 +150,56 @@ namespace ReactiveUI
     public abstract class ReactiveViewController<TViewModel> : ReactiveViewController, IViewFor<TViewModel>
         where TViewModel : class
     {
-        protected ReactiveViewController() { }
-        protected ReactiveViewController(NSCoder c) : base(c) { }
-        protected ReactiveViewController(NSObjectFlag f) : base(f) { }
-        protected ReactiveViewController(IntPtr handle) : base(handle) { }
-        protected ReactiveViewController(string nibNameOrNull, NSBundle nibBundleOrNull) : base(nibNameOrNull, nibBundleOrNull) { }
+        protected ReactiveViewController()
+        {
+        }
 
-        TViewModel _viewModel;
-        public TViewModel ViewModel {
+        protected ReactiveViewController(NSCoder c) : base(c)
+        {
+        }
+
+        protected ReactiveViewController(NSObjectFlag f) : base(f)
+        {
+        }
+
+        protected ReactiveViewController(IntPtr handle) : base(handle)
+        {
+        }
+
+        protected ReactiveViewController(string nibNameOrNull, NSBundle nibBundleOrNull) : base(nibNameOrNull, nibBundleOrNull)
+        {
+        }
+
+        private TViewModel _viewModel;
+
+        public TViewModel ViewModel
+        {
             get { return _viewModel; }
             set { this.RaiseAndSetIfChanged(ref _viewModel, value); }
         }
 
-        object IViewFor.ViewModel {
+        object IViewFor.ViewModel
+        {
             get { return ViewModel; }
             set { ViewModel = (TViewModel)value; }
         }
     }
 
-    static class UIViewControllerMixins
+    internal static class UIViewControllerMixins
     {
-        internal static void ActivateSubviews(this NSViewController This, bool activate)
+        internal static void ActivateSubviews(this NSViewController @this, bool activate)
         {
-            This.View.ActivateSubviews(activate);
+            @this.View.ActivateSubviews(activate);
         }
 
-        static void ActivateSubviews(this NSView This, bool activate)
+        private static void ActivateSubviews(this NSView @this, bool activate)
         {
-            foreach (var view in This.Subviews) {
+            foreach (var view in @this.Subviews)
+            {
                 var subview = view as ICanForceManualActivation;
 
-                if (subview != null) {
+                if (subview != null)
+                {
                     subview.Activate(activate);
                 }
 

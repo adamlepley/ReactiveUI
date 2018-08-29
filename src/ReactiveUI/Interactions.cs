@@ -33,30 +33,24 @@ namespace ReactiveUI
     /// </typeparam>
     public sealed class InteractionContext<TInput, TOutput>
     {
-        private readonly TInput input;
-        private TOutput output;
-        private int outputSet;
+        private readonly TInput _input;
+        private TOutput _output;
+        private int _outputSet;
 
         internal InteractionContext(TInput input)
         {
-            this.input = input;
+            _input = input;
         }
 
         /// <summary>
         /// Gets the input for the interaction.
         /// </summary>
-        public TInput Input
-        {
-            get { return this.input; }
-        }
+        public TInput Input => _input;
 
         /// <summary>
         /// Gets a value indicating whether the interaction is handled. That is, whether the output has been set.
         /// </summary>
-        public bool IsHandled
-        {
-            get { return this.outputSet == 1; }
-        }
+        public bool IsHandled => _outputSet == 1;
 
         /// <summary>
         /// Sets the output for the interaction.
@@ -69,11 +63,12 @@ namespace ReactiveUI
         /// </exception>
         public void SetOutput(TOutput output)
         {
-            if (Interlocked.CompareExchange(ref this.outputSet, 1, 0) != 0) {
+            if (Interlocked.CompareExchange(ref _outputSet, 1, 0) != 0)
+            {
                 throw new InvalidOperationException("Output has already been set.");
             }
 
-            this.output = output;
+            _output = output;
         }
 
         /// <summary>
@@ -87,11 +82,12 @@ namespace ReactiveUI
         /// </exception>
         public TOutput GetOutput()
         {
-            if (this.outputSet == 0) {
+            if (_outputSet == 0)
+            {
                 throw new InvalidOperationException("Output has not been set.");
             }
 
-            return this.output;
+            return _output;
         }
     }
 
@@ -130,9 +126,9 @@ namespace ReactiveUI
     /// </typeparam>
     public class Interaction<TInput, TOutput>
     {
-        private readonly IList<Func<InteractionContext<TInput, TOutput>, IObservable<Unit>>> handlers;
-        private readonly object sync;
-        private readonly IScheduler handlerScheduler;
+        private readonly IList<Func<InteractionContext<TInput, TOutput>, IObservable<Unit>>> _handlers;
+        private readonly object _sync;
+        private readonly IScheduler _handlerScheduler;
 
         /// <summary>
         /// Creates a new interaction instance.
@@ -142,9 +138,9 @@ namespace ReactiveUI
         /// </param>
         public Interaction(IScheduler handlerScheduler = null)
         {
-            this.handlers = new List<Func<InteractionContext<TInput, TOutput>, IObservable<Unit>>>();
-            this.sync = new object();
-            this.handlerScheduler = handlerScheduler ?? CurrentThreadScheduler.Instance;
+            _handlers = new List<Func<InteractionContext<TInput, TOutput>, IObservable<Unit>>>();
+            _sync = new object();
+            _handlerScheduler = handlerScheduler ?? CurrentThreadScheduler.Instance;
         }
 
         /// <summary>
@@ -164,11 +160,13 @@ namespace ReactiveUI
         /// </returns>
         public IDisposable RegisterHandler(Action<InteractionContext<TInput, TOutput>> handler)
         {
-            if (handler == null) {
-                throw new ArgumentNullException("handler");
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
             }
 
-            return RegisterHandler(interaction => {
+            return RegisterHandler(interaction =>
+            {
                 handler(interaction);
                 return Observables.Unit;
             });
@@ -191,8 +189,9 @@ namespace ReactiveUI
         /// </returns>
         public IDisposable RegisterHandler(Func<InteractionContext<TInput, TOutput>, Task> handler)
         {
-            if (handler == null) {
-                throw new ArgumentNullException("handler");
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
             }
 
             return RegisterHandler(interaction => handler(interaction).ToObservable());
@@ -201,6 +200,7 @@ namespace ReactiveUI
         /// <summary>
         /// Registers an observable-based asynchronous interaction handler.
         /// </summary>
+        /// <typeparam name="TDontCare"></typeparam>
         /// <remarks>
         /// <para>
         /// This overload of <c>RegisterHandler</c> is useful if the handler needs to perform some asynchronous
@@ -215,14 +215,15 @@ namespace ReactiveUI
         /// </returns>
         public IDisposable RegisterHandler<TDontCare>(Func<InteractionContext<TInput, TOutput>, IObservable<TDontCare>> handler)
         {
-            if (handler == null) {
-                throw new ArgumentNullException("handler");
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
             }
 
             Func<InteractionContext<TInput, TOutput>, IObservable<Unit>> unitHandler = context => handler(context).Select(_ => Unit.Default);
 
-            this.AddHandler(unitHandler);
-            return Disposable.Create(() => this.RemoveHandler(unitHandler));
+            AddHandler(unitHandler);
+            return Disposable.Create(() => RemoveHandler(unitHandler));
         }
 
         /// <summary>
@@ -246,11 +247,10 @@ namespace ReactiveUI
         {
             var context = new InteractionContext<TInput, TOutput>(input);
 
-            return this
-                .GetHandlers()
+            return GetHandlers()
                 .Reverse()
                 .ToObservable()
-                .ObserveOn(this.handlerScheduler)
+                .ObserveOn(_handlerScheduler)
                 .Select(handler => Observable.Defer(() => handler(context)))
                 .Concat()
                 .TakeWhile(_ => !context.IsHandled)
@@ -271,22 +271,25 @@ namespace ReactiveUI
         /// </returns>
         protected Func<InteractionContext<TInput, TOutput>, IObservable<Unit>>[] GetHandlers()
         {
-            lock (this.sync) {
-                return this.handlers.ToArray();
+            lock (_sync)
+            {
+                return _handlers.ToArray();
             }
         }
 
         private void AddHandler(Func<InteractionContext<TInput, TOutput>, IObservable<Unit>> handler)
         {
-            lock (this.sync) {
-                this.handlers.Add(handler);
+            lock (_sync)
+            {
+                _handlers.Add(handler);
             }
         }
 
         private void RemoveHandler(Func<InteractionContext<TInput, TOutput>, IObservable<Unit>> handler)
         {
-            lock (this.sync) {
-                this.handlers.Remove(handler);
+            lock (_sync)
+            {
+                _handlers.Remove(handler);
             }
         }
     }
@@ -302,29 +305,23 @@ namespace ReactiveUI
     /// </typeparam>
     public class UnhandledInteractionException<TInput, TOutput> : Exception
     {
-        private readonly Interaction<TInput, TOutput> interaction;
-        private readonly TInput input;
+        private readonly Interaction<TInput, TOutput> _interaction;
+        private readonly TInput _input;
 
         public UnhandledInteractionException(Interaction<TInput, TOutput> interaction, TInput input)
         {
-            this.interaction = interaction;
-            this.input = input;
+            _interaction = interaction;
+            _input = input;
         }
 
         /// <summary>
         /// Gets the interaction that was not handled.
         /// </summary>
-        public Interaction<TInput, TOutput> Interaction
-        {
-            get { return this.interaction; }
-        }
+        public Interaction<TInput, TOutput> Interaction => _interaction;
 
         /// <summary>
         /// Gets the input for the interaction that was not handled.
         /// </summary>
-        public TInput Input
-        {
-            get { return this.input; }
-        }
+        public TInput Input => _input;
     }
 }

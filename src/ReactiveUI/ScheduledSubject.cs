@@ -25,12 +25,11 @@ namespace ReactiveUI
             }
         }
 
-        readonly IObserver<T> _defaultObserver;
-        readonly IScheduler _scheduler;
-        readonly ISubject<T> _subject;
-
-        int _observerRefCount = 0;
-        IDisposable _defaultObserverSub = Disposable.Empty;
+        private readonly IObserver<T> _defaultObserver;
+        private readonly IScheduler _scheduler;
+        private readonly ISubject<T> _subject;
+        private int _observerRefCount;
+        private IDisposable _defaultObserverSub = Disposable.Empty;
 
         public void Dispose()
         {
@@ -63,8 +62,10 @@ namespace ReactiveUI
 
             return new CompositeDisposable(
                 _subject.ObserveOn(_scheduler).Subscribe(observer),
-                Disposable.Create(() => {
-                    if (Interlocked.Decrement(ref _observerRefCount) <= 0 && _defaultObserver != null) {
+                Disposable.Create(() =>
+                {
+                    if (Interlocked.Decrement(ref _observerRefCount) <= 0 && _defaultObserver != null)
+                    {
                         _defaultObserverSub = _subject.ObserveOn(_scheduler).Subscribe(_defaultObserver);
                     }
                 }));

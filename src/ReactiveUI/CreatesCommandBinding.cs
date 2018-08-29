@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -18,15 +18,16 @@ using Windows.UI.Xaml.Input;
 namespace ReactiveUI
 {
     /// <summary>
-    /// This binder is the default binder for connecting to arbitrary events
+    /// This binder is the default binder for connecting to arbitrary events.
     /// </summary>
     public class CreatesCommandBindingViaEvent : ICreatesCommandBinding
     {
         // NB: These are in priority order
-        static readonly List<Tuple<string, Type>> defaultEventsToBind = new List<Tuple<string, Type>>() {
-            Tuple.Create("Click", typeof (EventArgs)),
-            Tuple.Create("TouchUpInside", typeof (EventArgs)),
-            Tuple.Create("MouseUp", typeof (EventArgs)),
+        private static readonly List<Tuple<string, Type>> defaultEventsToBind = new List<Tuple<string, Type>>()
+        {
+            Tuple.Create("Click", typeof(EventArgs)),
+            Tuple.Create("TouchUpInside", typeof(EventArgs)),
+            Tuple.Create("MouseUp", typeof(EventArgs)),
 #if NETFX_CORE
             Tuple.Create("PointerReleased", typeof(PointerRoutedEventArgs)),
             Tuple.Create("Tapped", typeof(TappedRoutedEventArgs)),
@@ -35,9 +36,13 @@ namespace ReactiveUI
 
         public int GetAffinityForObject(Type type, bool hasEventTarget)
         {
-            if (hasEventTarget) return 5;
+            if (hasEventTarget)
+            {
+                return 5;
+            }
 
-            return defaultEventsToBind.Any(x => {
+            return defaultEventsToBind.Any(x =>
+            {
                 var ei = type.GetRuntimeEvent(x.Item1);
                 return ei != null;
             }) ? 3 : 0;
@@ -50,17 +55,18 @@ namespace ReactiveUI
                 .Select(x => new { EventInfo = type.GetRuntimeEvent(x.Item1), Args = x.Item2 })
                 .FirstOrDefault(x => x.EventInfo != null);
 
-            if (eventInfo == null) {
+            if (eventInfo == null)
+            {
                 throw new Exception(
-                    String.Format(
-                        "Couldn't find a default event to bind to on {0}, specify an event expicitly", 
+                    string.Format(
+                        "Couldn't find a default event to bind to on {0}, specify an event expicitly",
                         target.GetType().FullName));
             }
 
             var mi = GetType().GetRuntimeMethods().First(x => x.Name == "BindCommandToObject" && x.IsGenericMethod);
             mi = mi.MakeGenericMethod(eventInfo.Args);
 
-            return (IDisposable)mi.Invoke(this, new[] {command, target, commandParameter, eventInfo.EventInfo.Name});
+            return (IDisposable)mi.Invoke(this, new[] { command, target, commandParameter, eventInfo.EventInfo.Name});
         }
 
         public IDisposable BindCommandToObject<TEventArgs>(ICommand command, object target, IObservable<object> commandParameter, string eventName)
@@ -75,8 +81,10 @@ namespace ReactiveUI
 
             ret.Add(commandParameter.Subscribe(x => latestParameter = x));
 
-            ret.Add(evt.Subscribe(ea => {
-                if (command.CanExecute(latestParameter)) {
+            ret.Add(evt.Subscribe(ea =>
+            {
+                if (command.CanExecute(latestParameter))
+                {
                     command.Execute(latestParameter);
                 }
             }));
@@ -89,14 +97,19 @@ namespace ReactiveUI
     {
         public int GetAffinityForObject(Type type, bool hasEventTarget)
         {
-            if (hasEventTarget) return 0;
+            if (hasEventTarget)
+            {
+                return 0;
+            }
 
-            var propsToFind = new[] {
+            var propsToFind = new[]
+            {
                 new { Name = "Command", TargetType = typeof(ICommand) },
                 new { Name = "CommandParameter", TargetType = typeof(object) },
             };
 
-            return propsToFind.All(x => {
+            return propsToFind.All(x =>
+            {
                 var pi = type.GetRuntimeProperty(x.Name);
                 return pi != null;
             }) ? 5 : 0;
@@ -112,7 +125,8 @@ namespace ReactiveUI
             var originalCmd = cmdPi.GetValue(target, null);
             var originalCmdParam = cmdParamPi.GetValue(target, null);
 
-            ret.Add(Disposable.Create(() => {
+            ret.Add(Disposable.Create(() =>
+            {
                 cmdPi.SetValue(target, originalCmd, null);
                 cmdParamPi.SetValue(target, originalCmdParam, null);
             }));

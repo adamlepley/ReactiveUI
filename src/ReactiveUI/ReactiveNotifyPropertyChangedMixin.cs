@@ -26,13 +26,15 @@ namespace ReactiveUI
         /// IObservedChange) guarantees that the Value property of
         /// the IObservedChange is set.
         /// </summary>
-        /// <param name="this">The source object to observe properties of</param>
+        /// <typeparam name="TSender">The sender type.</typeparam>
+        /// <typeparam name="TValue">The value type.</typeparam>
+        /// <param name="this">The source object to observe properties of.</param>
         /// <param name="property">An Expression representing the property (i.e.
-        /// 'x => x.SomeProperty.SomeOtherProperty'</param>
+        /// 'x => x.SomeProperty.SomeOtherProperty'.</param>
         /// <param name="beforeChange">If True, the Observable will notify
         /// immediately before a property is going to change.</param>
-        /// <param name="skipInitial">If true, the Observable will not notify 
-        /// with the initial value</param>
+        /// <param name="skipInitial">If true, the Observable will not notify
+        /// with the initial value.</param>
         /// <returns>An Observable representing the property change
         /// notifications for the given property.</returns>
         public static IObservable<IObservedChange<TSender, TValue>> ObservableForProperty<TSender, TValue>(
@@ -41,21 +43,22 @@ namespace ReactiveUI
                 bool beforeChange = false,
                 bool skipInitial = true)
         {
-            if (@this == null) {
+            if (@this == null)
+            {
                 throw new ArgumentNullException(nameof(@this));
             }
 
             /* x => x.Foo.Bar.Baz;
-             * 
+             *
              * Subscribe to This, look for Foo
              * Subscribe to Foo, look for Bar
              * Subscribe to Bar, look for Baz
              * Subscribe to Baz, publish to Subject
              * Return Subject
-             * 
+             *
              * If Bar changes (notification fires on Foo), resubscribe to new Bar
              *  Resubscribe to new Baz, publish to Subject
-             * 
+             *
              * If Baz changes (notification fires on Bar),
              *  Resubscribe to new Baz, publish to Subject
              */
@@ -73,9 +76,12 @@ namespace ReactiveUI
         /// ReactiveObject, running the IObservedChange through a Selector
         /// function.
         /// </summary>
-        /// <param name="this">The source object to observe properties of</param>
+        /// <typeparam name="TSender">The sender type.</typeparam>
+        /// <typeparam name="TValue">The value type.</typeparam>
+        /// <typeparam name="TRet"></typeparam>
+        /// <param name="this">The source object to observe properties of.</param>
         /// <param name="property">An Expression representing the property (i.e.
-        /// 'x => x.SomeProperty'</param>
+        /// 'x => x.SomeProperty'.</param>
         /// <param name="selector">A Select function that will be run on each
         /// item.</param>
         /// <param name="beforeChange">If True, the Observable will notify
@@ -104,19 +110,22 @@ namespace ReactiveUI
 
             IEnumerable<Expression> chain = Reflection.Rewrite(expression).GetExpressionChain();
             notifier = chain.Aggregate(notifier, (n, expr) => n
-                .Select(y => nestedObservedChanges(expr, y, beforeChange))
+                .Select(y => NestedObservedChanges(expr, y, beforeChange))
                 .Switch());
 
-            if (skipInitial) {
+            if (skipInitial)
+            {
                 notifier = notifier.Skip(1);
             }
 
             notifier = notifier.Where(x => x.Sender != null);
 
-            var r = notifier.Select(x => {
+            var r = notifier.Select(x =>
+            {
                 // ensure cast to TValue will succeed, throw useful exception otherwise
                 var val = x.GetValue();
-                if (val != null && !(val is TValue)) {
+                if (val != null && !(val is TValue))
+                {
                     throw new InvalidCastException(string.Format("Unable to cast from {0} to {1}.", val.GetType(), typeof(TValue)));
                 }
 
@@ -126,53 +135,61 @@ namespace ReactiveUI
             return r.DistinctUntilChanged(x => x.Value);
         }
 
-        static IObservedChange<object, object> observedChangeFor(Expression expression, IObservedChange<object, object> sourceChange)
+        private static IObservedChange<object, object> ObservedChangeFor(Expression expression, IObservedChange<object, object> sourceChange)
         {
             var propertyName = expression.GetMemberInfo().Name;
-            if (sourceChange.Value == null) {
-                return new ObservedChange<object, object>(sourceChange.Value, expression); ;
-            } else {
-                object value;
-                // expression is always a simple expression
-                Reflection.TryGetValueForPropertyChain(out value, sourceChange.Value, new[] { expression });
-                return new ObservedChange<object, object>(sourceChange.Value, expression, value);
+            if (sourceChange.Value == null)
+            {
+                return new ObservedChange<object, object>(sourceChange.Value, expression);
             }
+
+            object value;
+
+            // expression is always a simple expression
+            Reflection.TryGetValueForPropertyChain(out value, sourceChange.Value, new[] { expression });
+
+            return new ObservedChange<object, object>(sourceChange.Value, expression, value);
         }
 
-        static IObservable<IObservedChange<object, object>> nestedObservedChanges(Expression expression, IObservedChange<object, object> sourceChange, bool beforeChange)
+        private static IObservable<IObservedChange<object, object>> NestedObservedChanges(Expression expression, IObservedChange<object, object> sourceChange, bool beforeChange)
         {
             // Make sure a change at a root node propogates events down
-            var kicker = observedChangeFor(expression, sourceChange);
+            var kicker = ObservedChangeFor(expression, sourceChange);
 
             // Handle null values in the chain
-            if (sourceChange.Value == null) {
+            if (sourceChange.Value == null)
+            {
                 return Observable.Return(kicker);
             }
 
             // Handle non null values in the chain
-            return notifyForProperty(sourceChange.Value, expression, beforeChange)
+            return NotifyForProperty(sourceChange.Value, expression, beforeChange)
                 .Select(x => new ObservedChange<object, object>(x.Sender, expression, x.GetValue()))
                 .StartWith(kicker);
         }
 
-        static readonly MemoizingMRUCache<Tuple<Type, string, bool>, ICreatesObservableForProperty> notifyFactoryCache =
-            new MemoizingMRUCache<Tuple<Type, string, bool>, ICreatesObservableForProperty>((t, _) => {
+        private static readonly MemoizingMRUCache<Tuple<Type, string, bool>, ICreatesObservableForProperty> notifyFactoryCache =
+            new MemoizingMRUCache<Tuple<Type, string, bool>, ICreatesObservableForProperty>((t, _) =>
+            {
                 return Locator.Current.GetServices<ICreatesObservableForProperty>()
-                    .Aggregate(Tuple.Create(0, (ICreatesObservableForProperty)null), (acc, x) => {
+                    .Aggregate(Tuple.Create(0, (ICreatesObservableForProperty)null), (acc, x) =>
+                    {
                         int score = x.GetAffinityForObject(t.Item1, t.Item2, t.Item3);
                         return (score > acc.Item1) ? Tuple.Create(score, x) : acc;
                     }).Item2;
             }, RxApp.BigCacheLimit);
 
-        static IObservable<IObservedChange<object, object>> notifyForProperty(object sender, Expression expression, bool beforeChange)
+        private static IObservable<IObservedChange<object, object>> NotifyForProperty(object sender, Expression expression, bool beforeChange)
         {
             var propertyName = expression.GetMemberInfo().Name;
             var result = default(ICreatesObservableForProperty);
-            lock (notifyFactoryCache) {
+            lock (notifyFactoryCache)
+            {
                 result = notifyFactoryCache.Get(Tuple.Create(sender.GetType(), propertyName, beforeChange));
             }
 
-            if (result == null) {
+            if (result == null)
+            {
                 throw new Exception($"Could not find a ICreatesObservableForProperty for {sender.GetType()} property {propertyName}. This should never happen, your service locator is probably broken. Please make sure you have installed the latest version of the ReactiveUI packages for your platform. See https://reactiveui.net/docs/getting-started/installation/nuget-packages for guidance.");
             }
 

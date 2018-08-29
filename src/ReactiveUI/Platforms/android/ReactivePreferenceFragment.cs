@@ -3,53 +3,62 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using Android.Runtime;
 using System.ComponentModel;
-using System.Reactive.Subjects;
 using System.Reactive;
-using Android.Preferences;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using Android.Preferences;
+using Android.Runtime;
 
 namespace ReactiveUI
 {
     /// <summary>
-    /// This is a PreferenceFragment that is both an Activity and has ReactiveObject powers 
-    /// (i.e. you can call RaiseAndSetIfChanged)
+    /// This is a PreferenceFragment that is both an Activity and has ReactiveObject powers
+    /// (i.e. you can call RaiseAndSetIfChanged).
     /// </summary>
+    /// <typeparam name="TViewModel"></typeparam>
     public class ReactivePreferenceFragment<TViewModel> : ReactivePreferenceFragment, IViewFor<TViewModel>, ICanActivate
         where TViewModel : class
     {
-        protected ReactivePreferenceFragment() { }
+        protected ReactivePreferenceFragment()
+        {
+        }
 
         protected ReactivePreferenceFragment(IntPtr handle, JniHandleOwnership ownership) : base(handle, ownership)
         {
         }
 
-        TViewModel _ViewModel;
-        public TViewModel ViewModel {
+        private TViewModel _ViewModel;
+
+        public TViewModel ViewModel
+        {
             get { return _ViewModel; }
             set { this.RaiseAndSetIfChanged(ref _ViewModel, value); }
         }
 
-        object IViewFor.ViewModel {
+        object IViewFor.ViewModel
+        {
             get { return _ViewModel; }
             set { _ViewModel = (TViewModel)value; }
         }
     }
 
     /// <summary>
-    /// This is a PreferenceFragment that is both an Activity and has ReactiveObject powers 
-    /// (i.e. you can call RaiseAndSetIfChanged)
+    /// This is a PreferenceFragment that is both an Activity and has ReactiveObject powers
+    /// (i.e. you can call RaiseAndSetIfChanged).
     /// </summary>
     public class ReactivePreferenceFragment : PreferenceFragment, IReactiveNotifyPropertyChanged<ReactivePreferenceFragment>, IReactiveObject, IHandleObservableErrors
     {
-        protected ReactivePreferenceFragment() { }
+        protected ReactivePreferenceFragment()
+        {
+        }
 
         protected ReactivePreferenceFragment(IntPtr handle, JniHandleOwnership ownership) : base(handle, ownership)
         {
         }
 
-        public event PropertyChangingEventHandler PropertyChanging {
+        public event PropertyChangingEventHandler PropertyChanging
+        {
             add { PropertyChangingEventManager.AddHandler(this, value); }
             remove { PropertyChangingEventManager.RemoveHandler(this, value); }
         }
@@ -59,7 +68,8 @@ namespace ReactiveUI
             PropertyChangingEventManager.DeliverEvent(this, args);
         }
 
-        public event PropertyChangedEventHandler PropertyChanged {
+        public event PropertyChangedEventHandler PropertyChanged
+        {
             add { PropertyChangedEventManager.AddHandler(this, value); }
             remove { PropertyChangedEventManager.RemoveHandler(this, value); }
         }
@@ -71,17 +81,19 @@ namespace ReactiveUI
 
         /// <summary>
         /// Represents an Observable that fires *before* a property is about to
-        /// be changed.         
+        /// be changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactivePreferenceFragment>> Changing {
-            get { return this.getChangingObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactivePreferenceFragment>> Changing
+        {
+            get { return this.GetChangingObservable(); }
         }
 
         /// <summary>
         /// Represents an Observable that fires *after* a property has changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactivePreferenceFragment>> Changed {
-            get { return this.getChangedObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactivePreferenceFragment>> Changed
+        {
+            get { return this.GetChangedObservable(); }
         }
 
         /// <summary>
@@ -93,27 +105,38 @@ namespace ReactiveUI
         /// notifications.</returns>
         public IDisposable SuppressChangeNotifications()
         {
-            return this.suppressChangeNotifications();
+            return IReactiveObjectExtensions.SuppressChangeNotifications(this);
         }
 
-        public IObservable<Exception> ThrownExceptions { get { return this.getThrownExceptionsObservable(); } }
+        public IObservable<Exception> ThrownExceptions
+        {
+            get { return this.GetThrownExceptionsObservable(); }
+        }
 
-        readonly Subject<Unit> activated = new Subject<Unit>();
-        public IObservable<Unit> Activated { get { return activated.AsObservable(); } }
+        private readonly Subject<Unit> _activated = new Subject<Unit>();
 
-        readonly Subject<Unit> deactivated = new Subject<Unit>();
-        public IObservable<Unit> Deactivated { get { return deactivated.AsObservable(); } }
+        public IObservable<Unit> Activated
+        {
+            get { return _activated.AsObservable(); }
+        }
+
+        private readonly Subject<Unit> _deactivated = new Subject<Unit>();
+
+        public IObservable<Unit> Deactivated
+        {
+            get { return _deactivated.AsObservable(); }
+        }
 
         public override void OnPause()
         {
             base.OnPause();
-            deactivated.OnNext(Unit.Default);
+            _deactivated.OnNext(Unit.Default);
         }
 
         public override void OnResume()
         {
             base.OnResume();
-            activated.OnNext(Unit.Default);
+            _activated.OnNext(Unit.Default);
         }
     }
 }

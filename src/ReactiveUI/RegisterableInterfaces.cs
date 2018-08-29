@@ -91,6 +91,7 @@ namespace ReactiveUI
         /// <param name="contract">A unique string to distinguish messages with
         /// identical types (i.e. "MyCoolViewModel") - if the message type is
         /// only used for one purpose, leave this as null.</param>
+        /// <returns></returns>
         IDisposable RegisterMessageSource<T>(IObservable<T> source, string contract = null);
 
         /// <summary>
@@ -100,7 +101,7 @@ namespace ReactiveUI
         /// or events.
         /// </summary>
         /// <typeparam name="T">The type of the message to send.</typeparam>
-        /// <param name="message">The actual message to send</param>
+        /// <param name="message">The actual message to send.</param>
         /// <param name="contract">A unique string to distinguish messages with
         /// identical types (i.e. "MyCoolViewModel") - if the message type is
         /// only used for one purpose, leave this as null.</param>
@@ -120,13 +121,13 @@ namespace ReactiveUI
         /// GetNotificationForProperty for this particular Type. If the method
         /// isn't supported at all, return a non-positive integer. When multiple
         /// implementations return a positive value, the host will use the one
-        /// which returns the highest value. When in doubt, return '2' or '0'
+        /// which returns the highest value. When in doubt, return '2' or '0'.
         /// </summary>
         /// <param name="type">The type to query for.</param>
         /// <param name="propertyName">The property of the type to query for.</param>
         /// <param name="beforeChanged">If true, returns whether GNFP is supported before a change occurs.</param>
         /// <returns>A positive integer if GNFP is supported, zero or a negative
-        /// value otherwise</returns>
+        /// value otherwise.</returns>
         int GetAffinityForObject(Type type, string propertyName, bool beforeChanged = false);
 
         /// <summary>
@@ -144,7 +145,7 @@ namespace ReactiveUI
         /// property changes.</param>
         /// <returns>An IObservable which is signalled whenever the specified
         /// property on the object changes. If this cannot be done for a
-        /// specified value of beforeChanged, return Observable.Never</returns>
+        /// specified value of beforeChanged, return Observable.Never.</returns>
         IObservable<IObservedChange<object, object>> GetNotificationForProperty(object sender, Expression expression, string propertyName, bool beforeChanged = false);
     }
 
@@ -162,10 +163,10 @@ namespace ReactiveUI
         /// return a positive value, the host will use the one which returns
         /// the highest value. When in doubt, return '2' or '0'.
         /// </summary>
-        /// <param name="fromType">The source type to convert from</param>
-        /// <param name="toType">The target type to convert to</param>
+        /// <param name="fromType">The source type to convert from.</param>
+        /// <param name="toType">The target type to convert to.</param>
         /// <returns>A positive integer if TryConvert is supported,
-        /// zero or a negative value otherwise</returns>
+        /// zero or a negative value otherwise.</returns>
         int GetAffinityForObjects(Type fromType, Type toType);
 
         /// <summary>
@@ -175,23 +176,23 @@ namespace ReactiveUI
         /// <param name="toType">The type to coerce the object to.</param>
         /// <param name="conversionHint">An implementation-defined value,
         /// usually to specify things like locale awareness.</param>
-        /// <param name="result">An object that is of the type <paramref name="toType"/></param>
+        /// <param name="result">An object that is of the type <paramref name="toType"/>.</param>
         /// <returns>True if conversion was successful.</returns>
         bool TryConvert(object from, Type toType, object conversionHint, out object result);
     }
 
     /// <summary>
     /// Implement this as a way to intercept bindings at the time that they are
-    /// created and execute an additional action (or to cancel the binding)
+    /// created and execute an additional action (or to cancel the binding).
     /// </summary>
     public interface IPropertyBindingHook
     {
         /// <summary>
         /// Called when any binding is set up.
         /// </summary>
-        /// <returns>If false, the binding is cancelled</returns>
-        /// <param name="source">The source ViewModel</param>
-        /// <param name="target">The target View (not the actual control)</param>
+        /// <returns>If false, the binding is cancelled.</returns>
+        /// <param name="source">The source ViewModel.</param>
+        /// <param name="target">The target View (not the actual control).</param>
         /// <param name="getCurrentViewModelProperties">Get current view model properties.</param>
         /// <param name="getCurrentViewProperties">Get current view properties.</param>
         /// <param name="direction">The Binding direction.</param>
@@ -206,7 +207,9 @@ namespace ReactiveUI
     /// Use this Interface when you want to mark a control as recieving View
     /// Activation when it doesn't have a backing ViewModel.
     /// </summary>
-    public interface IActivatable { }
+    public interface IActivatable
+    {
+    }
 
     /// <summary>
     /// This base class is mostly used by the Framework. Implement <see cref="IViewFor{T}"/>
@@ -223,6 +226,7 @@ namespace ReactiveUI
     /// <summary>
     /// Implement this interface on your Views to support Routing and Binding.
     /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface IViewFor<T> : IViewFor
         where T : class
     {
@@ -252,13 +256,13 @@ namespace ReactiveUI
         /// BindCommandToObject for this particular Type. If the method
         /// isn't supported at all, return a non-positive integer. When multiple
         /// implementations return a positive value, the host will use the one
-        /// which returns the highest value. When in doubt, return '2' or '0'
+        /// which returns the highest value. When in doubt, return '2' or '0'.
         /// </summary>
         /// <param name="type">The type to query for.</param>
         /// <param name="hasEventTarget">If true, the host intends to use a custom
         /// event target.</param>
         /// <returns>A positive integer if BCTO is supported, zero or a negative
-        /// value otherwise</returns>
+        /// value otherwise.</returns>
         int GetAffinityForObject(Type type, bool hasEventTarget);
 
         /// <summary>
@@ -268,13 +272,13 @@ namespace ReactiveUI
         /// Command/CommandParameter like WPF or has a non-standard event name
         /// for "Invoke".
         /// </summary>
-        /// <param name="command">The command to bind</param>
+        /// <param name="command">The command to bind.</param>
         /// <param name="target">The target object, usually a UI control of
-        /// some kind</param>
+        /// some kind.</param>
         /// <param name="commandParameter">An IObservable source whose latest
         /// value will be passed as the command parameter to the command. Hosts
         /// will always pass a valid IObservable, but this may be
-        /// Observable.Empty</param>
+        /// Observable.Empty.</param>
         /// <returns>An IDisposable which will disconnect the binding when
         /// disposed.</returns>
         IDisposable BindCommandToObject(ICommand command, object target, IObservable<object> commandParameter);
@@ -284,13 +288,14 @@ namespace ReactiveUI
         /// be a standard .NET event, or it could be an event derived in another
         /// manner (i.e. in MonoTouch).
         /// </summary>
-        /// <param name="command">The command to bind</param>
+        /// <typeparam name="TEventArgs">The event argument type.</typeparam>
+        /// <param name="command">The command to bind.</param>
         /// <param name="target">The target object, usually a UI control of
-        /// some kind</param>
+        /// some kind.</param>
         /// <param name="commandParameter">An IObservable source whose latest
         /// value will be passed as the command parameter to the command. Hosts
         /// will always pass a valid IObservable, but this may be
-        /// Observable.Empty</param>
+        /// Observable.Empty.</param>
         /// <param name="eventName">The event to bind to.</param>
         /// <returns></returns>
         /// <returns>An IDisposable which will disconnect the binding when
@@ -300,7 +305,6 @@ namespace ReactiveUI
             where TEventArgs : EventArgs
 #endif
         ;
-
     }
 
     /// <summary>
@@ -310,13 +314,15 @@ namespace ReactiveUI
     public interface IViewLocator : IEnableLogger
     {
         /// <summary>
-        /// Determines the view for an associated ViewModel
+        /// Determines the view for an associated ViewModel.
         /// </summary>
+        /// <typeparam name="T">The view model type.</typeparam>
         /// <returns>The view, with the ViewModel property assigned to
         /// viewModel.</returns>
         /// <param name="viewModel">View model.</param>
         /// <param name="contract">Contract.</param>
-        IViewFor ResolveView<T>(T viewModel, string contract = null) where T : class;
+        IViewFor ResolveView<T>(T viewModel, string contract = null)
+            where T : class;
     }
 
     internal interface IPlatformOperations
@@ -371,12 +377,12 @@ namespace ReactiveUI
         /// Signals when the application should persist its state to disk.
         /// </summary>
         /// <value>Returns an IDisposable that should be disposed once the
-        /// application finishes persisting its state</value>
+        /// application finishes persisting its state.</value>
         IObservable<IDisposable> ShouldPersistState { get; set; }
 
         /// <summary>
         /// Signals that the saved application state should be deleted, this
-        /// usually is called after an app has crashed
+        /// usually is called after an app has crashed.
         /// </summary>
         IObservable<Unit> ShouldInvalidateState { get; set; }
 
@@ -387,7 +393,7 @@ namespace ReactiveUI
         Func<object> CreateNewAppState { get; set; }
 
         /// <summary>
-        /// The current application state - get a typed version of this via 
+        /// The current application state - get a typed version of this via
         /// <see cref="SuspensionHostExtensions.GetAppState{T}(ISuspensionHost)"/>.
         /// The "application state" is a notion entirely defined
         /// via the client application - the framework places no restrictions on
@@ -404,18 +410,22 @@ namespace ReactiveUI
     public interface ISuspensionDriver
     {
         /// <summary>
-        /// Loads the application state from persistent storage
+        /// Loads the application state from persistent storage.
         /// </summary>
+        /// <returns>An object observable.</returns>
         IObservable<object> LoadState();
 
         /// <summary>
         /// Saves the application state to disk.
         /// </summary>
+        /// <param name="state">The application state.</param>
+        /// <returns>A completed observable.</returns>
         IObservable<Unit> SaveState(object state);
 
         /// <summary>
-        /// Invalidates the application state (i.e. deletes it from disk)
+        /// Invalidates the application state (i.e. deletes it from disk).
         /// </summary>
+        /// <returns>A completed observable.</returns>
         IObservable<Unit> InvalidateState();
     }
 }

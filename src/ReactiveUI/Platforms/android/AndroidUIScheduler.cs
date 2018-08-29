@@ -3,34 +3,33 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
-using ReactiveUI;
 using Android.App;
-using Splat;
 using Android.OS;
+using ReactiveUI;
+using Splat;
 
 namespace ReactiveUI
 {
     /// <summary>
-    /// HandlerScheduler is a scheduler that schedules items on a running 
-    /// Activity's main thread. This is the moral equivalent of 
+    /// HandlerScheduler is a scheduler that schedules items on a running
+    /// Activity's main thread. This is the moral equivalent of
     /// DispatcherScheduler.
     /// </summary>
     public class HandlerScheduler : IScheduler, IEnableLogger
     {
         public static IScheduler MainThreadScheduler = new HandlerScheduler(new Handler(Looper.MainLooper), Looper.MainLooper.Thread.Id);
-
-        Handler handler;
-        long looperId;
+        private Handler _handler;
+        private long _looperId;
 
         public HandlerScheduler(Handler handler, long? threadIdAssociatedWithHandler)
         {
-            this.handler = handler;
-            looperId = threadIdAssociatedWithHandler ?? -1;
+            _handler = handler;
+            _looperId = threadIdAssociatedWithHandler ?? -1;
         }
 
         public IDisposable Schedule<TState>(TState state, Func<IScheduler, TState, IDisposable> action)
@@ -38,12 +37,18 @@ namespace ReactiveUI
             bool isCancelled = false;
             var innerDisp = new SerialDisposable() { Disposable = Disposable.Empty };
 
-            if (looperId > 0 && looperId == Java.Lang.Thread.CurrentThread().Id) {
+            if (_looperId > 0 && _looperId == Java.Lang.Thread.CurrentThread().Id)
+            {
                 return action(this, state);
             }
 
-            handler.Post(() => {
-                if (isCancelled) return;
+            _handler.Post(() =>
+            {
+                if (isCancelled)
+                {
+                    return;
+                }
+
                 innerDisp.Disposable = action(this, state);
             });
 
@@ -57,8 +62,13 @@ namespace ReactiveUI
             bool isCancelled = false;
             var innerDisp = new SerialDisposable() { Disposable = Disposable.Empty };
 
-            handler.PostDelayed(() => {
-                if (isCancelled) return;
+            _handler.PostDelayed(() =>
+            {
+                if (isCancelled)
+                {
+                    return;
+                }
+
                 innerDisp.Disposable = action(this, state);
             }, dueTime.Ticks / 10 / 1000);
 
@@ -69,14 +79,16 @@ namespace ReactiveUI
 
         public IDisposable Schedule<TState>(TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
         {
-            if (dueTime <= Now) {
+            if (dueTime <= Now)
+            {
                 return Schedule(state, action);
             }
 
             return Schedule(state, dueTime - Now, action);
         }
 
-        public DateTimeOffset Now {
+        public DateTimeOffset Now
+        {
             get { return DateTimeOffset.Now; }
         }
     }

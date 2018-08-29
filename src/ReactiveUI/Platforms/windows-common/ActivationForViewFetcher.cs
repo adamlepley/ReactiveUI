@@ -5,8 +5,8 @@
 using System;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Windows;
 using System.Reflection;
+using System.Windows;
 
 #if NETFX_CORE
 using Windows.UI.Xaml;
@@ -26,7 +26,9 @@ namespace ReactiveUI
             var fe = view as FrameworkElement;
 
             if (fe == null)
+            {
                 return Observable<bool>.Empty;
+            }
 #if WINDOWS_UWP
             var viewLoaded = WindowsObservable.FromEventPattern<FrameworkElement, object>(x => fe.Loading += x,
                 x => fe.Loading -= x).Select(_ => true);

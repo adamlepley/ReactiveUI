@@ -13,33 +13,30 @@ namespace ReactiveUI.Routing.Tests
     using System.Threading.Tasks;
     using DynamicData;
     using Microsoft.Reactive.Testing;
+
     public class TestViewModel : ReactiveObject, IRoutableViewModel
     {
-        string _SomeProp;
+        private string _SomeProp;
+
         public string SomeProp
         {
-            get { return _SomeProp; }
-            set { this.RaiseAndSetIfChanged(ref _SomeProp, value); }
+            get => _SomeProp;
+            set => this.RaiseAndSetIfChanged(ref _SomeProp, value);
         }
 
-        public string UrlPathSegment
-        {
-            get { return "Test"; }
-        }
+        public string UrlPathSegment => "Test";
 
-        public IScreen HostScreen
-        {
-            get { return null; }
-        }
+        public IScreen HostScreen => null;
     }
 
     public class TestScreen : ReactiveObject, IScreen
     {
-        RoutingState _Router;
+        private RoutingState _Router;
+
         public RoutingState Router
         {
-            get { return _Router; }
-            set { this.RaiseAndSetIfChanged(ref _Router, value); }
+            get => _Router;
+            set => this.RaiseAndSetIfChanged(ref _Router, value);
         }
     }
 
@@ -120,7 +117,7 @@ namespace ReactiveUI.Routing.Tests
             fixture.Router.NavigateAndReset.Execute(viewModel);
 
             Assert.True(fixture.Router.NavigationStack.Count == 1);
-            Assert.True(object.ReferenceEquals(fixture.Router.NavigationStack.First(), viewModel));
+            Assert.True(ReferenceEquals(fixture.Router.NavigationStack.First(), viewModel));
         }
 
         [Fact]
@@ -131,7 +128,7 @@ namespace ReactiveUI.Routing.Tests
             {
                 Scheduler = scheduler
             };
-            
+
             fixture
                 .Navigate
                 .ToObservableChangeSet(ImmediateScheduler.Instance).Bind(out var navigate).Subscribe();

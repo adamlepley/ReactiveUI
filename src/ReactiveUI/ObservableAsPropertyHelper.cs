@@ -18,14 +18,15 @@ namespace ReactiveUI
     /// ObservableAsPropertyHelper is a class to help ViewModels implement
     /// "output properties", that is, a property that is backed by an
     /// Observable. The property will be read-only, but will still fire change
-    /// notifications. This class can be created directly, but is more often created 
-    /// via the <see cref="OAPHCreationHelperMixin" /> extension methods.    
+    /// notifications. This class can be created directly, but is more often created
+    /// via the <see cref="OAPHCreationHelperMixin" /> extension methods.
     /// </summary>
+    /// <typeparam name="T"></typeparam>
     public sealed class ObservableAsPropertyHelper<T> : IHandleObservableErrors, IDisposable, IEnableLogger
     {
-        T _lastValue;
-        readonly IConnectableObservable<T> _source;
-        IDisposable _inner;
+        private T _lastValue;
+        private readonly IConnectableObservable<T> _source;
+        private IDisposable _inner;
         private int _activated;
 
         /// <summary>
@@ -35,28 +36,30 @@ namespace ReactiveUI
         /// The Observable to base the property on.
         /// </param>
         /// <param name="onChanged">
-        /// The action to take when the property changes, typically this will call the 
+        /// The action to take when the property changes, typically this will call the
         /// ViewModel's RaisePropertyChanged method.
         /// </param>
         /// <param name="initialValue">
         /// The initial value of the property.
         /// </param>
         /// <param name="deferSubscription">
-        /// A value indicating whether the <see cref="ObservableAsPropertyHelper{T}"/> 
-        /// should defer the subscription to the <paramref name="observable"/> source 
-        /// until the first call to <see cref="Value"/>, or if it should immediately 
+        /// A value indicating whether the <see cref="ObservableAsPropertyHelper{T}"/>
+        /// should defer the subscription to the <paramref name="observable"/> source
+        /// until the first call to <see cref="Value"/>, or if it should immediately
         /// subscribe to the the <paramref name="observable"/> source.
         /// </param>
         /// <param name="scheduler">
-        /// The scheduler that the notifications will be provided on - 
-        /// this should normally be a Dispatcher-based scheduler
+        /// The scheduler that the notifications will be provided on -
+        /// this should normally be a Dispatcher-based scheduler.
         /// </param>
         public ObservableAsPropertyHelper(
             IObservable<T> observable,
             Action<T> onChanged,
             T initialValue = default(T),
             bool deferSubscription = false,
-            IScheduler scheduler = null) : this(observable, onChanged, null, initialValue, deferSubscription, scheduler) { }
+            IScheduler scheduler = null) : this(observable, onChanged, null, initialValue, deferSubscription, scheduler)
+        {
+        }
 
         /// <summary>
         /// Constructs an ObservableAsPropertyHelper object.
@@ -65,25 +68,25 @@ namespace ReactiveUI
         /// The Observable to base the property on.
         /// </param>
         /// <param name="onChanged">
-        /// The action to take when the property changes, typically this will call 
+        /// The action to take when the property changes, typically this will call
         /// the ViewModel's RaisePropertyChanged method.
         /// </param>
         /// <param name="onChanging">
-        /// The action to take when the property changes, typically this will call 
+        /// The action to take when the property changes, typically this will call
         /// the ViewModel's RaisePropertyChanging method.
         /// </param>
         /// <param name="initialValue">
         /// The initial value of the property.
         /// </param>
         /// <param name="deferSubscription">
-        /// A value indicating whether the <see cref="ObservableAsPropertyHelper{T}"/> 
-        /// should defer the subscription to the <paramref name="observable"/> source 
-        /// until the first call to <see cref="Value"/>, or if it should immediately 
+        /// A value indicating whether the <see cref="ObservableAsPropertyHelper{T}"/>
+        /// should defer the subscription to the <paramref name="observable"/> source
+        /// until the first call to <see cref="Value"/>, or if it should immediately
         /// subscribe to the the <paramref name="observable"/> source.
         /// </param>
         /// <param name="scheduler">
-        /// The scheduler that the notifications will provided on - this 
-        /// should normally be a Dispatcher-based scheduler
+        /// The scheduler that the notifications will provided on - this
+        /// should normally be a Dispatcher-based scheduler.
         /// </param>
         public ObservableAsPropertyHelper(
             IObservable<T> observable,
@@ -102,7 +105,8 @@ namespace ReactiveUI
             var subj = new ScheduledSubject<T>(scheduler);
             var exSubject = new ScheduledSubject<Exception>(CurrentThreadScheduler.Instance, RxApp.DefaultExceptionHandler);
 
-            subj.Subscribe(x => {
+            subj.Subscribe(x =>
+            {
                 onChanging(x);
                 _lastValue = x;
                 onChanged(x);
@@ -112,20 +116,22 @@ namespace ReactiveUI
 
             _lastValue = initialValue;
             _source = observable.StartWith(initialValue).DistinctUntilChanged().Multicast(subj);
-            if (!deferSubscription) {
+            if (!deferSubscription)
+            {
                 _inner = _source.Connect();
                 _activated = 1;
             }
         }
 
         /// <summary>
-        /// The last provided value from the Observable. 
+        /// The last provided value from the Observable.
         /// </summary>
         public T Value
         {
             get
             {
-                if (Interlocked.CompareExchange(ref _activated, 1, 0) == 0) {
+                if (Interlocked.CompareExchange(ref _activated, 1, 0) == 0)
+                {
                     _inner = _source.Connect();
                 }
 
@@ -136,19 +142,19 @@ namespace ReactiveUI
         /// <summary>
         /// Gets a boolean value indicating whether the ObservableAsPropertyHelper
         /// has subscribed to the source Observable.
-        /// Useful for scenarios where you use deferred subscription and want to know if 
+        /// Useful for scenarios where you use deferred subscription and want to know if
         /// the ObservableAsPropertyHelper Value has been accessed yet.
         /// </summary>
         public bool IsSubscribed => _activated > 0;
 
         /// <summary>
-        /// Fires whenever an exception would normally terminate ReactiveUI 
+        /// Fires whenever an exception would normally terminate ReactiveUI
         /// internal state.
         /// </summary>
         public IObservable<Exception> ThrownExceptions { get; private set; }
 
         /// <summary>
-        /// Disposes this ObservableAsPropertyHelper
+        /// Disposes this ObservableAsPropertyHelper.
         /// </summary>
         public void Dispose()
         {
@@ -165,9 +171,10 @@ namespace ReactiveUI
         /// The initial (and only) value of the property.
         /// </param>
         /// <param name="scheduler">
-        /// The scheduler that the notifications will be provided on - this should 
-        /// normally be a Dispatcher-based scheduler
+        /// The scheduler that the notifications will be provided on - this should
+        /// normally be a Dispatcher-based scheduler.
         /// </param>
+        /// <returns></returns>
         public static ObservableAsPropertyHelper<T> Default(T initialValue = default(T), IScheduler scheduler = null)
         {
             return new ObservableAsPropertyHelper<T>(Observable<T>.Never, _ => { }, initialValue, false, scheduler);
@@ -175,12 +182,12 @@ namespace ReactiveUI
     }
 
     /// <summary>
-    /// A collection of helpers to aid working with observable properties
+    /// A collection of helpers to aid working with observable properties.
     /// </summary>
     public static class OAPHCreationHelperMixin
     {
-        static ObservableAsPropertyHelper<TRet> observableToProperty<TObj, TRet>(
-                this TObj This,
+        private static ObservableAsPropertyHelper<TRet> ObservableToProperty<TObj, TRet>(
+                this TObj @this,
                 IObservable<TRet> observable,
                 Expression<Func<TObj, TRet>> property,
                 TRet initialValue = default(TRet),
@@ -188,30 +195,33 @@ namespace ReactiveUI
                 IScheduler scheduler = null)
             where TObj : IReactiveObject
         {
-            Contract.Requires(This != null);
+            Contract.Requires(@this != null);
             Contract.Requires(observable != null);
             Contract.Requires(property != null);
 
             Expression expression = Reflection.Rewrite(property.Body);
 
-            if (expression.GetParent().NodeType != ExpressionType.Parameter) {
+            if (expression.GetParent().NodeType != ExpressionType.Parameter)
+            {
                 throw new ArgumentException("Property expression must be of the form 'x => x.SomeProperty'");
             }
 
             var name = expression.GetMemberInfo().Name;
             if (expression is IndexExpression)
+            {
                 name += "[]";
+            }
 
             var ret = new ObservableAsPropertyHelper<TRet>(observable,
-                _ => This.raisePropertyChanged(name),
-                _ => This.raisePropertyChanging(name),
+                _ => @this.raisePropertyChanged(name),
+                _ => @this.raisePropertyChanging(name),
                 initialValue, deferSubscription, scheduler);
 
             return ret;
         }
 
-        static ObservableAsPropertyHelper<TRet> observableToProperty<TObj, TRet>(
-                this TObj This,
+        private static ObservableAsPropertyHelper<TRet> ObservableToProperty<TObj, TRet>(
+                this TObj @this,
                 IObservable<TRet> observable,
                 string property,
                 TRet initialValue = default(TRet),
@@ -219,50 +229,52 @@ namespace ReactiveUI
                 IScheduler scheduler = null)
             where TObj : IReactiveObject
         {
-            Contract.Requires(This != null);
+            Contract.Requires(@this != null);
             Contract.Requires(observable != null);
             Contract.Requires(property != null);
 
             return new ObservableAsPropertyHelper<TRet>(
                 observable,
-                _ => This.raisePropertyChanged(property),
-                _ => This.raisePropertyChanging(property),
+                _ => @this.raisePropertyChanged(property),
+                _ => @this.raisePropertyChanging(property),
                 initialValue, deferSubscription, scheduler);
         }
 
         /// <summary>
         /// Converts an Observable to an ObservableAsPropertyHelper and
         /// automatically provides the onChanged method to raise the property
-        /// changed notification.         
+        /// changed notification.
         /// </summary>
-        /// <param name="This">
-        /// The observable to convert to an ObservableAsPropertyHelper
+        /// <typeparam name="TObj"></typeparam>
+        /// <typeparam name="TRet"></typeparam>
+        /// <param name="this">
+        /// The observable to convert to an ObservableAsPropertyHelper.
         /// </param>
         /// <param name="source">
-        /// The ReactiveObject that has the property
+        /// The ReactiveObject that has the property.
         /// </param>
         /// <param name="property">
-        /// An Expression representing the property (i.e. <c>x => x.SomeProperty</c>)
+        /// An Expression representing the property (i.e. <c>x => x.SomeProperty</c>).
         /// </param>
         /// <param name="initialValue">
         /// The initial value of the property.
         /// </param>
         /// <param name="deferSubscription">
-        /// A value indicating whether the <see cref="ObservableAsPropertyHelper{T}"/> 
-        /// should defer the subscription to the <paramref name="This"/> source 
+        /// A value indicating whether the <see cref="ObservableAsPropertyHelper{T}"/>
+        /// should defer the subscription to the <paramref name="this"/> source
         /// until the first call to <see cref="ObservableAsPropertyHelper{T}.Value"/>,
-        /// or if it should immediately subscribe to the the <paramref name="This"/> source.
+        /// or if it should immediately subscribe to the the <paramref name="this"/> source.
         /// </param>
         /// <param name="scheduler">
-        /// The scheduler that the notifications will be provided on - this should normally 
-        /// be a Dispatcher-based scheduler
+        /// The scheduler that the notifications will be provided on - this should normally
+        /// be a Dispatcher-based scheduler.
         /// </param>
         /// <returns>
-        /// An initialized ObservableAsPropertyHelper; use this as the backing field 
+        /// An initialized ObservableAsPropertyHelper; use this as the backing field
         /// for your property.
         /// </returns>
         public static ObservableAsPropertyHelper<TRet> ToProperty<TObj, TRet>(
-            this IObservable<TRet> This,
+            this IObservable<TRet> @this,
             TObj source,
             Expression<Func<TObj, TRet>> property,
             TRet initialValue = default(TRet),
@@ -270,45 +282,47 @@ namespace ReactiveUI
             IScheduler scheduler = null)
             where TObj : IReactiveObject
         {
-            return source.observableToProperty(This, property, initialValue, deferSubscription, scheduler);
+            return source.ObservableToProperty(@this, property, initialValue, deferSubscription, scheduler);
         }
 
         /// <summary>
         /// Converts an Observable to an ObservableAsPropertyHelper and
         /// automatically provides the onChanged method to raise the property
-        /// changed notification.         
+        /// changed notification.
         /// </summary>
-        /// <param name="This">
-        /// The observable to convert to an ObservableAsPropertyHelper
+        /// <typeparam name="TObj"></typeparam>
+        /// <typeparam name="TRet"></typeparam>
+        /// <param name="this">
+        /// The observable to convert to an ObservableAsPropertyHelper.
         /// </param>
         /// <param name="source">
-        /// The ReactiveObject that has the property
+        /// The ReactiveObject that has the property.
         /// </param>
         /// <param name="property">
-        /// An Expression representing the property (i.e. <c>x => x.SomeProperty</c>)
+        /// An Expression representing the property (i.e. <c>x => x.SomeProperty</c>).
         /// </param>
         /// <param name="result">
-        /// An out param matching the return value, provided for convenience
+        /// An out param matching the return value, provided for convenience.
         /// </param>
         /// <param name="initialValue">
         /// The initial value of the property.
         /// </param>
         /// <param name="deferSubscription">
-        /// A value indicating whether the <see cref="ObservableAsPropertyHelper{T}"/> 
-        /// should defer the subscription to the <paramref name="This"/> source 
-        /// until the first call to <see cref="ObservableAsPropertyHelper{T}.Value"/>, 
-        /// or if it should immediately subscribe to the the <paramref name="This"/> source.
+        /// A value indicating whether the <see cref="ObservableAsPropertyHelper{T}"/>
+        /// should defer the subscription to the <paramref name="this"/> source
+        /// until the first call to <see cref="ObservableAsPropertyHelper{T}.Value"/>,
+        /// or if it should immediately subscribe to the the <paramref name="this"/> source.
         /// </param>
         /// <param name="scheduler">
-        /// The scheduler that the notifications will be provided on - this should 
-        /// normally be a Dispatcher-based scheduler
+        /// The scheduler that the notifications will be provided on - this should
+        /// normally be a Dispatcher-based scheduler.
         /// </param>
         /// <returns>
-        /// An initialized ObservableAsPropertyHelper; use this as the backing 
+        /// An initialized ObservableAsPropertyHelper; use this as the backing
         /// field for your property.
         /// </returns>
         public static ObservableAsPropertyHelper<TRet> ToProperty<TObj, TRet>(
-            this IObservable<TRet> This,
+            this IObservable<TRet> @this,
             TObj source,
             Expression<Func<TObj, TRet>> property,
             out ObservableAsPropertyHelper<TRet> result,
@@ -317,7 +331,7 @@ namespace ReactiveUI
             IScheduler scheduler = null)
             where TObj : IReactiveObject
         {
-            var ret = source.observableToProperty(This, property, initialValue, deferSubscription, scheduler);
+            var ret = source.ObservableToProperty(@this, property, initialValue, deferSubscription, scheduler);
 
             result = ret;
             return ret;
@@ -326,13 +340,15 @@ namespace ReactiveUI
         /// <summary>
         /// Converts an Observable to an ObservableAsPropertyHelper and
         /// automatically provides the onChanged method to raise the property
-        /// changed notification.         
+        /// changed notification.
         /// </summary>
-        /// <param name="This">
-        /// The observable to convert to an ObservableAsPropertyHelper
+        /// <typeparam name="TObj"></typeparam>
+        /// <typeparam name="TRet"></typeparam>
+        /// <param name="this">
+        /// The observable to convert to an ObservableAsPropertyHelper.
         /// </param>
         /// <param name="source">
-        /// The ReactiveObject that has the property
+        /// The ReactiveObject that has the property.
         /// </param>
         /// <param name="property">
         /// The name of the property that has changed. Recommended for use with nameof() or a FODY.
@@ -342,21 +358,21 @@ namespace ReactiveUI
         /// The initial value of the property.
         /// </param>
         /// <param name="deferSubscription">
-        /// A value indicating whether the <see cref="ObservableAsPropertyHelper{T}"/> 
-        /// should defer the subscription to the <paramref name="This"/> source 
+        /// A value indicating whether the <see cref="ObservableAsPropertyHelper{T}"/>
+        /// should defer the subscription to the <paramref name="this"/> source
         /// until the first call to <see cref="ObservableAsPropertyHelper{T}.Value"/>,
-        /// or if it should immediately subscribe to the the <paramref name="This"/> source.
+        /// or if it should immediately subscribe to the the <paramref name="this"/> source.
         /// </param>
         /// <param name="scheduler">
-        /// The scheduler that the notifications will be provided on - this should normally 
-        /// be a Dispatcher-based scheduler
+        /// The scheduler that the notifications will be provided on - this should normally
+        /// be a Dispatcher-based scheduler.
         /// </param>
         /// <returns>
-        /// An initialized ObservableAsPropertyHelper; use this as the backing field 
+        /// An initialized ObservableAsPropertyHelper; use this as the backing field
         /// for your property.
         /// </returns>
         public static ObservableAsPropertyHelper<TRet> ToProperty<TObj, TRet>(
-            this IObservable<TRet> This,
+            this IObservable<TRet> @this,
             TObj source,
             string property,
             TRet initialValue = default(TRet),
@@ -364,45 +380,47 @@ namespace ReactiveUI
             IScheduler scheduler = null)
             where TObj : IReactiveObject
         {
-            return source.observableToProperty(This, property, initialValue, deferSubscription, scheduler);
+            return source.ObservableToProperty(@this, property, initialValue, deferSubscription, scheduler);
         }
 
         /// <summary>
         /// Converts an Observable to an ObservableAsPropertyHelper and
         /// automatically provides the onChanged method to raise the property
-        /// changed notification.         
+        /// changed notification.
         /// </summary>
-        /// <param name="This">
-        /// The observable to convert to an ObservableAsPropertyHelper
+        /// <typeparam name="TObj"></typeparam>
+        /// <typeparam name="TRet"></typeparam>
+        /// <param name="this">
+        /// The observable to convert to an ObservableAsPropertyHelper.
         /// </param>
         /// <param name="source">
-        /// The ReactiveObject that has the property
+        /// The ReactiveObject that has the property.
         /// </param>
         /// <param name="property">
         /// The name of the property that has changed. Recommended for use with nameof() or a FODY.
         /// </param>
         /// <param name="result">
-        /// An out param matching the return value, provided for convenience
+        /// An out param matching the return value, provided for convenience.
         /// </param>
         /// <param name="initialValue">
         /// The initial value of the property.
         /// </param>
         /// <param name="deferSubscription">
-        /// A value indicating whether the <see cref="ObservableAsPropertyHelper{T}"/> 
-        /// should defer the subscription to the <paramref name="This"/> source 
-        /// until the first call to <see cref="ObservableAsPropertyHelper{T}.Value"/>, 
-        /// or if it should immediately subscribe to the the <paramref name="This"/> source.
+        /// A value indicating whether the <see cref="ObservableAsPropertyHelper{T}"/>
+        /// should defer the subscription to the <paramref name="this"/> source
+        /// until the first call to <see cref="ObservableAsPropertyHelper{T}.Value"/>,
+        /// or if it should immediately subscribe to the the <paramref name="this"/> source.
         /// </param>
         /// <param name="scheduler">
-        /// The scheduler that the notifications will be provided on - this should 
-        /// normally be a Dispatcher-based scheduler
+        /// The scheduler that the notifications will be provided on - this should
+        /// normally be a Dispatcher-based scheduler.
         /// </param>
         /// <returns>
-        /// An initialized ObservableAsPropertyHelper; use this as the backing 
+        /// An initialized ObservableAsPropertyHelper; use this as the backing
         /// field for your property.
         /// </returns>
         public static ObservableAsPropertyHelper<TRet> ToProperty<TObj, TRet>(
-            this IObservable<TRet> This,
+            this IObservable<TRet> @this,
             TObj source,
             string property,
             out ObservableAsPropertyHelper<TRet> result,
@@ -411,8 +429,8 @@ namespace ReactiveUI
             IScheduler scheduler = null)
             where TObj : IReactiveObject
         {
-            result = source.observableToProperty(
-                This,
+            result = source.ObservableToProperty(
+                @this,
                 property,
                 initialValue,
                 deferSubscription,

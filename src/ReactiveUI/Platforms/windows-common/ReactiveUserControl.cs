@@ -45,7 +45,7 @@ namespace ReactiveUI
         where TViewModel : class
     {
         public TViewModel BindingRoot => ViewModel;
-        
+
         public static readonly DependencyProperty ViewModelProperty =
             DependencyProperty.Register(
                 "ViewModel",
@@ -55,14 +55,14 @@ namespace ReactiveUI
 
         public TViewModel ViewModel
         {
-            get { return (TViewModel)this.GetValue(ViewModelProperty); }
-            set { this.SetValue(ViewModelProperty, value); }
+            get => (TViewModel)GetValue(ViewModelProperty);
+            set => SetValue(ViewModelProperty, value);
         }
 
         object IViewFor.ViewModel
         {
-            get { return this.ViewModel; }
-            set { this.ViewModel = (TViewModel)value; }
+            get => ViewModel;
+            set => ViewModel = (TViewModel)value;
         }
     }
 }

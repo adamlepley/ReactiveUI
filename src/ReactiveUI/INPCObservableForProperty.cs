@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -11,13 +11,13 @@ using System.Reflection;
 namespace ReactiveUI
 {
     /// <summary>
-    /// Generates Observables based on observing INotifyPropertyChanged objects
+    /// Generates Observables based on observing INotifyPropertyChanged objects.
     /// </summary>
     public class INPCObservableForProperty : ICreatesObservableForProperty
     {
         public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged)
         {
-            var target = beforeChanged ? typeof (INotifyPropertyChanging) : typeof (INotifyPropertyChanged);
+            var target = beforeChanged ? typeof(INotifyPropertyChanging) : typeof(INotifyPropertyChanged);
             return target.GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()) ? 5 : 0;
         }
 
@@ -26,36 +26,42 @@ namespace ReactiveUI
             var before = sender as INotifyPropertyChanging;
             var after = sender as INotifyPropertyChanged;
 
-            if (beforeChanged ? before == null : after == null)  {
+            if (beforeChanged ? before == null : after == null)
+            {
                 return Observable<IObservedChange<object, object>>.Never;
             }
 
-            if (beforeChanged) {
+            if (beforeChanged)
+            {
                 var obs = Observable.FromEventPattern<PropertyChangingEventHandler, PropertyChangingEventArgs>(
                     x => before.PropertyChanging += x, x => before.PropertyChanging -= x);
 
-                if (expression.NodeType == ExpressionType.Index) {
+                if (expression.NodeType == ExpressionType.Index)
+                {
                     return obs.Where(x => string.IsNullOrEmpty(x.EventArgs.PropertyName)
                         || x.EventArgs.PropertyName.Equals(propertyName + "[]"))
                         .Select(x => new ObservedChange<object, object>(sender, expression));
-                } else {
-                    return obs.Where(x => string.IsNullOrEmpty(x.EventArgs.PropertyName)
-                        || x.EventArgs.PropertyName.Equals(propertyName))
-                    .Select(x => new ObservedChange<object, object>(sender, expression));
                 }
-            } else {
+
+                return obs.Where(x => string.IsNullOrEmpty(x.EventArgs.PropertyName)
+                    || x.EventArgs.PropertyName.Equals(propertyName))
+                .Select(x => new ObservedChange<object, object>(sender, expression));
+            }
+            else
+            {
                 var obs = Observable.FromEventPattern<PropertyChangedEventHandler, PropertyChangedEventArgs>(
                     x => after.PropertyChanged += x, x => after.PropertyChanged -= x);
 
-                if (expression.NodeType == ExpressionType.Index) {
-                    return obs.Where(x => string.IsNullOrEmpty(x.EventArgs.PropertyName) 
+                if (expression.NodeType == ExpressionType.Index)
+                {
+                    return obs.Where(x => string.IsNullOrEmpty(x.EventArgs.PropertyName)
                         || x.EventArgs.PropertyName.Equals(propertyName + "[]"))
                     .Select(x => new ObservedChange<object, object>(sender, expression));
-                } else {
-                    return obs.Where(x => string.IsNullOrEmpty(x.EventArgs.PropertyName)
-                        || x.EventArgs.PropertyName.Equals(propertyName))
-                    .Select(x => new ObservedChange<object, object>(sender, expression));
                 }
+
+                return obs.Where(x => string.IsNullOrEmpty(x.EventArgs.PropertyName)
+                    || x.EventArgs.PropertyName.Equals(propertyName))
+                .Select(x => new ObservedChange<object, object>(sender, expression));
             }
         }
     }

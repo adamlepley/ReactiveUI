@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -17,6 +17,7 @@ namespace ReactiveUI.Legacy
     /// IReactiveNotifyCollectionItemChanged provides notifications for collection item updates, ie when an object in
     /// a collection changes.
     /// </summary>
+    /// <typeparam name="TSender">The sender type.</typeparam>
     [Obsolete("ReactiveList is no longer supported. We suggest replacing it with DynamicData https://github.com/rolandpheasant/dynamicdata")]
     public interface IReactiveNotifyCollectionItemChanged<out TSender>
     {
@@ -47,6 +48,7 @@ namespace ReactiveUI.Legacy
     /// IReactiveNotifyCollectionChanged of T provides notifications when the contents
     /// of collection are changed (items are added/removed/moved).
     /// </summary>
+    /// <typeparam name="T"></typeparam>
     [Obsolete("ReactiveList is no longer supported. We suggest replacing it with DynamicData https://github.com/rolandpheasant/dynamicdata")]
     public interface IReactiveNotifyCollectionChanged<out T>
     {
@@ -90,23 +92,23 @@ namespace ReactiveUI.Legacy
 
         /// <summary>
         /// This Observable is equivalent to the NotifyCollectionChanged event,
-        /// but fires before the collection is changed
+        /// but fires before the collection is changed.
         /// </summary>
         IObservable<NotifyCollectionChangedEventArgs> Changing { get; }
 
         /// <summary>
         /// This Observable is equivalent to the NotifyCollectionChanged event,
-        /// and fires after the collection is changed
+        /// and fires after the collection is changed.
         /// </summary>
         IObservable<NotifyCollectionChangedEventArgs> Changed { get; }
 
         /// <summary>
-        /// Fires when the collection count changes, regardless of reason
+        /// Fires when the collection count changes, regardless of reason.
         /// </summary>
         IObservable<int> CountChanging { get; }
 
         /// <summary>
-        /// Fires when the collection count changes, regardless of reason
+        /// Fires when the collection count changes, regardless of reason.
         /// </summary>
         IObservable<int> CountChanged { get; }
 
@@ -125,6 +127,7 @@ namespace ReactiveUI.Legacy
         IDisposable SuppressChangeNotifications();
     }
 
+    /// <summary>
     /// IReactiveCollection of T represents a collection that can notify when its
     /// contents are changed (either items are added/removed, or the object
     /// itself changes).
@@ -132,6 +135,8 @@ namespace ReactiveUI.Legacy
     /// It is important to implement the Changing/Changed from
     /// IReactiveNotifyPropertyChanged semantically as "Fire when *anything* in
     /// the collection or any of its items have changed, in any way".
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     [Obsolete("ReactiveList is no longer supported. We suggest replacing it with DynamicData https://github.com/rolandpheasant/dynamicdata")]
     public interface IReactiveCollection<out T> : IReactiveNotifyCollectionChanged<T>, IReactiveNotifyCollectionItemChanged<T>, IEnumerable<T>, INotifyCollectionChanged, INotifyCollectionChanging, IReactiveObject
     {
@@ -150,6 +155,7 @@ namespace ReactiveUI.Legacy
     /// IReactiveNotifyPropertyChanged semantically as "Fire when *anything* in
     /// the collection or any of its items have changed, in any way".
     /// </summary>
+    /// <typeparam name="T"></typeparam>
     [Obsolete("ReactiveList is no longer supported. We suggest replacing it with DynamicData https://github.com/rolandpheasant/dynamicdata")]
     public interface IReadOnlyReactiveCollection<out T> : IReadOnlyCollection<T>, IReactiveCollection<T>
     {
@@ -164,6 +170,7 @@ namespace ReactiveUI.Legacy
     /// IReactiveNotifyPropertyChanged semantically as "Fire when *anything* in
     /// the collection or any of its items have changed, in any way".
     /// </summary>
+    /// <typeparam name="T"></typeparam>
     [Obsolete("ReactiveList is no longer supported. We suggest replacing it with DynamicData https://github.com/rolandpheasant/dynamicdata")]
     public interface IReadOnlyReactiveList<out T> : IReadOnlyReactiveCollection<T>, IReadOnlyList<T>
     {
@@ -175,6 +182,7 @@ namespace ReactiveUI.Legacy
     /// collection; this method is useful for creating ViewModel collections
     /// that are automatically updated when the respective Model collection is updated.
     /// </summary>
+    /// <typeparam name="T"></typeparam>
     [Obsolete("ReactiveList is no longer supported. We suggest replacing it with DynamicData https://github.com/rolandpheasant/dynamicdata")]
     public interface IReactiveDerivedList<out T> : IReadOnlyReactiveList<T>, IDisposable
     {
@@ -189,6 +197,7 @@ namespace ReactiveUI.Legacy
     /// IReactiveNotifyPropertyChanged semantically as "Fire when *anything* in
     /// the collection or any of its items have changed, in any way".
     /// </summary>
+    /// <typeparam name="T"></typeparam>
     [Obsolete("ReactiveList is no longer supported. We suggest replacing it with DynamicData https://github.com/rolandpheasant/dynamicdata")]
     public interface IReactiveList<T> : IReactiveCollection<T>, IList<T>
     {
@@ -207,5 +216,5 @@ namespace ReactiveUI.Legacy
         void Sort(Comparison<T> comparison);
 
         void Sort(int index, int count, IComparer<T> comparer);
-    }    
+    }
 }

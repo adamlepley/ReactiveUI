@@ -6,14 +6,14 @@ using System;
 using System.ComponentModel;
 using System.Reactive;
 using System.Reactive.Concurrency;
-using System.Reactive.Subjects;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using CoreGraphics;
 using Foundation;
 
 #if UIKIT
-using NSView = UIKit.UIView;
 using UIKit;
+using NSView = UIKit.UIView;
 #else
 using AppKit;
 #endif
@@ -21,18 +21,33 @@ using AppKit;
 namespace ReactiveUI
 {
     /// <summary>
-    /// This is an View that is both an NSView and has ReactiveObject powers 
-    /// (i.e. you can call RaiseAndSetIfChanged)
+    /// This is an View that is both an NSView and has ReactiveObject powers
+    /// (i.e. you can call RaiseAndSetIfChanged).
     /// </summary>
     public class ReactiveView : NSView, IReactiveNotifyPropertyChanged<ReactiveView>, IHandleObservableErrors, IReactiveObject, ICanActivate, ICanForceManualActivation
     {
-        protected ReactiveView() { }
-        protected ReactiveView(NSCoder c) : base(c) { }
-        protected ReactiveView(NSObjectFlag f) : base(f) { }
-        protected ReactiveView(IntPtr handle) : base(handle) { }
-        protected ReactiveView(CGRect frame) : base(frame) { }
+        protected ReactiveView()
+        {
+        }
 
-        public event PropertyChangingEventHandler PropertyChanging {
+        protected ReactiveView(NSCoder c) : base(c)
+        {
+        }
+
+        protected ReactiveView(NSObjectFlag f) : base(f)
+        {
+        }
+
+        protected ReactiveView(IntPtr handle) : base(handle)
+        {
+        }
+
+        protected ReactiveView(CGRect frame) : base(frame)
+        {
+        }
+
+        public event PropertyChangingEventHandler PropertyChanging
+        {
             add { PropertyChangingEventManager.AddHandler(this, value); }
             remove { PropertyChangingEventManager.RemoveHandler(this, value); }
         }
@@ -42,7 +57,8 @@ namespace ReactiveUI
             PropertyChangingEventManager.DeliverEvent(this, args);
         }
 
-        public event PropertyChangedEventHandler PropertyChanged {
+        public event PropertyChangedEventHandler PropertyChanged
+        {
             add { PropertyChangedEventManager.AddHandler(this, value); }
             remove { PropertyChangedEventManager.RemoveHandler(this, value); }
         }
@@ -54,17 +70,19 @@ namespace ReactiveUI
 
         /// <summary>
         /// Represents an Observable that fires *before* a property is about to
-        /// be changed.         
+        /// be changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveView>> Changing {
-            get { return this.getChangingObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveView>> Changing
+        {
+            get { return this.GetChangingObservable(); }
         }
 
         /// <summary>
         /// Represents an Observable that fires *after* a property has changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveView>> Changed {
-            get { return this.getChangedObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveView>> Changed
+        {
+            get { return this.GetChangedObservable(); }
         }
 
         /// <summary>
@@ -76,15 +94,27 @@ namespace ReactiveUI
         /// notifications.</returns>
         public IDisposable SuppressChangeNotifications()
         {
-            return this.suppressChangeNotifications();
+            return IReactiveObjectExtensions.SuppressChangeNotifications(this);
         }
 
-        public IObservable<Exception> ThrownExceptions { get { return this.getThrownExceptionsObservable(); } }
+        public IObservable<Exception> ThrownExceptions
+        {
+            get { return this.GetThrownExceptionsObservable(); }
+        }
 
-        Subject<Unit> activated = new Subject<Unit>();
-        public IObservable<Unit> Activated { get { return activated.AsObservable(); } }
-        Subject<Unit> deactivated = new Subject<Unit>();
-        public IObservable<Unit> Deactivated { get { return deactivated.AsObservable(); } }
+        private Subject<Unit> _activated = new Subject<Unit>();
+
+        public IObservable<Unit> Activated
+        {
+            get { return _activated.AsObservable(); }
+        }
+
+        private Subject<Unit> _deactivated = new Subject<Unit>();
+
+        public IObservable<Unit> Deactivated
+        {
+            get { return _deactivated.AsObservable(); }
+        }
 
 #if UIKIT
         public override void WillMoveToSuperview(NSView newsuper)
@@ -96,36 +126,54 @@ namespace ReactiveUI
             base.WillMoveToSuperview(newsuper);
 #else
             // Xamarin throws ArgumentNullException if newsuper is null
-            if (newsuper != null) {
+            if (newsuper != null)
+            {
                 base.ViewWillMoveToSuperview(newsuper);
             }
 #endif
-            (newsuper != null ? activated : deactivated).OnNext(Unit.Default);
+            (newsuper != null ? _activated : _deactivated).OnNext(Unit.Default);
         }
 
         void ICanForceManualActivation.Activate(bool activate)
         {
             RxApp.MainThreadScheduler.Schedule(() =>
-                (activate ? activated : deactivated).OnNext(Unit.Default));
+                (activate ? _activated : _deactivated).OnNext(Unit.Default));
         }
     }
 
     public abstract class ReactiveView<TViewModel> : ReactiveView, IViewFor<TViewModel>
         where TViewModel : class
     {
-        protected ReactiveView() { }
-        protected ReactiveView(NSCoder c) : base(c) { }
-        protected ReactiveView(NSObjectFlag f) : base(f) { }
-        protected ReactiveView(IntPtr handle) : base(handle) { }
-        protected ReactiveView(CGRect frame) : base(frame) { }
+        protected ReactiveView()
+        {
+        }
 
-        TViewModel _viewModel;
-        public TViewModel ViewModel {
+        protected ReactiveView(NSCoder c) : base(c)
+        {
+        }
+
+        protected ReactiveView(NSObjectFlag f) : base(f)
+        {
+        }
+
+        protected ReactiveView(IntPtr handle) : base(handle)
+        {
+        }
+
+        protected ReactiveView(CGRect frame) : base(frame)
+        {
+        }
+
+        private TViewModel _viewModel;
+
+        public TViewModel ViewModel
+        {
             get { return _viewModel; }
             set { this.RaiseAndSetIfChanged(ref _viewModel, value); }
         }
 
-        object IViewFor.ViewModel {
+        object IViewFor.ViewModel
+        {
             get { return ViewModel; }
             set { ViewModel = (TViewModel)value; }
         }

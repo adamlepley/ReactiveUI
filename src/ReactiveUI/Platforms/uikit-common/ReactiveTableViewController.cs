@@ -16,14 +16,38 @@ namespace ReactiveUI
     public abstract class ReactiveTableViewController : NSTableViewController,
     IReactiveNotifyPropertyChanged<ReactiveTableViewController>, IHandleObservableErrors, IReactiveObject, ICanActivate
     {
-        protected ReactiveTableViewController(NSTableViewStyle withStyle) : base(withStyle) { setupRxObj(); }
-        protected ReactiveTableViewController(string nibName, NSBundle bundle) : base(nibName, bundle) { setupRxObj(); }
-        protected ReactiveTableViewController(IntPtr handle) : base(handle) { setupRxObj(); }
-        protected ReactiveTableViewController(NSObjectFlag t) : base(t) { setupRxObj(); }
-        protected ReactiveTableViewController(NSCoder coder) : base(coder) { setupRxObj(); }
-        protected ReactiveTableViewController() { setupRxObj(); }
+        protected ReactiveTableViewController(NSTableViewStyle withStyle) : base(withStyle)
+        {
+            SetupRxObj();
+        }
 
-        public event PropertyChangingEventHandler PropertyChanging {
+        protected ReactiveTableViewController(string nibName, NSBundle bundle) : base(nibName, bundle)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactiveTableViewController(IntPtr handle) : base(handle)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactiveTableViewController(NSObjectFlag t) : base(t)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactiveTableViewController(NSCoder coder) : base(coder)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactiveTableViewController()
+        {
+            SetupRxObj();
+        }
+
+        public event PropertyChangingEventHandler PropertyChanging
+        {
             add { PropertyChangingEventManager.AddHandler(this, value); }
             remove { PropertyChangingEventManager.RemoveHandler(this, value); }
         }
@@ -33,7 +57,8 @@ namespace ReactiveUI
             PropertyChangingEventManager.DeliverEvent(this, args);
         }
 
-        public event PropertyChangedEventHandler PropertyChanged {
+        public event PropertyChangedEventHandler PropertyChanged
+        {
             add { PropertyChangedEventManager.AddHandler(this, value); }
             remove { PropertyChangedEventManager.RemoveHandler(this, value); }
         }
@@ -45,22 +70,27 @@ namespace ReactiveUI
 
         /// <summary>
         /// Represents an Observable that fires *before* a property is about to
-        /// be changed.         
+        /// be changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveTableViewController>> Changing {
-            get { return this.getChangingObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveTableViewController>> Changing
+        {
+            get { return this.GetChangingObservable(); }
         }
 
         /// <summary>
         /// Represents an Observable that fires *after* a property has changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveTableViewController>> Changed {
-            get { return this.getChangedObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveTableViewController>> Changed
+        {
+            get { return this.GetChangedObservable(); }
         }
 
-        public IObservable<Exception> ThrownExceptions { get { return this.getThrownExceptionsObservable(); } }
+        public IObservable<Exception> ThrownExceptions
+        {
+            get { return this.GetThrownExceptionsObservable(); }
+        }
 
-        void setupRxObj()
+        private void SetupRxObj()
         {
         }
 
@@ -73,25 +103,34 @@ namespace ReactiveUI
         /// notifications.</returns>
         public IDisposable SuppressChangeNotifications()
         {
-            return this.suppressChangeNotifications();
+            return IReactiveObjectExtensions.SuppressChangeNotifications(this);
         }
 
-        Subject<Unit> activated = new Subject<Unit>();
-        public IObservable<Unit> Activated { get { return activated.AsObservable(); } }
-        Subject<Unit> deactivated = new Subject<Unit>();
-        public IObservable<Unit> Deactivated { get { return deactivated.AsObservable(); } }
+        private Subject<Unit> _activated = new Subject<Unit>();
+
+        public IObservable<Unit> Activated
+        {
+            get { return _activated.AsObservable(); }
+        }
+
+        private Subject<Unit> _deactivated = new Subject<Unit>();
+
+        public IObservable<Unit> Deactivated
+        {
+            get { return _deactivated.AsObservable(); }
+        }
 
         public override void ViewWillAppear(bool animated)
         {
             base.ViewWillAppear(animated);
-            activated.OnNext(Unit.Default);
+            _activated.OnNext(Unit.Default);
             this.ActivateSubviews(true);
         }
 
         public override void ViewDidDisappear(bool animated)
         {
             base.ViewDidDisappear(animated);
-            deactivated.OnNext(Unit.Default);
+            _deactivated.OnNext(Unit.Default);
             this.ActivateSubviews(false);
         }
     }
@@ -99,23 +138,42 @@ namespace ReactiveUI
     public abstract class ReactiveTableViewController<TViewModel> : ReactiveTableViewController, IViewFor<TViewModel>
         where TViewModel : class
     {
-        protected ReactiveTableViewController(NSTableViewStyle withStyle) : base(withStyle) { }
-        protected ReactiveTableViewController(string nibName, NSBundle bundle) : base(nibName, bundle) { }
-        protected ReactiveTableViewController(IntPtr handle) : base(handle) { }
-        protected ReactiveTableViewController(NSObjectFlag t) : base(t) { }
-        protected ReactiveTableViewController(NSCoder coder) : base(coder) { }
-        protected ReactiveTableViewController() { }
+        protected ReactiveTableViewController(NSTableViewStyle withStyle) : base(withStyle)
+        {
+        }
 
-        TViewModel _viewModel;
-        public TViewModel ViewModel {
+        protected ReactiveTableViewController(string nibName, NSBundle bundle) : base(nibName, bundle)
+        {
+        }
+
+        protected ReactiveTableViewController(IntPtr handle) : base(handle)
+        {
+        }
+
+        protected ReactiveTableViewController(NSObjectFlag t) : base(t)
+        {
+        }
+
+        protected ReactiveTableViewController(NSCoder coder) : base(coder)
+        {
+        }
+
+        protected ReactiveTableViewController()
+        {
+        }
+
+        private TViewModel _viewModel;
+
+        public TViewModel ViewModel
+        {
             get { return _viewModel; }
             set { this.RaiseAndSetIfChanged(ref _viewModel, value); }
         }
 
-        object IViewFor.ViewModel {
+        object IViewFor.ViewModel
+        {
             get { return ViewModel; }
             set { ViewModel = (TViewModel)value; }
         }
     }
 }
-

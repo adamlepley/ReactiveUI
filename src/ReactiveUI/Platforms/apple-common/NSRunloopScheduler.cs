@@ -17,7 +17,8 @@ namespace ReactiveUI
     /// </summary>
     public class NSRunloopScheduler : IScheduler
     {
-        public DateTimeOffset Now {
+        public DateTimeOffset Now
+        {
             get { return DateTimeOffset.Now; }
         }
 
@@ -25,8 +26,12 @@ namespace ReactiveUI
         {
             var innerDisp = new SingleAssignmentDisposable();
 
-            DispatchQueue.MainQueue.DispatchAsync(new NSAction(() => {
-                if (!innerDisp.IsDisposed) innerDisp.Disposable = action(this, state);
+            DispatchQueue.MainQueue.DispatchAsync(new NSAction(() =>
+            {
+                if (!innerDisp.IsDisposed)
+                {
+                    innerDisp.Disposable = action(this, state);
+                }
             }));
 
             return innerDisp;
@@ -34,7 +39,8 @@ namespace ReactiveUI
 
         public IDisposable Schedule<TState>(TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
         {
-            if (dueTime <= Now) {
+            if (dueTime <= Now)
+            {
                 return Schedule(state, action);
             }
 
@@ -46,11 +52,16 @@ namespace ReactiveUI
             var innerDisp = Disposable.Empty;
             bool isCancelled = false;
 
-            var timer = NSTimer.CreateScheduledTimer(dueTime, _ => {
-                if (!isCancelled) innerDisp = action(this, state);
+            var timer = NSTimer.CreateScheduledTimer(dueTime, _ =>
+            {
+                if (!isCancelled)
+                {
+                    innerDisp = action(this, state);
+                }
             });
 
-            return Disposable.Create(() => {
+            return Disposable.Create(() =>
+            {
                 isCancelled = true;
                 timer.Invalidate();
                 innerDisp.Dispose();

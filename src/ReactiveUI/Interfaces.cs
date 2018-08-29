@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -18,6 +18,8 @@ namespace ReactiveUI
     /// Note that it is used for both Changing (i.e.'before change')
     /// and Changed Observables.
     /// </summary>
+    /// <typeparam name="TSender">The sender type.</typeparam>
+    /// <typeparam name="TValue">The value type.</typeparam>
     public interface IObservedChange<out TSender, out TValue>
     {
         /// <summary>
@@ -41,8 +43,10 @@ namespace ReactiveUI
     }
 
     /// <summary>
-    /// A data-only version of IObservedChange
+    /// A data-only version of IObservedChange.
     /// </summary>
+    /// <typeparam name="TSender">The sender type.</typeparam>
+    /// <typeparam name="TValue">The value type.</typeparam>
     public class ObservedChange<TSender, TValue> : IObservedChange<TSender, TValue>
     {
         /// <summary>
@@ -53,9 +57,9 @@ namespace ReactiveUI
         /// <param name="value">The value.</param>
         public ObservedChange(TSender sender, Expression expression, TValue value = default(TValue))
         {
-            this.Sender = sender;
-            this.Expression = expression;
-            this.Value = value;
+            Sender = sender;
+            Expression = expression;
+            Value = value;
         }
 
         /// <summary>
@@ -102,6 +106,7 @@ namespace ReactiveUI
     /// Note that it is used for both Changing (i.e.'before change')
     /// and Changed Observables.
     /// </summary>
+    /// <typeparam name="TSender">The sender type.</typeparam>
     public interface IReactivePropertyChangedEventArgs<out TSender>
     {
         /// <summary>
@@ -118,7 +123,7 @@ namespace ReactiveUI
     /// <summary>
     ///
     /// </summary>
-    /// <typeparam name="TSender"></typeparam>
+    /// <typeparam name="TSender">The sender type.</typeparam>
     public class ReactivePropertyChangingEventArgs<TSender> : PropertyChangingEventArgs, IReactivePropertyChangedEventArgs<TSender>
     {
         /// <summary>
@@ -129,7 +134,7 @@ namespace ReactiveUI
         public ReactivePropertyChangingEventArgs(TSender sender, string propertyName)
             : base(propertyName)
         {
-            this.Sender = sender;
+            Sender = sender;
         }
 
         /// <summary>
@@ -141,7 +146,7 @@ namespace ReactiveUI
     /// <summary>
     ///
     /// </summary>
-    /// <typeparam name="TSender"></typeparam>
+    /// <typeparam name="TSender">The sender type.</typeparam>
     public class ReactivePropertyChangedEventArgs<TSender> : PropertyChangedEventArgs, IReactivePropertyChangedEventArgs<TSender>
     {
         /// <summary>
@@ -152,7 +157,7 @@ namespace ReactiveUI
         public ReactivePropertyChangedEventArgs(TSender sender, string propertyName)
             : base(propertyName)
         {
-            this.Sender = sender;
+            Sender = sender;
         }
 
         /// <summary>
@@ -165,6 +170,7 @@ namespace ReactiveUI
     /// IReactiveNotifyPropertyChanged represents an extended version of
     /// INotifyPropertyChanged that also exposes typed Observables.
     /// </summary>
+    /// <typeparam name="TSender">The sender type.</typeparam>
     public interface IReactiveNotifyPropertyChanged<out TSender>
     {
         /// <summary>
@@ -197,7 +203,7 @@ namespace ReactiveUI
     public interface IRoutableViewModel : IReactiveObject
     {
         /// <summary>
-        /// A string token representing the current ViewModel, such as 'login' or 'user'
+        /// A string token representing the current ViewModel, such as 'login' or 'user'.
         /// </summary>
         string UrlPathSegment { get; }
 
@@ -229,10 +235,11 @@ namespace ReactiveUI
     public interface ICanActivate
     {
         IObservable<Unit> Activated { get; }
+
         IObservable<Unit> Deactivated { get; }
     }
 
-    interface ICanForceManualActivation 
+    internal interface ICanForceManualActivation
     {
         void Activate(bool activate);
     }

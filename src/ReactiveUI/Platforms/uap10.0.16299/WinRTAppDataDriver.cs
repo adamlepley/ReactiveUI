@@ -25,7 +25,8 @@ namespace ReactiveUI
         {
             return ApplicationData.Current.RoamingFolder.GetFileAsync("appData.xmlish").ToObservable()
                 .SelectMany(x => FileIO.ReadTextAsync(x, UnicodeEncoding.Utf8))
-                .SelectMany(x => {
+                .SelectMany(x =>
+                {
                     var line = x.IndexOf('\n');
                     var typeName = x.Substring(0, line-1); // -1 for CR
                     var serializer = new DataContractSerializer(Type.GetType(typeName));
@@ -38,7 +39,8 @@ namespace ReactiveUI
 
         public IObservable<Unit> SaveState(object state)
         {
-            try {
+            try
+            {
                 var ms = new MemoryStream();
                 var writer = new StreamWriter(ms, Encoding.UTF8);
                 var serializer = new DataContractSerializer(state.GetType());
@@ -49,7 +51,9 @@ namespace ReactiveUI
 
                 return ApplicationData.Current.RoamingFolder.CreateFileAsync("appData.xmlish", CreationCollisionOption.ReplaceExisting).ToObservable()
                     .SelectMany(x => FileIO.WriteBytesAsync(x, ms.ToArray()).ToObservable());
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 return Observable.Throw<Unit>(ex);
             }
         }

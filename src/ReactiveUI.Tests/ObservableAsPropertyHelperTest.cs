@@ -26,7 +26,8 @@ namespace ReactiveUI.Tests
             var input = new[] { 1, 2, 3, 3, 4 }.ToObservable();
             var output = new List<int>();
 
-            (new TestScheduler()).With(sched => {
+            (new TestScheduler()).With(sched =>
+            {
                 var fixture = new ObservableAsPropertyHelper<int>(input,
                     x => output.Add(x), -5);
 
@@ -46,7 +47,8 @@ namespace ReactiveUI.Tests
             var input = new[] { 1, 2, 3 }.ToObservable();
             var output = new List<int>();
 
-            (new TestScheduler()).With(sched => {
+            (new TestScheduler()).With(sched =>
+            {
                 var fixture = new ObservableAsPropertyHelper<int>(input,
                     x => output.Add(x), 1);
 
@@ -63,7 +65,8 @@ namespace ReactiveUI.Tests
         {
             var output = new List<int>();
 
-            (new TestScheduler()).With(sched => {
+            (new TestScheduler()).With(sched =>
+            {
                 var fixture = new ObservableAsPropertyHelper<int>(Observable<int>.Never,
                     x => output.Add(x), 32);
 
@@ -96,7 +99,8 @@ namespace ReactiveUI.Tests
         {
             var isSubscribed = false;
 
-            var observable = Observable.Create<int>(o => {
+            var observable = Observable.Create<int>(o =>
+            {
                 isSubscribed = true;
                 o.OnNext(42);
                 o.OnCompleted();
@@ -115,7 +119,8 @@ namespace ReactiveUI.Tests
         {
             var isSubscribed = false;
 
-            var observable = Observable.Create<int>(o => {
+            var observable = Observable.Create<int>(o =>
+            {
                 isSubscribed = true;
                 o.OnNext(42);
                 o.OnCompleted();
@@ -133,7 +138,8 @@ namespace ReactiveUI.Tests
         [Fact]
         public void OAPHDeferSubscriptionParameterIsSubscribedIsNotTrueInitially()
         {
-            var observable = Observable.Create<int>(o => {
+            var observable = Observable.Create<int>(o =>
+            {
                 o.OnNext(42);
                 o.OnCompleted();
 
@@ -176,7 +182,8 @@ namespace ReactiveUI.Tests
         [Fact]
         public void NoThrownExceptionsSubscriberEqualsOAPHDeath()
         {
-            (new TestScheduler()).With(sched => {
+            (new TestScheduler()).With(sched =>
+            {
                 var input = new Subject<int>();
                 var fixture = new ObservableAsPropertyHelper<int>(input, _ => { }, -5);
 
@@ -186,9 +193,12 @@ namespace ReactiveUI.Tests
                 input.OnError(new Exception("Die!"));
 
                 var failed = true;
-                try {
+                try
+                {
                     sched.Start();
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     failed = ex.InnerException.Message != "Die!";
                 }
 
@@ -252,19 +262,23 @@ namespace ReactiveUI.Tests
         {
             var fixture = new OaphNameOfTestFixture();
 
-            fixture.ObservableForProperty(x => x.FirstThreeLettersOfOneWord, beforeChange: true).ToObservableChangeSet(ImmediateScheduler.Instance).Bind(out var firstThreeChanging).Subscribe();;
-            fixture.ObservableForProperty(x => x.LastThreeLettersOfOneWord, beforeChange: true).ToObservableChangeSet(ImmediateScheduler.Instance).Bind(out var lastThreeChanging).Subscribe();;
+            fixture.ObservableForProperty(x => x.FirstThreeLettersOfOneWord, beforeChange: true).ToObservableChangeSet(ImmediateScheduler.Instance).Bind(out var firstThreeChanging).Subscribe();
+
+            fixture.ObservableForProperty(x => x.LastThreeLettersOfOneWord, beforeChange: true).ToObservableChangeSet(ImmediateScheduler.Instance).Bind(out var lastThreeChanging).Subscribe();
 
             var changing = new[] { firstThreeChanging, lastThreeChanging };
 
-            fixture.ObservableForProperty(x => x.FirstThreeLettersOfOneWord, beforeChange: false).ToObservableChangeSet(ImmediateScheduler.Instance).Bind(out var firstThreeChanged).Subscribe();;
-            fixture.ObservableForProperty(x => x.LastThreeLettersOfOneWord, beforeChange: false).ToObservableChangeSet(ImmediateScheduler.Instance).Bind(out var lastThreeChanged).Subscribe();;
+            fixture.ObservableForProperty(x => x.FirstThreeLettersOfOneWord, beforeChange: false).ToObservableChangeSet(ImmediateScheduler.Instance).Bind(out var firstThreeChanged).Subscribe();
+
+            fixture.ObservableForProperty(x => x.LastThreeLettersOfOneWord, beforeChange: false).ToObservableChangeSet(ImmediateScheduler.Instance).Bind(out var lastThreeChanged).Subscribe();
+
             var changed = new[] { firstThreeChanged, lastThreeChanged };
 
             Assert.True(changed.All(x => x.Count == 0));
             Assert.True(changing.All(x => x.Count == 0));
 
-            for (var i = 0; i < testWords.Length; ++i) {
+            for (var i = 0; i < testWords.Length; ++i)
+            {
                 fixture.IsOnlyOneWord = testWords[i];
                 Assert.True(changed.All(x => x.Count == i + 1));
                 Assert.True(changing.All(x => x.Count == i + 1));
@@ -280,8 +294,10 @@ namespace ReactiveUI.Tests
         [Fact]
         public void ToPropertyShouldSubscribeOnlyOnce()
         {
-            using (ProductionMode.Set()) {
+            using (ProductionMode.Set())
+            {
                 var f = new RaceConditionFixture();
+
                 // This line is important because it triggers connect to
                 // be called recursively thus cause the subscription
                 // to be called twice. Not sure if this is a reactive UI
@@ -298,8 +314,10 @@ namespace ReactiveUI.Tests
         [Fact]
         public void ToProperty_NameOf_ShouldSubscribeOnlyOnce()
         {
-            using (ProductionMode.Set()) {
+            using (ProductionMode.Set())
+            {
                 var f = new RaceConditionNameOfFixture();
+
                 // This line is important because it triggers connect to
                 // be called recursively thus cause the subscription
                 // to be called twice. Not sure if this is a reactive UI
@@ -316,11 +334,13 @@ namespace ReactiveUI.Tests
         [Fact]
         public void ToProperty_GivenIndexer_NotifiesOnExpectedPropertyName()
         {
-            (new TestScheduler()).With(sched => {
+            (new TestScheduler()).With(sched =>
+            {
                 var fixture = new OAPHIndexerTestFixture();
                 var propertiesChanged = new List<string>();
 
-                fixture.PropertyChanged += (sender, args) => {
+                fixture.PropertyChanged += (sender, args) =>
+                {
                     propertiesChanged.Add(args.PropertyName);
                 };
 
@@ -331,7 +351,7 @@ namespace ReactiveUI.Tests
         }
     }
 
-    class ProductionMode : IModeDetector
+    internal class ProductionMode : IModeDetector
     {
         public bool? InUnitTestRunner()
         {
@@ -356,14 +376,11 @@ namespace ReactiveUI.Tests
 
         public string Text
         {
-            get { return _text; }
-            set { this.RaiseAndSetIfChanged(ref _text, value); }
+            get => _text;
+            set => this.RaiseAndSetIfChanged(ref _text, value);
         }
 
-        public string this[string propertyName]
-        {
-            get { return string.Empty; }
-        }
+        public string this[string propertyName] => string.Empty;
 
         public OAPHIndexerTestFixture()
         {
@@ -378,10 +395,7 @@ namespace ReactiveUI.Tests
         public ObservableAsPropertyHelper<bool> _A;
         public int Count;
 
-        public bool A
-        {
-            get { return _A.Value; }
-        }
+        public bool A => _A.Value;
 
         public RaceConditionFixture()
         {
@@ -402,10 +416,7 @@ namespace ReactiveUI.Tests
         public ObservableAsPropertyHelper<bool> _A;
         public int Count;
 
-        public bool A
-        {
-            get { return _A.Value; }
-        }
+        public bool A => _A.Value;
 
         public RaceConditionNameOfFixture()
         {

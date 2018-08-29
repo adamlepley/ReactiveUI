@@ -32,12 +32,16 @@ namespace ReactiveUI
 
             var router = @this.HostScreen.Router;
             var navigationStackChanged = router.NavigationChanged.CountChanged();
-            return navigationStackChanged.Subscribe(_ => {
-                if (router.GetCurrentViewModel() == @this) {
+            return navigationStackChanged.Subscribe(_ =>
+            {
+                if (router.GetCurrentViewModel() == @this)
+                {
                     inner?.Dispose();
 
                     inner = onNavigatedTo();
-                } else {
+                }
+                else
+                {
                     inner?.Dispose();
                 }
             });
@@ -48,13 +52,13 @@ namespace ReactiveUI
         /// the topmost ViewModel in the navigation stack is this ViewModel.
         /// This allows you to set up connections that only operate while the
         /// ViewModel has focus.
-        /// 
+        ///
         /// The observable will complete when the ViewModel is removed completely
         /// from the navigation stack. If your ViewModel can be _removed_ from
         /// the navigation stack and then reused later, you must call this method
         /// and resubscribe each time it is reused.
         /// </summary>
-        /// <param name="this">The viewmodel to watch for navigation changes</param>
+        /// <param name="this">The viewmodel to watch for navigation changes.</param>
         /// <returns>An IObservable{Unit} that signals when the ViewModel has
         /// been added or brought to the top of the navigation stack. The
         /// observable completes when the ViewModel is no longer a part of the
@@ -77,13 +81,13 @@ namespace ReactiveUI
         /// This method will return an observable that fires events _just before_
         /// the ViewModel is no longer the topmost ViewModel in the navigation
         /// stack. This allows you to clean up anything before losing focus.
-        /// 
+        ///
         /// The observable will complete when the ViewModel is removed completely
         /// from the navigation stack. If your ViewModel can be _removed_ from
         /// the navigation stack and then reused later, you must call this method
         /// and resubscribe each time it is reused.
         /// </summary>
-        /// /// <param name="this">The viewmodel to watch for navigation changes</param>
+        /// /// <param name="this">The viewmodel to watch for navigation changes.</param>
         /// <returns>An IObservable{Unit} that signals when the ViewModel is no
         /// longer the topmost ViewModel in the navigation stack. The observable
         /// completes when the ViewModel is no longer a part of the navigation
@@ -96,7 +100,7 @@ namespace ReactiveUI
             var itemRemoved = navigationStackChanged
                 .Where(x => x.Any(change => change.Reason == ListChangeReason.Remove && change.Item.Current == @this));
 
-            var viewModelsChanged = navigationStackChanged.Scan(new IRoutableViewModel[2], (previous, current) => new[] {previous[1], router.GetCurrentViewModel()});
+            var viewModelsChanged = navigationStackChanged.Scan(new IRoutableViewModel[2], (previous, current) => new[] { previous[1], router.GetCurrentViewModel() });
             return viewModelsChanged
                 .Where(x => x[0] == @this)
                 .Select(_ => Unit.Default)

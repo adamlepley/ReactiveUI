@@ -10,16 +10,17 @@ namespace ReactiveUI
 {
     internal static class CompatMixins
     {
-        internal static void ForEach<T>(this IEnumerable<T> This, Action<T> block)
+        internal static void ForEach<T>(this IEnumerable<T> @this, Action<T> block)
         {
-            foreach (var v in This) {
+            foreach (var v in @this)
+            {
                 block(v);
             }
         }
 
-        internal static IEnumerable<T> SkipLast<T>(this IEnumerable<T> This, int count)
+        internal static IEnumerable<T> SkipLast<T>(this IEnumerable<T> @this, int count)
         {
-            return This.Take(This.Count() - count);
+            return @this.Take(@this.Count() - count);
         }
     }
 

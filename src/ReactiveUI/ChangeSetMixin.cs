@@ -30,12 +30,13 @@ namespace ReactiveUI
         /// <returns>An observable of changes that only have count changes.</returns>
         public static IObservable<IChangeSet> CountChanged(this IObservable<IChangeSet> changeSet)
         {
-            return changeSet.Where(x => x.HasCountChanged());
+            return changeSet.Where(HasCountChanged);
         }
 
         /// <summary>
         /// Is the change set associated with a count change.
         /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="changeSet">The change list to evaluate.</param>
         /// <returns>An observable of changes that only have count changes.</returns>
         public static IObservable<IChangeSet<T>> CountChanged<T>(this IObservable<IChangeSet<T>> changeSet)

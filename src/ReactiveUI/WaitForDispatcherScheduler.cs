@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -15,12 +15,12 @@ namespace ReactiveUI
     /// </summary>
     public class WaitForDispatcherScheduler : IScheduler
     {
-        private IScheduler scheduler;
-        private readonly Func<IScheduler> schedulerFactory;
+        private IScheduler _scheduler;
+        private readonly Func<IScheduler> _schedulerFactory;
 
         public WaitForDispatcherScheduler(Func<IScheduler> schedulerFactory)
         {
-            this.schedulerFactory = schedulerFactory;
+            _schedulerFactory = schedulerFactory;
 
             // NB: Creating a scheduler will fail on WinRT if we attempt to do
             // so on a non-UI thread, even if the underlying Dispatcher exists.
@@ -44,21 +44,27 @@ namespace ReactiveUI
             return AttemptToCreateScheduler().Schedule(state, dueTime, action);
         }
 
-        public DateTimeOffset Now
-        {
-            get { return AttemptToCreateScheduler().Now; }
-        }
+        public DateTimeOffset Now => AttemptToCreateScheduler().Now;
 
         private IScheduler AttemptToCreateScheduler()
         {
-            if (scheduler != null) return scheduler;
-            try {
-                scheduler = schedulerFactory();
-                return scheduler;
-            } catch (InvalidOperationException) {
+            if (_scheduler != null)
+            {
+                return _scheduler;
+            }
+
+            try
+            {
+                _scheduler = _schedulerFactory();
+                return _scheduler;
+            }
+            catch (InvalidOperationException)
+            {
                 // NB: Dispatcher's not ready yet. Keep using CurrentThread
                 return CurrentThreadScheduler.Instance;
-            } catch (ArgumentNullException) {
+            }
+            catch (ArgumentNullException)
+            {
                 // NB: Dispatcher's not ready yet. Keep using CurrentThread
                 return CurrentThreadScheduler.Instance;
             }

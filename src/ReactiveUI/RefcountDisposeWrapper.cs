@@ -7,21 +7,25 @@ using System.Threading;
 
 namespace ReactiveUI
 {
-    sealed class RefcountDisposeWrapper
+    internal sealed class RefcountDisposeWrapper
     {
-        IDisposable _inner;
-        int refCount = 1;
+        private IDisposable _inner;
+        private int _refCount = 1;
 
-        public RefcountDisposeWrapper(IDisposable inner) { _inner = inner; }
+        public RefcountDisposeWrapper(IDisposable inner)
+        {
+            _inner = inner;
+        }
 
         public void AddRef()
         {
-            Interlocked.Increment(ref refCount);
+            Interlocked.Increment(ref _refCount);
         }
 
         public void Release()
         {
-            if (Interlocked.Decrement(ref refCount) == 0) {
+            if (Interlocked.Decrement(ref _refCount) == 0)
+            {
                 var inner = Interlocked.Exchange(ref _inner, null);
                 inner.Dispose();
             }

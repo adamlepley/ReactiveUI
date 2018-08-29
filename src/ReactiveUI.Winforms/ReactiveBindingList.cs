@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -18,33 +18,37 @@ namespace ReactiveUI.Winforms.Legacy
         ICollection, IEnumerable, IList, IBindingList,
         ICancelAddNew, IRaiseItemChangedEvents
     {
-        public ReactiveBindingList() : this(null) {}
+        public ReactiveBindingList() : this(null)
+        {
+        }
 
         public void CancelNew(int itemIndex)
         {
-            //throw new NotImplementedException();
+            // throw new NotImplementedException();
         }
 
         public void EndNew(int itemIndex)
         {
-            //throw new NotImplementedException();
+            // throw new NotImplementedException();
         }
 
-        public bool RaisesItemChangedEvents { get { return base.ChangeTrackingEnabled; } }
+        public bool RaisesItemChangedEvents => ChangeTrackingEnabled;
 
         /// <summary>
-        /// ReactiveBindingList constructor
+        /// ReactiveBindingList constructor.
         /// </summary>
-        /// <param name="items"></param>
+        /// <param name="items">The items.</param>
         public ReactiveBindingList(IEnumerable<T> items)
             : base(items)
-        {}
-
-        protected override void raiseCollectionChanged(NotifyCollectionChangedEventArgs e)
         {
-            base.raiseCollectionChanged(e);
-            if (this.ListChanged != null) {
-                e.AsListChangedEventArgs().ForEach(x => this.ListChanged(this, x));
+        }
+
+        protected override void RaiseCollectionChanged(NotifyCollectionChangedEventArgs e)
+        {
+            base.RaiseCollectionChanged(e);
+            if (ListChanged != null)
+            {
+                e.AsListChangedEventArgs().ForEach(x => ListChanged(this, x));
             }
         }
 
@@ -78,23 +82,23 @@ namespace ReactiveUI.Winforms.Legacy
             throw new NotSupportedException();
         }
 
-        public bool AllowNew { get { return true; } }
+        public bool AllowNew => true;
 
-        public bool AllowEdit { get { return true; } }
+        public bool AllowEdit => true;
 
-        public bool AllowRemove { get { return true; } }
+        public bool AllowRemove => true;
 
-        public bool SupportsChangeNotification { get { return true; } }
+        public bool SupportsChangeNotification => true;
 
-        public bool SupportsSearching { get { return false; } }
+        public bool SupportsSearching => false;
 
-        public bool SupportsSorting { get { return false; } }
+        public bool SupportsSorting => false;
 
-        public bool IsSorted { get { return false; } }
+        public bool IsSorted => false;
 
-        public PropertyDescriptor SortProperty { get { return null; } }
+        public PropertyDescriptor SortProperty => null;
 
-        public ListSortDirection SortDirection { get { return ListSortDirection.Ascending; } }
+        public ListSortDirection SortDirection => ListSortDirection.Ascending;
 
         public event ListChangedEventHandler ListChanged;
     }

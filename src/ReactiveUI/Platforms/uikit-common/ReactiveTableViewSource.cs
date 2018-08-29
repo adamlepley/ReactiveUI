@@ -21,8 +21,11 @@ namespace ReactiveUI
     public class TableSectionInformation<TSource> : ISectionInformation<TSource, UITableView, UITableViewCell>
     {
         public INotifyCollectionChanged Collection { get; protected set; }
+
         public Action<UITableViewCell> InitializeCellAction { get; protected set; }
+
         public Func<object, NSString> CellKeySelector { get; protected set; }
+
         public float SizeHint { get; protected set; }
 
         /// <summary>
@@ -47,7 +50,9 @@ namespace ReactiveUI
             SizeHint = sizeHint;
             CellKeySelector = cellKeySelector;
             if (initializeCellAction != null)
+            {
                 InitializeCellAction = cell => initializeCellAction((TCell)cell);
+            }
         }
 
         public TableSectionInformation(INotifyCollectionChanged collection, NSString cellKey, float sizeHint, Action<TCell> initializeCellAction = null)
@@ -56,20 +61,21 @@ namespace ReactiveUI
         }
     }
 
-    class UITableViewAdapter : IUICollViewAdapter<UITableView, UITableViewCell>
+    internal class UITableViewAdapter : IUICollViewAdapter<UITableView, UITableViewCell>
     {
-        readonly UITableView view;
-        readonly BehaviorSubject<bool> isReloadingData;
-        int inFlightReloads;
+        private readonly UITableView _view;
+        private readonly BehaviorSubject<bool> _isReloadingData;
+        private int _inFlightReloads;
 
         internal UITableViewAdapter(UITableView view)
         {
-            this.view = view;
-            this.isReloadingData = new BehaviorSubject<bool>(false);
+            _view = view;
+            _isReloadingData = new BehaviorSubject<bool>(false);
         }
 
-        public IObservable<bool> IsReloadingData {
-            get { return this.isReloadingData.AsObservable(); }
+        public IObservable<bool> IsReloadingData
+        {
+            get { return _isReloadingData.AsObservable(); }
         }
 
         public UITableViewRowAnimation InsertSectionsAnimation { get; set; } = UITableViewRowAnimation.Automatic;
@@ -86,12 +92,13 @@ namespace ReactiveUI
 
         public void ReloadData()
         {
-            ++inFlightReloads;
-            view.ReloadData();
+            ++_inFlightReloads;
+            _view.ReloadData();
 
-            if (inFlightReloads == 1) {
-                Debug.Assert(!this.isReloadingData.Value);
-                this.isReloadingData.OnNext(true);
+            if (_inFlightReloads == 1)
+            {
+                Debug.Assert(!_isReloadingData.Value);
+                _isReloadingData.OnNext(true);
             }
 
             // since ReloadData() queues the appropriate messages on the UI thread, we know we're done reloading
@@ -101,51 +108,86 @@ namespace ReactiveUI
 
         public void BeginUpdates()
         {
-            view.BeginUpdates();
+            _view.BeginUpdates();
         }
 
         public void PerformUpdates(Action updates, Action completion)
         {
-            view.BeginUpdates();
-            try {
+            _view.BeginUpdates();
+            try
+            {
                 updates();
-            } finally {
-                view.EndUpdates();
+            }
+            finally
+            {
+                _view.EndUpdates();
                 completion();
             }
         }
 
         public void EndUpdates()
         {
-            view.EndUpdates();
+            _view.EndUpdates();
         }
 
-        public void InsertSections(NSIndexSet indexes) { view.InsertSections(indexes, InsertSectionsAnimation); }
-        public void DeleteSections(NSIndexSet indexes) { view.DeleteSections(indexes, DeleteSectionsAnimation); }
-        public void ReloadSections(NSIndexSet indexes) { view.ReloadSections(indexes, ReloadSectionsAnimation); }
-        public void MoveSection(int fromIndex, int toIndex) { view.MoveSection(fromIndex, toIndex); }
-        public void InsertItems(NSIndexPath[] paths) { view.InsertRows(paths, InsertRowsAnimation); }
-        public void DeleteItems(NSIndexPath[] paths) { view.DeleteRows(paths, DeleteRowsAnimation); }
-        public void ReloadItems(NSIndexPath[] paths) { view.ReloadRows(paths, ReloadRowsAnimation); }
-        public void MoveItem(NSIndexPath path, NSIndexPath newPath) { view.MoveRow(path, newPath); }
+        public void InsertSections(NSIndexSet indexes)
+        {
+            _view.InsertSections(indexes, InsertSectionsAnimation);
+        }
+
+        public void DeleteSections(NSIndexSet indexes)
+        {
+            _view.DeleteSections(indexes, DeleteSectionsAnimation);
+        }
+
+        public void ReloadSections(NSIndexSet indexes)
+        {
+            _view.ReloadSections(indexes, ReloadSectionsAnimation);
+        }
+
+        public void MoveSection(int fromIndex, int toIndex)
+        {
+            _view.MoveSection(fromIndex, toIndex);
+        }
+
+        public void InsertItems(NSIndexPath[] paths)
+        {
+            _view.InsertRows(paths, InsertRowsAnimation);
+        }
+
+        public void DeleteItems(NSIndexPath[] paths)
+        {
+            _view.DeleteRows(paths, DeleteRowsAnimation);
+        }
+
+        public void ReloadItems(NSIndexPath[] paths)
+        {
+            _view.ReloadRows(paths, ReloadRowsAnimation);
+        }
+
+        public void MoveItem(NSIndexPath path, NSIndexPath newPath)
+        {
+            _view.MoveRow(path, newPath);
+        }
 
         public UITableViewCell DequeueReusableCell(NSString cellKey, NSIndexPath path)
         {
-            return view.DequeueReusableCell(cellKey, path);
+            return _view.DequeueReusableCell(cellKey, path);
         }
 
-        void FinishReloadData()
+        private void FinishReloadData()
         {
-            --inFlightReloads;
+            --_inFlightReloads;
 
-            if (inFlightReloads == 0) {
+            if (_inFlightReloads == 0)
+            {
                 // this is required because sometimes iOS schedules further work that results in calls to GetCell
                 // that work could happen after FinishReloadData unless we force layout here
                 // of course, we can't have that work running after IsReloading ticks to false because otherwise
                 // some updates may occur before the calls to GetCell and thus the calls to GetCell could fail due to invalid indexes
-                this.view.LayoutIfNeeded();
-                Debug.Assert(this.isReloadingData.Value);
-                this.isReloadingData.OnNext(false);
+                _view.LayoutIfNeeded();
+                Debug.Assert(_isReloadingData.Value);
+                _isReloadingData.OnNext(false);
             }
         }
     }
@@ -157,7 +199,7 @@ namespace ReactiveUI
     {
         /// <summary>
         /// Gets the function that creates the <see cref="UIView"/>
-        /// used as header for this section. Overrides Title
+        /// used as header for this section. Overrides Title.
         /// </summary>
         public Func<UIView> View { get; protected set; }
 
@@ -179,8 +221,8 @@ namespace ReactiveUI
         /// <param name="height">Height of the header.</param>
         public TableSectionHeader(Func<UIView> view, float height)
         {
-            this.View = view;
-            this.Height = height;
+            View = view;
+            Height = height;
         }
 
         /// <summary>
@@ -189,40 +231,41 @@ namespace ReactiveUI
         /// <param name="title">Title to use.</param>
         public TableSectionHeader(string title)
         {
-            this.Title = title;
+            Title = title;
         }
     }
 
     /// <summary>
-    /// ReactiveTableViewSource is a Table View Source that is connected to 
-    /// a List that automatically updates the View based on the 
-    /// contents of the list. The collection changes are buffered and View 
+    /// ReactiveTableViewSource is a Table View Source that is connected to
+    /// a List that automatically updates the View based on the
+    /// contents of the list. The collection changes are buffered and View
     /// items are animated in and out as items are added.
     /// </summary>
+    /// <typeparam name="TSource"></typeparam>
     public class ReactiveTableViewSource<TSource> : UITableViewSource, IEnableLogger, IDisposable, IReactiveNotifyPropertyChanged<ReactiveTableViewSource<TSource>>, IHandleObservableErrors, IReactiveObject
     {
-        readonly CommonReactiveSource<TSource, UITableView, UITableViewCell, TableSectionInformation<TSource>> commonSource;
-        readonly Subject<object> elementSelected = new Subject<object>();
-        readonly UITableViewAdapter adapter;
+        private readonly CommonReactiveSource<TSource, UITableView, UITableViewCell, TableSectionInformation<TSource>> _commonSource;
+        private readonly Subject<object> _elementSelected = new Subject<object>();
+        private readonly UITableViewAdapter _adapter;
 
         public ReactiveTableViewSource(UITableView tableView, INotifyCollectionChanged collection, NSString cellKey, float sizeHint, Action<UITableViewCell> initializeCellAction = null)
             : this(tableView)
         {
-            this.Data = new[] { new TableSectionInformation<TSource, UITableViewCell>(collection, cellKey, sizeHint, initializeCellAction) };
+            Data = new[] { new TableSectionInformation<TSource, UITableViewCell>(collection, cellKey, sizeHint, initializeCellAction) };
         }
 
         [Obsolete("Please bind your view model to the Data property.")]
         public ReactiveTableViewSource(UITableView tableView, IReadOnlyList<TableSectionInformation<TSource>> sectionInformation)
             : this(tableView)
         {
-            this.Data = sectionInformation;
+            Data = sectionInformation;
         }
 
         public ReactiveTableViewSource(UITableView tableView)
         {
-            setupRxObj();
-            this.adapter = new UITableViewAdapter(tableView);
-            this.commonSource = new CommonReactiveSource<TSource, UITableView, UITableViewCell, TableSectionInformation<TSource>>(adapter);
+            SetupRxObj();
+            _adapter = new UITableViewAdapter(tableView);
+            _commonSource = new CommonReactiveSource<TSource, UITableView, UITableViewCell, TableSectionInformation<TSource>>(_adapter);
         }
 
         /// <summary>
@@ -233,30 +276,38 @@ namespace ReactiveUI
         /// then the source will react to changes to the contents of the list as well.
         /// </summary>
         /// <value>The data.</value>
-        public IReadOnlyList<TableSectionInformation<TSource>> Data {
-            get { return commonSource.SectionInfo; }
-            set {
-                if (commonSource.SectionInfo == value) return;
+        public IReadOnlyList<TableSectionInformation<TSource>> Data
+        {
+            get => _commonSource.SectionInfo;
 
-                this.raisePropertyChanging("Data");
-                commonSource.SectionInfo = value;
-                this.raisePropertyChanged("Data");
+            set
+            {
+                if (_commonSource.SectionInfo == value)
+                {
+                    return;
+                }
+
+                this.raisePropertyChanging(nameof(Data));
+                _commonSource.SectionInfo = value;
+                this.raisePropertyChanged(nameof(Data));
             }
         }
 
         /// <summary>
         /// Gets an IObservable that is a hook to <see cref="RowSelected"/> calls.
         /// </summary>
-        public IObservable<object> ElementSelected {
-            get { return elementSelected; }
+        public IObservable<object> ElementSelected
+        {
+            get { return _elementSelected; }
         }
 
         /// <summary>
         /// Gets or sets the row animation to use when UITableView.InsertSections is invoked.
         /// </summary>
-        public UITableViewRowAnimation InsertSectionsAnimation {
-            get { return adapter.InsertSectionsAnimation; }
-            set { adapter.InsertSectionsAnimation = value; }
+        public UITableViewRowAnimation InsertSectionsAnimation
+        {
+            get { return _adapter.InsertSectionsAnimation; }
+            set { _adapter.InsertSectionsAnimation = value; }
         }
 
         /// <summary>
@@ -264,8 +315,8 @@ namespace ReactiveUI
         /// </summary>
         public UITableViewRowAnimation DeleteSectionsAnimation
         {
-            get { return adapter.DeleteSectionsAnimation; }
-            set { adapter.DeleteSectionsAnimation = value; }
+            get { return _adapter.DeleteSectionsAnimation; }
+            set { _adapter.DeleteSectionsAnimation = value; }
         }
 
         /// <summary>
@@ -273,8 +324,8 @@ namespace ReactiveUI
         /// </summary>
         public UITableViewRowAnimation ReloadSectionsAnimation
         {
-            get { return adapter.ReloadSectionsAnimation; }
-            set { adapter.ReloadSectionsAnimation = value; }
+            get { return _adapter.ReloadSectionsAnimation; }
+            set { _adapter.ReloadSectionsAnimation = value; }
         }
 
         /// <summary>
@@ -282,8 +333,8 @@ namespace ReactiveUI
         /// </summary>
         public UITableViewRowAnimation InsertRowsAnimation
         {
-            get { return adapter.InsertRowsAnimation; }
-            set { adapter.InsertRowsAnimation = value; }
+            get { return _adapter.InsertRowsAnimation; }
+            set { _adapter.InsertRowsAnimation = value; }
         }
 
         /// <summary>
@@ -291,8 +342,8 @@ namespace ReactiveUI
         /// </summary>
         public UITableViewRowAnimation DeleteRowsAnimation
         {
-            get { return adapter.DeleteRowsAnimation; }
-            set { adapter.DeleteRowsAnimation = value; }
+            get { return _adapter.DeleteRowsAnimation; }
+            set { _adapter.DeleteRowsAnimation = value; }
         }
 
         /// <summary>
@@ -300,29 +351,30 @@ namespace ReactiveUI
         /// </summary>
         public UITableViewRowAnimation ReloadRowsAnimation
         {
-            get { return adapter.ReloadRowsAnimation; }
-            set { adapter.ReloadRowsAnimation = value; }
+            get { return _adapter.ReloadRowsAnimation; }
+            set { _adapter.ReloadRowsAnimation = value; }
         }
 
         public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath)
         {
-            return commonSource.GetCell(indexPath);
+            return _commonSource.GetCell(indexPath);
         }
 
         public override nint NumberOfSections(UITableView tableView)
         {
-            return commonSource.NumberOfSections();
+            return _commonSource.NumberOfSections();
         }
 
         public override nint RowsInSection(UITableView tableview, nint section)
         {
             // iOS may call this method even when we have no sections, but only if we've overridden
             // EstimatedHeight(UITableView, NSIndexPath) in our UITableViewSource
-            if (section >= commonSource.NumberOfSections()) {
+            if (section >= _commonSource.NumberOfSections())
+            {
                 return 0;
             }
 
-            return commonSource.RowsInSection((int)section);
+            return _commonSource.RowsInSection((int)section);
         }
 
         public override bool CanEditRow(UITableView tableView, NSIndexPath indexPath)
@@ -337,29 +389,34 @@ namespace ReactiveUI
 
         public override void RowSelected(UITableView tableView, NSIndexPath indexPath)
         {
-            elementSelected.OnNext(commonSource.ItemAt(indexPath));
+            _elementSelected.OnNext(_commonSource.ItemAt(indexPath));
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) commonSource.Dispose();
+            if (disposing)
+            {
+                _commonSource.Dispose();
+            }
+
             base.Dispose(disposing);
         }
 
         public override nfloat GetHeightForRow(UITableView tableView, NSIndexPath indexPath)
         {
-            return commonSource.SectionInfo[indexPath.Section].SizeHint;
+            return _commonSource.SectionInfo[indexPath.Section].SizeHint;
         }
 
         public override nfloat GetHeightForHeader(UITableView tableView, nint section)
         {
             // iOS may call this method even when we have no sections, but only if we've overridden
             // EstimatedHeight(UITableView, NSIndexPath) in our UITableViewSource
-            if (section >= commonSource.NumberOfSections()) {
+            if (section >= _commonSource.NumberOfSections())
+            {
                 return 0;
             }
 
-            var header = commonSource.SectionInfo[(int)section].Header;
+            var header = _commonSource.SectionInfo[(int)section].Header;
 
             // NB: -1 is a magic # that causes iOS to use the regular height. go figure.
             return header == null || header.View == null ? -1 : header.Height;
@@ -369,44 +426,46 @@ namespace ReactiveUI
         {
             // iOS may call this method even when we have no sections, but only if we've overridden
             // EstimatedHeight(UITableView, NSIndexPath) in our UITableViewSource
-            if (section >= commonSource.NumberOfSections()) {
+            if (section >= _commonSource.NumberOfSections())
+            {
                 return 0;
             }
 
-            var footer = commonSource.SectionInfo[(int)section].Footer;
+            var footer = _commonSource.SectionInfo[(int)section].Footer;
             return footer == null || footer.View == null ? -1 : footer.Height;
         }
 
         public override string TitleForHeader(UITableView tableView, nint section)
         {
-            var header = commonSource.SectionInfo[(int)section].Header;
+            var header = _commonSource.SectionInfo[(int)section].Header;
             return header == null || header.Title == null ? null : header.Title;
         }
 
         public override string TitleForFooter(UITableView tableView, nint section)
         {
-            var footer = commonSource.SectionInfo[(int)section].Footer;
+            var footer = _commonSource.SectionInfo[(int)section].Footer;
             return footer == null || footer.Title == null ? null : footer.Title;
         }
 
         public override UIView GetViewForHeader(UITableView tableView, nint section)
         {
-            var header = commonSource.SectionInfo[(int)section].Header;
+            var header = _commonSource.SectionInfo[(int)section].Header;
             return header == null || header.View == null ? null : header.View.Invoke();
         }
 
         public override UIView GetViewForFooter(UITableView tableView, nint section)
         {
-            var footer = commonSource.SectionInfo[(int)section].Footer;
+            var footer = _commonSource.SectionInfo[(int)section].Footer;
             return footer == null || footer.View == null ? null : footer.View.Invoke();
         }
 
         public object ItemAt(NSIndexPath indexPath)
         {
-            return commonSource.ItemAt(indexPath);
+            return _commonSource.ItemAt(indexPath);
         }
 
-        public event PropertyChangingEventHandler PropertyChanging {
+        public event PropertyChangingEventHandler PropertyChanging
+        {
             add { PropertyChangingEventManager.AddHandler(this, value); }
             remove { PropertyChangingEventManager.RemoveHandler(this, value); }
         }
@@ -416,7 +475,8 @@ namespace ReactiveUI
             PropertyChangingEventManager.DeliverEvent(this, args);
         }
 
-        public event PropertyChangedEventHandler PropertyChanged {
+        public event PropertyChangedEventHandler PropertyChanged
+        {
             add { PropertyChangedEventManager.AddHandler(this, value); }
             remove { PropertyChangedEventManager.RemoveHandler(this, value); }
         }
@@ -430,20 +490,25 @@ namespace ReactiveUI
         /// Represents an Observable that fires *before* a property is about to
         /// be changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveTableViewSource<TSource>>> Changing {
-            get { return this.getChangingObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveTableViewSource<TSource>>> Changing
+        {
+            get { return this.GetChangingObservable(); }
         }
 
         /// <summary>
         /// Represents an Observable that fires *after* a property has changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveTableViewSource<TSource>>> Changed {
-            get { return this.getChangedObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveTableViewSource<TSource>>> Changed
+        {
+            get { return this.GetChangedObservable(); }
         }
 
-        public IObservable<Exception> ThrownExceptions { get { return this.getThrownExceptionsObservable(); } }
+        public IObservable<Exception> ThrownExceptions
+        {
+            get { return this.GetThrownExceptionsObservable(); }
+        }
 
-        void setupRxObj()
+        private void SetupRxObj()
         {
         }
 
@@ -456,7 +521,7 @@ namespace ReactiveUI
         /// notifications.</returns>
         public IDisposable SuppressChangeNotifications()
         {
-            return this.suppressChangeNotifications();
+            return IReactiveObjectExtensions.SuppressChangeNotifications(this);
         }
     }
 
@@ -478,6 +543,7 @@ namespace ReactiveUI
         /// <param name="tableView">Table view.</param>
         /// <param name="initSource">Optionally initializes some property of
         /// the <see cref="ReactiveTableViewSource"/>.</param>
+        /// <typeparam name="TSource"></typeparam>
         /// <typeparam name="TCell">Type of the <see cref="UITableViewCell"/>.</typeparam>
         public static IDisposable BindTo<TSource, TCell>(
             this IObservable<IReadOnlyList<TableSectionInformation<TSource, TCell>>> sectionsObservable,
@@ -486,7 +552,10 @@ namespace ReactiveUI
             where TCell : UITableViewCell
         {
             var source = new ReactiveTableViewSource<TSource>(tableView);
-            if (initSource != null) initSource(source);
+            if (initSource != null)
+            {
+                initSource(source);
+            }
 
             var bind = sectionsObservable.BindTo(source, x => x.Data);
             tableView.Source = source;
@@ -506,6 +575,7 @@ namespace ReactiveUI
         /// <param name="initializeCellAction">Initialize cell action.</param>
         /// <param name="initSource">Optionally initializes some property of
         /// the <see cref="ReactiveTableViewSource"/>.</param>
+        /// <typeparam name="TSource"></typeparam>
         /// <typeparam name="TCell">Type of the <see cref="UITableViewCell"/>.</typeparam>
         public static IDisposable BindTo<TSource, TCell>(
             this IObservable<INotifyCollectionChanged> sourceObservable,
@@ -517,7 +587,8 @@ namespace ReactiveUI
             where TCell : UITableViewCell
         {
             return sourceObservable
-                .Select(src => new[] {
+                .Select(src => new[]
+                {
                     new TableSectionInformation<TSource, TCell>(
                         src,
                         cellKey,
@@ -540,6 +611,7 @@ namespace ReactiveUI
         /// <param name="initializeCellAction">Initialize cell action.</param>
         /// <param name="initSource">Optionally initializes some property of
         /// the <see cref="ReactiveTableViewSource"/>.</param>
+        /// <typeparam name="TSource"></typeparam>
         /// <typeparam name="TCell">Type of the <see cref="UITableViewCell"/>.</typeparam>
         public static IDisposable BindTo<TSource, TCell>(
             this IObservable<INotifyCollectionChanged> sourceObservable,

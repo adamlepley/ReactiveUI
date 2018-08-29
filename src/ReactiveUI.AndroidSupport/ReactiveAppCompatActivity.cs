@@ -17,15 +17,19 @@ using Android.Support.V7.App;
 namespace ReactiveUI.AndroidSupport
 {
     /// <summary>
-    /// This is an Activity that is both an Activity and has ReactiveObject powers 
-    /// (i.e. you can call RaiseAndSetIfChanged)
+    /// This is an Activity that is both an Activity and has ReactiveObject powers
+    /// (i.e. you can call RaiseAndSetIfChanged).
     /// </summary>
+    /// <typeparam name="TViewModel"></typeparam>
     public class ReactiveAppCompatActivity<TViewModel> : ReactiveAppCompatActivity, IViewFor<TViewModel>, ICanActivate
         where TViewModel : class
     {
-        protected ReactiveAppCompatActivity() { }
+        protected ReactiveAppCompatActivity()
+        {
+        }
 
-        TViewModel _ViewModel;
+        private TViewModel _ViewModel;
+
         public TViewModel ViewModel
         {
             get => _ViewModel;
@@ -40,8 +44,8 @@ namespace ReactiveUI.AndroidSupport
     }
 
     /// <summary>
-    /// This is an Activity that is both an Activity and has ReactiveObject powers 
-    /// (i.e. you can call RaiseAndSetIfChanged)
+    /// This is an Activity that is both an Activity and has ReactiveObject powers
+    /// (i.e. you can call RaiseAndSetIfChanged).
     /// </summary>
     public class ReactiveAppCompatActivity : AppCompatActivity, IReactiveObject, IReactiveNotifyPropertyChanged<ReactiveAppCompatActivity>, IHandleObservableErrors
     {
@@ -69,16 +73,18 @@ namespace ReactiveUI.AndroidSupport
 
         /// <summary>
         /// Represents an Observable that fires *before* a property is about to
-        /// be changed.         
+        /// be changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveAppCompatActivity>> Changing => this.getChangingObservable();
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveAppCompatActivity>> Changing => this.GetChangingObservable();
 
         /// <summary>
         /// Represents an Observable that fires *after* a property has changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveAppCompatActivity>> Changed => this.getChangedObservable();
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveAppCompatActivity>> Changed => this.GetChangedObservable();
 
-        protected ReactiveAppCompatActivity() { }
+        protected ReactiveAppCompatActivity()
+        {
+        }
 
         protected ReactiveAppCompatActivity(IntPtr handle, JniHandleOwnership ownership) : base(handle, ownership)
         {
@@ -93,36 +99,39 @@ namespace ReactiveUI.AndroidSupport
         /// notifications.</returns>
         public IDisposable SuppressChangeNotifications()
         {
-            return this.suppressChangeNotifications();
+            return IReactiveObjectExtensions.SuppressChangeNotifications(this);
         }
 
-        public IObservable<Exception> ThrownExceptions => this.getThrownExceptionsObservable();
+        public IObservable<Exception> ThrownExceptions => this.GetThrownExceptionsObservable();
 
-        readonly Subject<Unit> activated = new Subject<Unit>();
-        public IObservable<Unit> Activated => activated.AsObservable();
+        private readonly Subject<Unit> _activated = new Subject<Unit>();
 
-        readonly Subject<Unit> deactivated = new Subject<Unit>();
-        public IObservable<Unit> Deactivated => deactivated.AsObservable();
+        public IObservable<Unit> Activated => _activated.AsObservable();
+
+        private readonly Subject<Unit> _deactivated = new Subject<Unit>();
+
+        public IObservable<Unit> Deactivated => _deactivated.AsObservable();
 
         protected override void OnPause()
         {
             base.OnPause();
-            deactivated.OnNext(Unit.Default);
+            _deactivated.OnNext(Unit.Default);
         }
 
         protected override void OnResume()
         {
             base.OnResume();
-            activated.OnNext(Unit.Default);
+            _activated.OnNext(Unit.Default);
         }
 
-        readonly Subject<Tuple<int, Result, Intent>> activityResult = new Subject<Tuple<int, Result, Intent>>();
-        public IObservable<Tuple<int, Result, Intent>> ActivityResult => activityResult.AsObservable();
+        private readonly Subject<Tuple<int, Result, Intent>> _activityResult = new Subject<Tuple<int, Result, Intent>>();
+
+        public IObservable<Tuple<int, Result, Intent>> ActivityResult => _activityResult.AsObservable();
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
             base.OnActivityResult(requestCode, resultCode, data);
-            activityResult.OnNext(Tuple.Create(requestCode, resultCode, data));
+            _activityResult.OnNext(Tuple.Create(requestCode, resultCode, data));
         }
 
         public Task<Tuple<Result, Intent>> StartActivityForResultAsync(Intent intent, int requestCode)
@@ -154,4 +163,3 @@ namespace ReactiveUI.AndroidSupport
         }
     }
 }
-

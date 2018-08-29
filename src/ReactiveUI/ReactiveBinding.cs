@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -15,8 +15,11 @@ namespace ReactiveUI
     /// This interface represents the result of a Bind/OneWayBind and gives
     /// information about the binding. When this object is disposed, it will
     /// destroy the binding it is describing (i.e. most of the time you won't
-    /// actually care about this object, just that it is disposable)
+    /// actually care about this object, just that it is disposable).
     /// </summary>
+    /// <typeparam name="TView"></typeparam>
+    /// <typeparam name="TViewModel"></typeparam>
+    /// <typeparam name="TValue">The value type.</typeparam>
     public interface IReactiveBinding<TView, TViewModel, TValue> : IDisposable
         where TViewModel : class
         where TView : IViewFor
@@ -78,19 +81,19 @@ namespace ReactiveUI
         where TViewModel : class
         where TView : IViewFor
     {
-        private IDisposable bindingDisposable;
+        private IDisposable _bindingDisposable;
 
-        public ReactiveBinding(TView view, TViewModel viewModel, Expression viewExpression, Expression viewModelExpression, 
+        public ReactiveBinding(TView view, TViewModel viewModel, Expression viewExpression, Expression viewModelExpression,
             IObservable<TValue> changed, BindingDirection direction, IDisposable bindingDisposable)
         {
-            this.View = view;
-            this.ViewModel = viewModel;
-            this.ViewExpression = viewExpression;
-            this.ViewModelExpression = viewModelExpression;
-            this.Direction = direction;
-            this.Changed = changed;
+            View = view;
+            ViewModel = viewModel;
+            ViewExpression = viewExpression;
+            ViewModelExpression = viewModelExpression;
+            Direction = direction;
+            Changed = changed;
 
-            this.bindingDisposable = bindingDisposable;
+            _bindingDisposable = bindingDisposable;
         }
 
         /// <summary>
@@ -147,9 +150,10 @@ namespace ReactiveUI
 
         public void Dispose()
         {
-            if (bindingDisposable != null) {
-                bindingDisposable.Dispose();
-                bindingDisposable = null;
+            if (_bindingDisposable != null)
+            {
+                _bindingDisposable.Dispose();
+                _bindingDisposable = null;
             }
         }
     }

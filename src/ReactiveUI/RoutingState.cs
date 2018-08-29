@@ -37,7 +37,7 @@ namespace ReactiveUI
         public ObservableCollection<IRoutableViewModel> NavigationStack => _navigationStack;
 
         [IgnoreDataMember]
-        private IScheduler scheduler;
+        private IScheduler _scheduler;
 
         /// <summary>
         /// The scheduler used for commands. Defaults to <c>RxApp.MainThreadScheduler</c>.
@@ -45,12 +45,13 @@ namespace ReactiveUI
         [IgnoreDataMember]
         public IScheduler Scheduler
         {
-            get => scheduler;
+            get => _scheduler;
             set
             {
-                if (scheduler != value) {
-                    scheduler = value;
-                    setupRx();
+                if (_scheduler != value)
+                {
+                    _scheduler = value;
+                    SetupRx();
                 }
             }
         }
@@ -91,16 +92,19 @@ namespace ReactiveUI
         public RoutingState(IScheduler scheduler)
         {
             _navigationStack = new ObservableCollection<IRoutableViewModel>();
-            this.scheduler = scheduler;
-            setupRx();
+            _scheduler = scheduler;
+            SetupRx();
         }
 
         [OnDeserialized]
-        private void setupRx(StreamingContext sc) { setupRx(); }
-
-        private void setupRx()
+        private void SetupRx(StreamingContext sc)
         {
-            var navigateScheduler = scheduler ?? RxApp.MainThreadScheduler;
+            SetupRx();
+        }
+
+        private void SetupRx()
+        {
+            var navigateScheduler = _scheduler ?? RxApp.MainThreadScheduler;
 
             NavigationChanged = _navigationStack.ToObservableChangeSet();
 
@@ -108,15 +112,18 @@ namespace ReactiveUI
                                                     Observable.Defer(() => Observable.Return(NavigationStack.Count)),
                                                     NavigationChanged.CountChanged().Select(_ => NavigationStack.Count));
             NavigateBack =
-                ReactiveCommand.CreateFromObservable(() => {
+                ReactiveCommand.CreateFromObservable(() =>
+                {
                     _navigationStack.RemoveAt(NavigationStack.Count - 1);
                     return Observables.Unit;
                 },
                 countAsBehavior.Select(x => x > 1),
                 navigateScheduler);
 
-            Navigate = ReactiveCommand.CreateFromObservable<IRoutableViewModel, IRoutableViewModel>(vm => {
-                if (vm == null) {
+            Navigate = ReactiveCommand.CreateFromObservable<IRoutableViewModel, IRoutableViewModel>(vm =>
+            {
+                if (vm == null)
+                {
                     throw new Exception("Navigate must be called on an IRoutableViewModel");
                 }
 
@@ -125,7 +132,8 @@ namespace ReactiveUI
             },
             outputScheduler: navigateScheduler);
 
-            NavigateAndReset = ReactiveCommand.CreateFromObservable<IRoutableViewModel, IRoutableViewModel>(vm => {
+            NavigateAndReset = ReactiveCommand.CreateFromObservable<IRoutableViewModel, IRoutableViewModel>(vm =>
+            {
                 _navigationStack.Clear();
                 return Navigate.Execute(vm);
             },
@@ -140,19 +148,23 @@ namespace ReactiveUI
         /// <summary>
         /// Locate the first ViewModel in the stack that matches a certain Type.
         /// </summary>
+        /// <typeparam name="T">The view model type.</typeparam>
+        /// <param name="this">The routing state.</param>
         /// <returns>The matching ViewModel or null if none exists.</returns>
-        public static T FindViewModelInStack<T>(this RoutingState This)
+        public static T FindViewModelInStack<T>(this RoutingState @this)
             where T : IRoutableViewModel
         {
-            return This.NavigationStack.Reverse().OfType<T>().FirstOrDefault();
+            return @this.NavigationStack.Reverse().OfType<T>().FirstOrDefault();
         }
 
         /// <summary>
-        /// Returns the currently visible ViewModel
+        /// Returns the currently visible ViewModel.
         /// </summary>
-        public static IRoutableViewModel GetCurrentViewModel(this RoutingState This)
+        /// <param name="this">The routing state.</param>
+        /// <returns></returns>
+        public static IRoutableViewModel GetCurrentViewModel(this RoutingState @this)
         {
-            return This.NavigationStack.LastOrDefault();
+            return @this.NavigationStack.LastOrDefault();
         }
     }
 }

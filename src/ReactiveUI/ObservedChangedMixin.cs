@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -17,40 +17,49 @@ namespace ReactiveUI
         /// <summary>
         /// Returns the name of a property which has been changed.
         /// </summary>
+        /// <typeparam name="TSender">The sender type.</typeparam>
+        /// <typeparam name="TValue">The value type.</typeparam>
+        /// <param name="this">The observed change.</param>
         /// <returns>
         /// The name of the property which has changed.
         /// </returns>
-        public static string GetPropertyName<TSender, TValue>(this IObservedChange<TSender, TValue> This)
+        public static string GetPropertyName<TSender, TValue>(this IObservedChange<TSender, TValue> @this)
         {
-            return Reflection.ExpressionToPropertyNames(This.Expression);
+            return Reflection.ExpressionToPropertyNames(@this.Expression);
         }
 
         /// <summary>
         /// Returns the current value of a property given a notification that
         /// it has changed.
         /// </summary>
-        /// <param name="This">
+        /// <typeparam name="TSender">The sender.</typeparam>
+        /// <typeparam name="TValue">The changed value.</typeparam>
+        /// <param name="this">
         /// The <see cref="IObservedChange{TSender, TValue}"/> instance to get the value of.
         /// </param>
         /// <returns>
-        /// The current value of the property
+        /// The current value of the property.
         /// </returns>
-        public static TValue GetValue<TSender, TValue>(this IObservedChange<TSender, TValue> This)
+        public static TValue GetValue<TSender, TValue>(this IObservedChange<TSender, TValue> @this)
         {
             TValue ret;
-            if (!This.TryGetValue(out ret)) {
-                throw new Exception(String.Format("One of the properties in the expression '{0}' was null", This.GetPropertyName()));
+            if (!@this.TryGetValue(out ret))
+            {
+                throw new Exception(string.Format("One of the properties in the expression '{0}' was null", @this.GetPropertyName()));
             }
+
             return ret;
         }
 
         /// <summary>
-        /// Attempts to return the current value of a property given a 
+        /// Attempts to return the current value of a property given a
         /// notification that it has changed. If any property in the
         /// property expression is null, false is returned.
         /// </summary>
-        /// <param name="This">
-        /// The <see cref="IObservedChange{TSender, TValue}"/> instance to get the value of
+        /// <typeparam name="TSender">The sender type.</typeparam>
+        /// <typeparam name="TValue">The value type.</typeparam>
+        /// <param name="this">
+        /// The <see cref="IObservedChange{TSender, TValue}"/> instance to get the value of.
         /// </param>
         /// <param name="changeValue">
         /// The value of the property expression.
@@ -58,14 +67,15 @@ namespace ReactiveUI
         /// <returns>
         /// True if the entire expression was able to be followed, false otherwise.
         /// </returns>
-        internal static bool TryGetValue<TSender, TValue>(this IObservedChange<TSender, TValue> This, out TValue changeValue)
+        internal static bool TryGetValue<TSender, TValue>(this IObservedChange<TSender, TValue> @this, out TValue changeValue)
         {
-            if (!Equals(This.Value, default(TValue))) {
-                changeValue = This.Value;
+            if (!Equals(@this.Value, default(TValue)))
+            {
+                changeValue = @this.Value;
                 return true;
             }
 
-            return Reflection.TryGetValueForPropertyChain(out changeValue, This.Sender, This.Expression.GetExpressionChain());
+            return Reflection.TryGetValueForPropertyChain(out changeValue, @this.Sender, @this.Expression.GetExpressionChain());
         }
 
         /// <summary>
@@ -74,8 +84,11 @@ namespace ReactiveUI
         /// target.property == This.GetValue() and "replay" the observed change
         /// onto another object).
         /// </summary>
-        /// <param name="This">
-        /// The <see cref="IObservedChange{TSender, TValue}"/> instance to use as a 
+        /// <typeparam name="TSender">The sender type.</typeparam>
+        /// <typeparam name="TValue">The value type.</typeparam>
+        /// <typeparam name="TTarget">The target type.</typeparam>
+        /// <param name="this">
+        /// The <see cref="IObservedChange{TSender, TValue}"/> instance to use as a
         /// value to apply.
         /// </param>
         /// <param name="target">
@@ -85,18 +98,20 @@ namespace ReactiveUI
         /// The target property to apply the change to.
         /// </param>
         internal static void SetValueToProperty<TSender, TValue, TTarget>(
-            this IObservedChange<TSender, TValue> This,
+            this IObservedChange<TSender, TValue> @this,
             TTarget target,
             Expression<Func<TTarget, TValue>> property)
         {
-            Reflection.TrySetValueToPropertyChain(target, Reflection.Rewrite(property.Body).GetExpressionChain(), This.GetValue());
+            Reflection.TrySetValueToPropertyChain(target, Reflection.Rewrite(property.Body).GetExpressionChain(), @this.GetValue());
         }
 
         /// <summary>
-        /// Given a stream of notification changes, this method will convert 
+        /// Given a stream of notification changes, this method will convert
         /// the property changes to the current value of the property.
         /// </summary>
-        /// <param name="This">
+        /// <typeparam name="TSender">The sender type.</typeparam>
+        /// <typeparam name="TValue">The value type.</typeparam>
+        /// <param name="this">
         /// The change notification stream to get the values of.
         /// </param>
         /// <returns>
@@ -104,9 +119,9 @@ namespace ReactiveUI
         /// the given change notification stream.
         /// </returns>
         public static IObservable<TValue> Value<TSender, TValue>(
-            this IObservable<IObservedChange<TSender, TValue>> This)
+            this IObservable<IObservedChange<TSender, TValue>> @this)
         {
-            return This.Select(GetValue);
+            return @this.Select(GetValue);
         }
     }
 }

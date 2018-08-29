@@ -22,7 +22,9 @@ namespace ReactiveUI
     public class CollectionViewSectionInformation<TSource> : ISectionInformation<TSource, UICollectionView, UICollectionViewCell>
     {
         public INotifyCollectionChanged Collection { get; protected set; }
+
         public Action<UICollectionViewCell> InitializeCellAction { get; protected set; }
+
         public Func<object, NSString> CellKeySelector { get; protected set; }
     }
 
@@ -34,7 +36,8 @@ namespace ReactiveUI
             Collection = collection;
             CellKeySelector = cellKeySelector;
 
-            if (initializeCellAction != null) {
+            if (initializeCellAction != null)
+            {
                 InitializeCellAction = cell => initializeCellAction((TCell)cell);
             }
         }
@@ -45,30 +48,32 @@ namespace ReactiveUI
         }
     }
 
-    class UICollectionViewAdapter : IUICollViewAdapter<UICollectionView, UICollectionViewCell>
+    internal class UICollectionViewAdapter : IUICollViewAdapter<UICollectionView, UICollectionViewCell>
     {
-        readonly UICollectionView view;
-        readonly BehaviorSubject<bool> isReloadingData;
-        int inFlightReloads;
+        private readonly UICollectionView _view;
+        private readonly BehaviorSubject<bool> _isReloadingData;
+        private int _inFlightReloads;
 
         internal UICollectionViewAdapter(UICollectionView view)
         {
-            this.view = view;
-            this.isReloadingData = new BehaviorSubject<bool>(false);
+            _view = view;
+            _isReloadingData = new BehaviorSubject<bool>(false);
         }
 
-        public IObservable<bool> IsReloadingData {
-            get { return this.isReloadingData.AsObservable(); }
+        public IObservable<bool> IsReloadingData
+        {
+            get { return _isReloadingData.AsObservable(); }
         }
 
         public void ReloadData()
         {
-            ++inFlightReloads;
-            view.ReloadData();
+            ++_inFlightReloads;
+            _view.ReloadData();
 
-            if (inFlightReloads == 1) {
-                Debug.Assert(!this.isReloadingData.Value);
-                this.isReloadingData.OnNext(true);
+            if (_inFlightReloads == 1)
+            {
+                Debug.Assert(!_isReloadingData.Value);
+                _isReloadingData.OnNext(true);
             }
 
             // since ReloadData() queues the appropriate messages on the UI thread, we know we're done reloading
@@ -77,36 +82,77 @@ namespace ReactiveUI
         }
 
         // UICollectionView no longer has these methods so these are no-ops
-        public void BeginUpdates() { }
-        public void EndUpdates() { }
+        public void BeginUpdates()
+        {
+        }
 
-        public void PerformUpdates(Action updates, Action completion) { view.PerformBatchUpdates(new NSAction(updates), (completed) => completion()); }
-        public void InsertSections(NSIndexSet indexes) { view.InsertSections(indexes); }
-        public void DeleteSections(NSIndexSet indexes) { view.DeleteSections(indexes); }
-        public void ReloadSections(NSIndexSet indexes) { view.ReloadSections(indexes); }
-        public void MoveSection(int fromIndex, int toIndex) { view.MoveSection(fromIndex, toIndex); }
-        public void InsertItems(NSIndexPath[] paths) { view.InsertItems(paths); }
-        public void DeleteItems(NSIndexPath[] paths) { view.DeleteItems(paths); }
-        public void ReloadItems(NSIndexPath[] paths) { view.ReloadItems(paths); }
-        public void MoveItem(NSIndexPath path, NSIndexPath newPath) { view.MoveItem(path, newPath); }
+        public void EndUpdates()
+        {
+        }
+
+        public void PerformUpdates(Action updates, Action completion)
+        {
+            _view.PerformBatchUpdates(new NSAction(updates), (completed) => completion());
+        }
+
+        public void InsertSections(NSIndexSet indexes)
+        {
+            _view.InsertSections(indexes);
+        }
+
+        public void DeleteSections(NSIndexSet indexes)
+        {
+            _view.DeleteSections(indexes);
+        }
+
+        public void ReloadSections(NSIndexSet indexes)
+        {
+            _view.ReloadSections(indexes);
+        }
+
+        public void MoveSection(int fromIndex, int toIndex)
+        {
+            _view.MoveSection(fromIndex, toIndex);
+        }
+
+        public void InsertItems(NSIndexPath[] paths)
+        {
+            _view.InsertItems(paths);
+        }
+
+        public void DeleteItems(NSIndexPath[] paths)
+        {
+            _view.DeleteItems(paths);
+        }
+
+        public void ReloadItems(NSIndexPath[] paths)
+        {
+            _view.ReloadItems(paths);
+        }
+
+        public void MoveItem(NSIndexPath path, NSIndexPath newPath)
+        {
+            _view.MoveItem(path, newPath);
+        }
 
         public UICollectionViewCell DequeueReusableCell(NSString cellKey, NSIndexPath path)
         {
-            return (UICollectionViewCell)view.DequeueReusableCell(cellKey, path);
+            return (UICollectionViewCell)_view.DequeueReusableCell(cellKey, path);
         }
 
-        void FinishReloadData()
+        private void FinishReloadData()
         {
-            --inFlightReloads;
+            --_inFlightReloads;
 
-            if (inFlightReloads == 0) {
+            if (_inFlightReloads == 0)
+            {
                 // this is required because sometimes iOS schedules further work that results in calls to GetCell
                 // that work could happen after FinishReloadData unless we force layout here
                 // of course, we can't have that work running after IsReloading ticks to false because otherwise
                 // some updates may occur before the calls to GetCell and thus the calls to GetCell could fail due to invalid indexes
-                this.view.LayoutIfNeeded();
-                Debug.Assert(this.isReloadingData.Value);
-                this.isReloadingData.OnNext(false);
+                _view.LayoutIfNeeded();
+                Debug.Assert(_isReloadingData.Value);
+                _isReloadingData.OnNext(false);
             }
         }
     }
@@ -117,29 +163,30 @@ namespace ReactiveUI
     /// on the contents of the list. The collection changes are buffered and
     /// View items are animated in and out as items are added.
     /// </summary>
+    /// <typeparam name="TSource"></typeparam>
     public class ReactiveCollectionViewSource<TSource> : UICollectionViewSource, IEnableLogger, IDisposable, IReactiveNotifyPropertyChanged<ReactiveCollectionViewSource<TSource>>, IHandleObservableErrors, IReactiveObject
     {
-        readonly CommonReactiveSource<TSource, UICollectionView, UICollectionViewCell, CollectionViewSectionInformation<TSource>> commonSource;
-        readonly Subject<object> elementSelected = new Subject<object>();
+        private readonly CommonReactiveSource<TSource, UICollectionView, UICollectionViewCell, CollectionViewSectionInformation<TSource>> _commonSource;
+        private readonly Subject<object> _elementSelected = new Subject<object>();
 
         public ReactiveCollectionViewSource(UICollectionView collectionView, INotifyCollectionChanged collection, NSString cellKey, Action<UICollectionViewCell> initializeCellAction = null)
             : this(collectionView)
         {
-            this.Data = new[] { new CollectionViewSectionInformation<TSource, UICollectionViewCell>(collection, cellKey, initializeCellAction) };
+            Data = new[] { new CollectionViewSectionInformation<TSource, UICollectionViewCell>(collection, cellKey, initializeCellAction) };
         }
 
         [Obsolete("Please bind your view model to the Data property.")]
         public ReactiveCollectionViewSource(UICollectionView collectionView, IReadOnlyList<CollectionViewSectionInformation<TSource>> sectionInformation)
             : this(collectionView)
         {
-            this.Data = sectionInformation;
+            Data = sectionInformation;
         }
 
         public ReactiveCollectionViewSource(UICollectionView collectionView)
         {
-            setupRxObj();
+            SetupRxObj();
             var adapter = new UICollectionViewAdapter(collectionView);
-            this.commonSource = new CommonReactiveSource<TSource, UICollectionView, UICollectionViewCell, CollectionViewSectionInformation<TSource>>(adapter);
+            _commonSource = new CommonReactiveSource<TSource, UICollectionView, UICollectionViewCell, CollectionViewSectionInformation<TSource>>(adapter);
         }
 
         /// <summary>
@@ -150,56 +197,68 @@ namespace ReactiveUI
         /// then the source will react to changes to the contents of the list as well.
         /// </summary>
         /// <value>The data.</value>
-        public IReadOnlyList<CollectionViewSectionInformation<TSource>> Data {
-            get { return commonSource.SectionInfo; }
-            set {
-                if (commonSource.SectionInfo == value) return;
+        public IReadOnlyList<CollectionViewSectionInformation<TSource>> Data
+        {
+            get { return _commonSource.SectionInfo; }
 
-                this.raisePropertyChanging("Data");
-                commonSource.SectionInfo = value;
-                this.raisePropertyChanged("Data");
+            set
+            {
+                if (_commonSource.SectionInfo == value)
+                {
+                    return;
+                }
+
+                this.raisePropertyChanging(nameof(Data));
+                _commonSource.SectionInfo = value;
+                this.raisePropertyChanged(nameof(Data));
             }
         }
 
         /// <summary>
         /// Gets an IObservable that is a hook to <see cref="ItemSelected"/> calls.
         /// </summary>
-        public IObservable<object> ElementSelected {
-            get { return elementSelected; }
+        public IObservable<object> ElementSelected
+        {
+            get { return _elementSelected; }
         }
 
         public override UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath)
         {
-            return commonSource.GetCell(indexPath);
+            return _commonSource.GetCell(indexPath);
         }
 
         public override nint NumberOfSections(UICollectionView collectionView)
         {
-            return commonSource.NumberOfSections();
+            return _commonSource.NumberOfSections();
         }
 
         public override nint GetItemsCount(UICollectionView collectionView, nint section)
         {
-            return commonSource.RowsInSection((int)section);
+            return _commonSource.RowsInSection((int)section);
         }
 
         public override void ItemSelected(UICollectionView collectionView, NSIndexPath indexPath)
         {
-            elementSelected.OnNext(commonSource.ItemAt(indexPath));
+            _elementSelected.OnNext(_commonSource.ItemAt(indexPath));
         }
 
         public object ItemAt(NSIndexPath indexPath)
         {
-            return commonSource.ItemAt(indexPath);
+            return _commonSource.ItemAt(indexPath);
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) commonSource.Dispose();
+            if (disposing)
+            {
+                _commonSource.Dispose();
+            }
+
             base.Dispose(disposing);
         }
 
-        public event PropertyChangingEventHandler PropertyChanging {
+        public event PropertyChangingEventHandler PropertyChanging
+        {
             add { PropertyChangingEventManager.AddHandler(this, value); }
             remove { PropertyChangingEventManager.RemoveHandler(this, value); }
         }
@@ -209,7 +268,8 @@ namespace ReactiveUI
             PropertyChangingEventManager.DeliverEvent(this, args);
         }
 
-        public event PropertyChangedEventHandler PropertyChanged {
+        public event PropertyChangedEventHandler PropertyChanged
+        {
             add { PropertyChangedEventManager.AddHandler(this, value); }
             remove { PropertyChangedEventManager.RemoveHandler(this, value); }
         }
@@ -223,20 +283,25 @@ namespace ReactiveUI
         /// Represents an Observable that fires *before* a property is about to
         /// be changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveCollectionViewSource<TSource>>> Changing {
-            get { return this.getChangingObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveCollectionViewSource<TSource>>> Changing
+        {
+            get { return this.GetChangingObservable(); }
         }
 
         /// <summary>
         /// Represents an Observable that fires *after* a property has changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveCollectionViewSource<TSource>>> Changed {
-            get { return this.getChangedObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveCollectionViewSource<TSource>>> Changed
+        {
+            get { return this.GetChangedObservable(); }
         }
 
-        public IObservable<Exception> ThrownExceptions { get { return this.getThrownExceptionsObservable(); } }
+        public IObservable<Exception> ThrownExceptions
+        {
+            get { return this.GetThrownExceptionsObservable(); }
+        }
 
-        void setupRxObj()
+        private void SetupRxObj()
         {
         }
 
@@ -249,7 +314,7 @@ namespace ReactiveUI
         /// notifications.</returns>
         public IDisposable SuppressChangeNotifications()
         {
-            return this.suppressChangeNotifications();
+            return IReactiveObjectExtensions.SuppressChangeNotifications(this);
         }
     }
 
@@ -271,6 +336,7 @@ namespace ReactiveUI
         /// <param name="collectionView">Collection view.</param>
         /// <param name="initSource">Optionally initializes some property of
         /// the <see cref="ReactiveCollectionViewSource"/>.</param>
+        /// <typeparam name="TSource"></typeparam>
         /// <typeparam name="TCell">Type of the <see cref="UICollectionViewCell"/>.</typeparam>
         public static IDisposable BindTo<TSource, TCell>(
             this IObservable<IReadOnlyList<CollectionViewSectionInformation<TSource, TCell>>> sectionsObservable,
@@ -279,7 +345,11 @@ namespace ReactiveUI
             where TCell : UICollectionViewCell
         {
             var source = new ReactiveCollectionViewSource<TSource>(collectionView);
-            if (initSource != null) initSource(source);
+            if (initSource != null)
+            {
+                initSource(source);
+            }
+
             var bind = sectionsObservable.BindTo(source, x => x.Data);
             collectionView.Source = source;
             return new CompositeDisposable(bind, source);
@@ -296,6 +366,7 @@ namespace ReactiveUI
         /// <param name="initializeCellAction">Initialize cell action.</param>
         /// <param name="initSource">Optionally initializes some property of
         /// the <see cref="ReactiveCollectionViewSource"/>.</param>
+        /// <typeparam name="TSource"></typeparam>
         /// <typeparam name="TCell">Type of the <see cref="UICollectionViewCell"/>.</typeparam>
         public static IDisposable BindTo<TSource, TCell>(
             this IObservable<INotifyCollectionChanged> sourceObservable,
@@ -329,6 +400,7 @@ namespace ReactiveUI
         /// <param name="initializeCellAction">Initialize cell action.</param>
         /// <param name="initSource">Optionally initializes some property of
         /// the <see cref="ReactiveCollectionViewSource"/>.</param>
+        /// <typeparam name="TSource"></typeparam>
         /// <typeparam name="TCell">Type of the <see cref="UICollectionViewCell"/>.</typeparam>
         public static IDisposable BindTo<TSource, TCell>(
             this IObservable<INotifyCollectionChanged> sourceObservable,

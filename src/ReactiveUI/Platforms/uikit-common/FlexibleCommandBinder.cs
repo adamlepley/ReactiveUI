@@ -3,9 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Reactive.Disposables;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reflection;
 using System.Windows.Input;
@@ -17,16 +17,22 @@ namespace ReactiveUI
     {
         public int GetAffinityForObject(Type type, bool hasEventTarget)
         {
-            if (hasEventTarget) return 0;
+            if (hasEventTarget)
+            {
+                return 0;
+            }
 
-            var match = config.Keys
+            var match = _config.Keys
                 .Where(x => x.IsAssignableFrom(type))
-                .OrderByDescending(x => config[x].Affinity)
+                .OrderByDescending(x => _config[x].Affinity)
                 .FirstOrDefault();
 
-            if (match == null) return 0;
+            if (match == null)
+            {
+                return 0;
+            }
 
-            var typeProperties = config[match];
+            var typeProperties = _config[match];
             return typeProperties.Affinity;
         }
 
@@ -34,16 +40,17 @@ namespace ReactiveUI
         {
             var type = target.GetType();
 
-            var match = config.Keys
+            var match = _config.Keys
                 .Where(x => x.IsAssignableFrom(type))
-                .OrderByDescending(x => config[x].Affinity)
+                .OrderByDescending(x => _config[x].Affinity)
                 .FirstOrDefault();
 
-            if (match == null) {
+            if (match == null)
+            {
                 throw new NotSupportedException(string.Format("CommandBinding for {0} is not supported", type.Name));
             }
 
-            var typeProperties = config[match];
+            var typeProperties = _config[match];
 
             return typeProperties.CreateBinding(command, target, commandParameter);
         }
@@ -54,38 +61,38 @@ namespace ReactiveUI
             throw new NotImplementedException();
         }
 
-        class CommandBindingInfo
+        private class CommandBindingInfo
         {
             public int Affinity;
             public Func<ICommand, object, IObservable<object>, IDisposable> CreateBinding;
         }
 
         /// <summary>
-        /// Configuration map
+        /// Configuration map.
         /// </summary>
-        readonly Dictionary<Type, CommandBindingInfo> config =
+        private readonly Dictionary<Type, CommandBindingInfo> _config =
             new Dictionary<Type, CommandBindingInfo>();
 
         /// <summary>
         /// Registers an observable factory for the specified type and property.
         /// </summary>
-        /// <param name="type">Type.</param>
-        /// <param name="property">Property.</param>
-        /// <param name="createObservable">Create observable.</param>
+        /// <param name="type">The type.</param>
+        /// <param name="affinity">The affinity.</param>
+        /// <param name="createBinding">The create binding.</param>
         protected void Register(Type type, int affinity, Func<System.Windows.Input.ICommand, object, IObservable<object>, IDisposable> createBinding)
         {
-            config[type] = new CommandBindingInfo { Affinity = affinity, CreateBinding = createBinding };
+            _config[type] = new CommandBindingInfo { Affinity = affinity, CreateBinding = createBinding };
         }
 
         /// <summary>
-        /// Creates a commands binding from event and a property
+        /// Creates a commands binding from event and a property.
         /// </summary>
         /// <returns>The binding from event.</returns>
         /// <param name="command">Command.</param>
         /// <param name="target">Target.</param>
         /// <param name="commandParameter">Command parameter.</param>
         /// <param name="eventName">Event name.</param>
-        /// <param name="enablePropertyName">Enable property name.</param>
+        /// <param name="enabledProperty">Enabled Property.</param>
         protected static IDisposable ForEvent(ICommand command, object target, IObservable<object> commandParameter, string eventName, PropertyInfo enabledProperty)
         {
             commandParameter = commandParameter ?? Observable.Return(target);
@@ -93,13 +100,19 @@ namespace ReactiveUI
             object latestParam = null;
             var ctl = target;
 
-            var actionDisp = Observable.FromEventPattern(ctl, eventName).Subscribe((e) => {
+            var actionDisp = Observable.FromEventPattern(ctl, eventName).Subscribe((e) =>
+            {
                 if (command.CanExecute(latestParam))
+                {
                     command.Execute(latestParam);
+                }
             });
 
             var enabledSetter = Reflection.GetValueSetterForProperty(enabledProperty);
-            if (enabledSetter == null) return actionDisp;
+            if (enabledSetter == null)
+            {
+                return actionDisp;
+            }
 
             // initial enabled state
             enabledSetter(target, command.CanExecute(latestParam), null);
@@ -115,8 +128,13 @@ namespace ReactiveUI
         }
 
         /// <summary>
-        /// Creates a commands binding from event and a property
+        /// Creates a commands binding from event and a property.
         /// </summary>
+        /// <param name="command">The command.</param>
+        /// <param name="target">The target object.</param>
+        /// <param name="commandParameter">The command parameter.</param>
+        /// <param name="enabledProperty">The enabled property.</param>
+        /// <returns>Returns a disposable.</returns>
         protected static IDisposable ForTargetAction(ICommand command, object target, IObservable<object> commandParameter, PropertyInfo enabledProperty)
         {
             commandParameter = commandParameter ?? Observable.Return(target);
@@ -126,9 +144,14 @@ namespace ReactiveUI
             IDisposable actionDisp = null;
 
             var ctl = target as UIControl;
-            if (ctl != null) {
-                var eh = new EventHandler((o, e) => {
-                    if (command.CanExecute(latestParam)) command.Execute(latestParam);
+            if (ctl != null)
+            {
+                var eh = new EventHandler((o, e) =>
+                {
+                    if (command.CanExecute(latestParam))
+                    {
+                        command.Execute(latestParam);
+                    }
                 });
 
                 ctl.AddTarget(eh, UIControlEvent.TouchUpInside);
@@ -136,7 +159,10 @@ namespace ReactiveUI
             }
 
             var enabledSetter = Reflection.GetValueSetterForProperty(enabledProperty);
-            if (enabledSetter == null) return actionDisp;
+            if (enabledSetter == null)
+            {
+                return actionDisp;
+            }
 
             // Initial enabled state
             enabledSetter(target, command.CanExecute(latestParam), null);

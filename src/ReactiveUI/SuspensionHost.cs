@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -13,39 +13,44 @@ namespace ReactiveUI
 {
     internal class SuspensionHost : ReactiveObject, ISuspensionHost
     {
-        readonly ReplaySubject<IObservable<Unit>> isLaunchingNew = new ReplaySubject<IObservable<Unit>>(1);
+        private readonly ReplaySubject<IObservable<Unit>> _isLaunchingNew = new ReplaySubject<IObservable<Unit>>(1);
+
         public IObservable<Unit> IsLaunchingNew
         {
-            get { return isLaunchingNew.Switch(); }
-            set { isLaunchingNew.OnNext(value); }
+            get => _isLaunchingNew.Switch();
+            set => _isLaunchingNew.OnNext(value);
         }
 
-        readonly ReplaySubject<IObservable<Unit>> isResuming = new ReplaySubject<IObservable<Unit>>(1);
+        private readonly ReplaySubject<IObservable<Unit>> _isResuming = new ReplaySubject<IObservable<Unit>>(1);
+
         public IObservable<Unit> IsResuming
         {
-            get { return isResuming.Switch(); }
-            set { isResuming.OnNext(value); }
+            get => _isResuming.Switch();
+            set => _isResuming.OnNext(value);
         }
 
-        readonly ReplaySubject<IObservable<Unit>> isUnpausing = new ReplaySubject<IObservable<Unit>>(1);
+        private readonly ReplaySubject<IObservable<Unit>> _isUnpausing = new ReplaySubject<IObservable<Unit>>(1);
+
         public IObservable<Unit> IsUnpausing
         {
-            get { return isUnpausing.Switch(); }
-            set { isUnpausing.OnNext(value); }
+            get => _isUnpausing.Switch();
+            set => _isUnpausing.OnNext(value);
         }
 
-        readonly ReplaySubject<IObservable<IDisposable>> shouldPersistState = new ReplaySubject<IObservable<IDisposable>>(1);
+        private readonly ReplaySubject<IObservable<IDisposable>> _shouldPersistState = new ReplaySubject<IObservable<IDisposable>>(1);
+
         public IObservable<IDisposable> ShouldPersistState
         {
-            get { return shouldPersistState.Switch(); }
-            set { shouldPersistState.OnNext(value); }
+            get => _shouldPersistState.Switch();
+            set => _shouldPersistState.OnNext(value);
         }
 
-        readonly ReplaySubject<IObservable<Unit>> shouldInvalidateState = new ReplaySubject<IObservable<Unit>>(1);
+        private readonly ReplaySubject<IObservable<Unit>> _shouldInvalidateState = new ReplaySubject<IObservable<Unit>>(1);
+
         public IObservable<Unit> ShouldInvalidateState
         {
-            get { return shouldInvalidateState.Switch(); }
-            set { shouldInvalidateState.OnNext(value); }
+            get => _shouldInvalidateState.Switch();
+            set => _shouldInvalidateState.OnNext(value);
         }
 
         /// <summary>
@@ -53,15 +58,15 @@ namespace ReactiveUI
         /// </summary>
         public Func<object> CreateNewAppState { get; set; }
 
-        object appState;
+        private object _appState;
 
         /// <summary>
         ///
         /// </summary>
         public object AppState
         {
-            get { return appState; }
-            set { this.RaiseAndSetIfChanged(ref appState, value); }
+            get => _appState;
+            set => this.RaiseAndSetIfChanged(ref _appState, value);
         }
 
         public SuspensionHost()
@@ -87,52 +92,52 @@ namespace ReactiveUI
         ///
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="This"></param>
+        /// <param name="this">The suspenstion host.</param>
         /// <returns></returns>
-        public static IObservable<T> ObserveAppState<T>(this ISuspensionHost This)
+        public static IObservable<T> ObserveAppState<T>(this ISuspensionHost @this)
         {
-            return This.WhenAny(x => x.AppState, x => (T)x.Value)
+            return @this.WhenAny(x => x.AppState, x => (T)x.Value)
                 .Where(x => x != null);
         }
 
         /// <summary>
         ///
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="This"></param>
+        /// <typeparam name="T">The app state type.</typeparam>
+        /// <param name="this">The suspenstion host.</param>
         /// <returns></returns>
-        public static T GetAppState<T>(this ISuspensionHost This)
+        public static T GetAppState<T>(this ISuspensionHost @this)
         {
-            return (T)This.AppState;
+            return (T)@this.AppState;
         }
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="This"></param>
-        /// <param name="driver"></param>
+        /// <param name="this">The suspenstion host.</param>
+        /// <param name="driver">The suspension driver.</param>
         /// <returns></returns>
-        public static IDisposable SetupDefaultSuspendResume(this ISuspensionHost This, ISuspensionDriver driver = null)
+        public static IDisposable SetupDefaultSuspendResume(this ISuspensionHost @this, ISuspensionDriver driver = null)
         {
             var ret = new CompositeDisposable();
             driver = driver ?? Locator.Current.GetService<ISuspensionDriver>();
 
-            ret.Add(This.ShouldInvalidateState
+            ret.Add(@this.ShouldInvalidateState
                 .SelectMany(_ => driver.InvalidateState())
-                .LoggedCatch(This, Observables.Unit, "Tried to invalidate app state")
-                .Subscribe(_ => This.Log().Info("Invalidated app state")));
+                .LoggedCatch(@this, Observables.Unit, "Tried to invalidate app state")
+                .Subscribe(_ => @this.Log().Info("Invalidated app state")));
 
-            ret.Add(This.ShouldPersistState
-                .SelectMany(x => driver.SaveState(This.AppState).Finally(x.Dispose))
-                .LoggedCatch(This, Observables.Unit, "Tried to persist app state")
-                .Subscribe(_ => This.Log().Info("Persisted application state")));
+            ret.Add(@this.ShouldPersistState
+                .SelectMany(x => driver.SaveState(@this.AppState).Finally(x.Dispose))
+                .LoggedCatch(@this, Observables.Unit, "Tried to persist app state")
+                .Subscribe(_ => @this.Log().Info("Persisted application state")));
 
-            ret.Add(Observable.Merge(This.IsResuming, This.IsLaunchingNew)
+            ret.Add(Observable.Merge(@this.IsResuming, @this.IsLaunchingNew)
                 .SelectMany(x => driver.LoadState())
-                .LoggedCatch(This,
-                    Observable.Defer(() => Observable.Return(This.CreateNewAppState())),
+                .LoggedCatch(@this,
+                    Observable.Defer(() => Observable.Return(@this.CreateNewAppState())),
                     "Failed to restore app state from storage, creating from scratch")
-                .Subscribe(x => This.AppState = x ?? This.CreateNewAppState()));
+                .Subscribe(x => @this.AppState = x ?? @this.CreateNewAppState()));
 
             return ret;
         }

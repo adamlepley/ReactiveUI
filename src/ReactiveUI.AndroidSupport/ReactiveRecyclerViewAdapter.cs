@@ -21,22 +21,22 @@ namespace ReactiveUI.AndroidSupport
 {
     /// <summary>
     /// An adapter for the Android <see cref="RecyclerView"/>.
-    /// Override the <see cref="RecyclerView.Adapter.CreateViewHolder(ViewGroup, int)"/> method 
-    /// to create the your <see cref="ReactiveRecyclerViewViewHolder{TViewModel}"/> based ViewHolder
+    /// Override the <see cref="RecyclerView.Adapter.CreateViewHolder(ViewGroup, int)"/> method
+    /// to create the your <see cref="ReactiveRecyclerViewViewHolder{TViewModel}"/> based ViewHolder.
     /// </summary>
     /// <typeparam name="TViewModel">The type of ViewModel that this adapter holds.</typeparam>
     public abstract class ReactiveRecyclerViewAdapter<TViewModel> : RecyclerView.Adapter
         where TViewModel : class, IReactiveObject
     {
-        private readonly ISourceList<TViewModel> list;
+        private readonly ISourceList<TViewModel> _list;
 
-        private IDisposable inner;
+        private IDisposable _inner;
 
         protected ReactiveRecyclerViewAdapter(IObservable<IChangeSet<TViewModel>> backingList)
         {
-            this.list = new SourceList<TViewModel>(backingList);
+            _list = new SourceList<TViewModel>(backingList);
 
-            this.inner = this.list
+            _inner = _list
                             .Connect()
                             .ForEachChange(UpdateBindings)
                             .Subscribe();
@@ -44,20 +44,20 @@ namespace ReactiveUI.AndroidSupport
 
         public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
         {
-            ((IViewFor)holder).ViewModel = this.list.Items.ElementAt(position);
+            ((IViewFor)holder).ViewModel = _list.Items.ElementAt(position);
         }
 
-        public override int ItemCount => this.list.Count;
+        public override int ItemCount => _list.Count;
 
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-            Interlocked.Exchange(ref this.inner, Disposable.Empty).Dispose();
+            Interlocked.Exchange(ref _inner, Disposable.Empty).Dispose();
         }
 
         private void UpdateBindings(Change<TViewModel> change)
         {
-            switch(change.Reason)
+            switch (change.Reason)
             {
             case ListChangeReason.Add:
                 NotifyItemInserted(change.Item.CurrentIndex);
@@ -85,8 +85,8 @@ namespace ReactiveUI.AndroidSupport
 
     /// <summary>
     /// An adapter for the Android <see cref="RecyclerView"/>.
-    /// Override the <see cref="RecyclerView.Adapter.CreateViewHolder(ViewGroup, int)"/> method 
-    /// to create the your <see cref="ReactiveRecyclerViewViewHolder{TViewModel}"/> based ViewHolder
+    /// Override the <see cref="RecyclerView.Adapter.CreateViewHolder(ViewGroup, int)"/> method
+    /// to create the your <see cref="ReactiveRecyclerViewViewHolder{TViewModel}"/> based ViewHolder.
     /// </summary>
     /// <typeparam name="TViewModel">The type of ViewModel that this adapter holds.</typeparam>
     /// <typeparam name="TCollection">The type of collection.</typeparam>
@@ -106,38 +106,39 @@ namespace ReactiveUI.AndroidSupport
         protected ReactiveRecyclerViewViewHolder(View view)
             : base(view)
         {
-            setupRxObj();
+            SetupRxObj();
 
-            this.Selected = Observable.FromEventPattern(
+            Selected = Observable.FromEventPattern(
                 h => view.Click += h,
                 h => view.Click -= h)
-                    .Select(_ => this.AdapterPosition);
+                    .Select(_ => AdapterPosition);
 
-            this.LongClicked = Observable.FromEventPattern<View.LongClickEventArgs>(
+            LongClicked = Observable.FromEventPattern<View.LongClickEventArgs>(
                 h => view.LongClick += h,
                 h => view.LongClick -= h)
-                    .Select(_ => this.AdapterPosition);
+                    .Select(_ => AdapterPosition);
         }
 
         /// <summary>
-        /// Signals that this ViewHolder has been selected. 
-        /// 
-        /// The <see cref="int"/> is the position of this ViewHolder in the <see cref="RecyclerView"/> 
+        /// Signals that this ViewHolder has been selected.
+        ///
+        /// The <see cref="int"/> is the position of this ViewHolder in the <see cref="RecyclerView"/>
         /// and corresponds to the <see cref="RecyclerView.ViewHolder.AdapterPosition"/> property.
         /// </summary>
         public IObservable<int> Selected { get; }
 
         /// <summary>
-        /// Signals that this ViewHolder has been long-clicked. 
-        /// 
-        /// The <see cref="int"/> is the position of this ViewHolder in the <see cref="RecyclerView"/> 
+        /// Signals that this ViewHolder has been long-clicked.
+        ///
+        /// The <see cref="int"/> is the position of this ViewHolder in the <see cref="RecyclerView"/>
         /// and corresponds to the <see cref="RecyclerView.ViewHolder.AdapterPosition"/> property.
         /// </summary>
         public IObservable<int> LongClicked { get; }
 
-        public View View => this.ItemView;
+        public View View => ItemView;
 
-        TViewModel _ViewModel;
+        private TViewModel _ViewModel;
+
         public TViewModel ViewModel
         {
             get => _ViewModel;
@@ -174,27 +175,30 @@ namespace ReactiveUI.AndroidSupport
 
         /// <summary>
         /// Represents an Observable that fires *before* a property is about to
-        /// be changed.         
+        /// be changed.
         /// </summary>
         [IgnoreDataMember]
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveRecyclerViewViewHolder<TViewModel>>> Changing => this.getChangingObservable();
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveRecyclerViewViewHolder<TViewModel>>> Changing => this.GetChangingObservable();
 
         /// <summary>
         /// Represents an Observable that fires *after* a property has changed.
         /// </summary>
         [IgnoreDataMember]
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveRecyclerViewViewHolder<TViewModel>>> Changed => this.getChangedObservable();
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveRecyclerViewViewHolder<TViewModel>>> Changed => this.GetChangedObservable();
 
         [IgnoreDataMember]
         protected Lazy<PropertyInfo[]> allPublicProperties;
 
         [IgnoreDataMember]
-        public IObservable<Exception> ThrownExceptions => this.getThrownExceptionsObservable();
+        public IObservable<Exception> ThrownExceptions => this.GetThrownExceptionsObservable();
 
         [OnDeserialized]
-        void setupRxObj(StreamingContext sc) { setupRxObj(); }
+        private void SetupRxObj(StreamingContext sc)
+        {
+            SetupRxObj();
+        }
 
-        void setupRxObj()
+        private void SetupRxObj()
         {
             allPublicProperties = new Lazy<PropertyInfo[]>(() =>
                 GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).ToArray());
@@ -209,12 +213,12 @@ namespace ReactiveUI.AndroidSupport
         /// notifications.</returns>
         public IDisposable SuppressChangeNotifications()
         {
-            return this.suppressChangeNotifications();
+            return IReactiveObjectExtensions.SuppressChangeNotifications(this);
         }
 
         public bool AreChangeNotificationsEnabled()
         {
-            return this.areChangeNotificationsEnabled();
+            return IReactiveObjectExtensions.AreChangeNotificationsEnabled(this);
         }
     }
 }

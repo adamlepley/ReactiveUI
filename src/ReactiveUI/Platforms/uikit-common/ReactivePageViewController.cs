@@ -5,8 +5,8 @@
 using System;
 using System.ComponentModel;
 using System.Reactive;
-using System.Reactive.Subjects;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Foundation;
 using UIKit;
 
@@ -15,17 +15,53 @@ namespace ReactiveUI
     public abstract class ReactivePageViewController : UIPageViewController,
         IReactiveNotifyPropertyChanged<ReactivePageViewController>, IHandleObservableErrors, IReactiveObject, ICanActivate
     {
-        protected ReactivePageViewController(UIPageViewControllerTransitionStyle style, UIPageViewControllerNavigationOrientation orientation) : base(style, orientation) { setupRxObj(); }
-        protected ReactivePageViewController(UIPageViewControllerTransitionStyle style, UIPageViewControllerNavigationOrientation orientation, NSDictionary options) : base(style, orientation, options) { setupRxObj(); }
-        protected ReactivePageViewController(UIPageViewControllerTransitionStyle style, UIPageViewControllerNavigationOrientation orientation, UIPageViewControllerSpineLocation spineLocation) : base(style, orientation, spineLocation) { setupRxObj(); }
-        protected ReactivePageViewController(UIPageViewControllerTransitionStyle style, UIPageViewControllerNavigationOrientation orientation, UIPageViewControllerSpineLocation spineLocation, float interPageSpacing) : base(style, orientation, spineLocation, interPageSpacing) { setupRxObj(); }
-        protected ReactivePageViewController(string nibName, NSBundle bundle) : base(nibName, bundle) { setupRxObj(); }
-        protected ReactivePageViewController(IntPtr handle) : base(handle) { setupRxObj(); }
-        protected ReactivePageViewController(NSObjectFlag t) : base(t) { setupRxObj(); }
-        protected ReactivePageViewController(NSCoder coder) : base(coder) { setupRxObj(); }
-        protected ReactivePageViewController() { setupRxObj(); }
+        protected ReactivePageViewController(UIPageViewControllerTransitionStyle style, UIPageViewControllerNavigationOrientation orientation) : base(style, orientation)
+        {
+            SetupRxObj();
+        }
 
-        public event PropertyChangingEventHandler PropertyChanging {
+        protected ReactivePageViewController(UIPageViewControllerTransitionStyle style, UIPageViewControllerNavigationOrientation orientation, NSDictionary options) : base(style, orientation, options)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactivePageViewController(UIPageViewControllerTransitionStyle style, UIPageViewControllerNavigationOrientation orientation, UIPageViewControllerSpineLocation spineLocation) : base(style, orientation, spineLocation)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactivePageViewController(UIPageViewControllerTransitionStyle style, UIPageViewControllerNavigationOrientation orientation, UIPageViewControllerSpineLocation spineLocation, float interPageSpacing) : base(style, orientation, spineLocation, interPageSpacing)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactivePageViewController(string nibName, NSBundle bundle) : base(nibName, bundle)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactivePageViewController(IntPtr handle) : base(handle)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactivePageViewController(NSObjectFlag t) : base(t)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactivePageViewController(NSCoder coder) : base(coder)
+        {
+            SetupRxObj();
+        }
+
+        protected ReactivePageViewController()
+        {
+            SetupRxObj();
+        }
+
+        public event PropertyChangingEventHandler PropertyChanging
+        {
             add { PropertyChangingEventManager.AddHandler(this, value); }
             remove { PropertyChangingEventManager.RemoveHandler(this, value); }
         }
@@ -35,7 +71,8 @@ namespace ReactiveUI
             PropertyChangingEventManager.DeliverEvent(this, args);
         }
 
-        public event PropertyChangedEventHandler PropertyChanged {
+        public event PropertyChangedEventHandler PropertyChanged
+        {
             add { PropertyChangedEventManager.AddHandler(this, value); }
             remove { PropertyChangedEventManager.RemoveHandler(this, value); }
         }
@@ -49,20 +86,25 @@ namespace ReactiveUI
         /// Represents an Observable that fires *before* a property is about to
         /// be changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactivePageViewController>> Changing {
-            get { return this.getChangingObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactivePageViewController>> Changing
+        {
+            get { return this.GetChangingObservable(); }
         }
 
         /// <summary>
         /// Represents an Observable that fires *after* a property has changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactivePageViewController>> Changed {
-            get { return this.getChangedObservable(); }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactivePageViewController>> Changed
+        {
+            get { return this.GetChangedObservable(); }
         }
 
-        public IObservable<Exception> ThrownExceptions { get { return this.getThrownExceptionsObservable(); } }
+        public IObservable<Exception> ThrownExceptions
+        {
+            get { return this.GetThrownExceptionsObservable(); }
+        }
 
-        void setupRxObj()
+        private void SetupRxObj()
         {
         }
 
@@ -75,25 +117,34 @@ namespace ReactiveUI
         /// notifications.</returns>
         public IDisposable SuppressChangeNotifications()
         {
-            return this.suppressChangeNotifications();
+            return IReactiveObjectExtensions.SuppressChangeNotifications(this);
         }
 
-        Subject<Unit> activated = new Subject<Unit>();
-        public IObservable<Unit> Activated { get { return activated.AsObservable(); } }
-        Subject<Unit> deactivated = new Subject<Unit>();
-        public IObservable<Unit> Deactivated { get { return deactivated.AsObservable(); } }
+        private Subject<Unit> _activated = new Subject<Unit>();
+
+        public IObservable<Unit> Activated
+        {
+            get { return _activated.AsObservable(); }
+        }
+
+        private Subject<Unit> _deactivated = new Subject<Unit>();
+
+        public IObservable<Unit> Deactivated
+        {
+            get { return _deactivated.AsObservable(); }
+        }
 
         public override void ViewWillAppear(bool animated)
         {
             base.ViewWillAppear(animated);
-            activated.OnNext(Unit.Default);
+            _activated.OnNext(Unit.Default);
             this.ActivateSubviews(true);
         }
 
         public override void ViewDidDisappear(bool animated)
         {
             base.ViewDidDisappear(animated);
-            deactivated.OnNext(Unit.Default);
+            _deactivated.OnNext(Unit.Default);
             this.ActivateSubviews(false);
         }
     }
@@ -101,23 +152,52 @@ namespace ReactiveUI
     public abstract class ReactivePageViewController<TViewModel> : ReactivePageViewController, IViewFor<TViewModel>
         where TViewModel : class
     {
-        protected ReactivePageViewController(UIPageViewControllerTransitionStyle style, UIPageViewControllerNavigationOrientation orientation) : base(style, orientation) { }
-        protected ReactivePageViewController(UIPageViewControllerTransitionStyle style, UIPageViewControllerNavigationOrientation orientation, NSDictionary options) : base(style, orientation, options) { }
-        protected ReactivePageViewController(UIPageViewControllerTransitionStyle style, UIPageViewControllerNavigationOrientation orientation, UIPageViewControllerSpineLocation spineLocation) : base(style, orientation, spineLocation) { }
-        protected ReactivePageViewController(UIPageViewControllerTransitionStyle style, UIPageViewControllerNavigationOrientation orientation, UIPageViewControllerSpineLocation spineLocation, float interPageSpacing) : base(style, orientation, spineLocation, interPageSpacing) { }
-        protected ReactivePageViewController(string nibName, NSBundle bundle) : base(nibName, bundle) { }
-        protected ReactivePageViewController(IntPtr handle) : base(handle) { }
-        protected ReactivePageViewController(NSObjectFlag t) : base(t) { }
-        protected ReactivePageViewController(NSCoder coder) : base(coder) { }
-        protected ReactivePageViewController() { }
+        protected ReactivePageViewController(UIPageViewControllerTransitionStyle style, UIPageViewControllerNavigationOrientation orientation) : base(style, orientation)
+        {
+        }
 
-        TViewModel _viewModel;
-        public TViewModel ViewModel {
+        protected ReactivePageViewController(UIPageViewControllerTransitionStyle style, UIPageViewControllerNavigationOrientation orientation, NSDictionary options) : base(style, orientation, options)
+        {
+        }
+
+        protected ReactivePageViewController(UIPageViewControllerTransitionStyle style, UIPageViewControllerNavigationOrientation orientation, UIPageViewControllerSpineLocation spineLocation) : base(style, orientation, spineLocation)
+        {
+        }
+
+        protected ReactivePageViewController(UIPageViewControllerTransitionStyle style, UIPageViewControllerNavigationOrientation orientation, UIPageViewControllerSpineLocation spineLocation, float interPageSpacing) : base(style, orientation, spineLocation, interPageSpacing)
+        {
+        }
+
+        protected ReactivePageViewController(string nibName, NSBundle bundle) : base(nibName, bundle)
+        {
+        }
+
+        protected ReactivePageViewController(IntPtr handle) : base(handle)
+        {
+        }
+
+        protected ReactivePageViewController(NSObjectFlag t) : base(t)
+        {
+        }
+
+        protected ReactivePageViewController(NSCoder coder) : base(coder)
+        {
+        }
+
+        protected ReactivePageViewController()
+        {
+        }
+
+        private TViewModel _viewModel;
+
+        public TViewModel ViewModel
+        {
             get { return _viewModel; }
             set { this.RaiseAndSetIfChanged(ref _viewModel, value); }
         }
 
-        object IViewFor.ViewModel {
+        object IViewFor.ViewModel
+        {
             get { return ViewModel; }
             set { ViewModel = (TViewModel)value; }
         }

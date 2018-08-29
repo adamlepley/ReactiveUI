@@ -12,10 +12,10 @@ namespace ReactiveUI
 {
     /// <summary>
     /// This class is the final fallback for WhenAny, and will simply immediately
-    /// return the value of the type at the time it was created. It will also 
-    /// warn the user that this is probably not what they want to do
+    /// return the value of the type at the time it was created. It will also
+    /// warn the user that this is probably not what they want to do.
     /// </summary>
-    public class POCOObservableForProperty : ICreatesObservableForProperty 
+    public class POCOObservableForProperty : ICreatesObservableForProperty
     {
         public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged = false)
         {
@@ -23,10 +23,12 @@ namespace ReactiveUI
         }
 
         private static readonly Dictionary<(Type, string), bool> hasWarned = new Dictionary<(Type, string), bool>();
+
         public IObservable<IObservedChange<object, object>> GetNotificationForProperty(object sender, Expression expression, string propertyName, bool beforeChanged = false)
         {
             var type = sender.GetType();
-            if (!hasWarned.ContainsKey((type, propertyName))) {
+            if (!hasWarned.ContainsKey((type, propertyName)))
+            {
                 this.Log().Warn($"The class {type.FullName} property {propertyName} is a POCO type and won't send change notifications, WhenAny will only return a single value!");
                 hasWarned[(type, propertyName)] = true;
             }

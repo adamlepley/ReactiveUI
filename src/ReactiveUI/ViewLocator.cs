@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -16,9 +16,11 @@ namespace ReactiveUI
             get
             {
                 var ret = Locator.Current.GetService<IViewLocator>();
-                if (ret == null) {
+                if (ret == null)
+                {
                     throw new Exception("Could not find a default ViewLocator. This should never happen, your dependency resolver is broken");
                 }
+
                 return ret;
             }
         }
@@ -50,6 +52,7 @@ namespace ReactiveUI
         /// Returns the view associated with a view model, deriving the name of the type via <see cref="ViewModelToViewFunc"/>, then discovering it via the
         /// service locator.
         /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <remarks>
         /// <para>
         /// Given view model type <c>T</c> with runtime type <c>RT</c>, this implementation will attempt to resolve the following views:
@@ -91,7 +94,7 @@ namespace ReactiveUI
         /// The view model whose associated view is to be resolved.
         /// </param>
         /// <param name="contract">
-        /// Optional contract to be used when resolving from Splat
+        /// Optional contract to be used when resolving from Splat.
         /// </param>
         /// <returns>
         /// The view associated with the given view model.
@@ -99,27 +102,31 @@ namespace ReactiveUI
         public IViewFor ResolveView<T>(T viewModel, string contract = null)
             where T : class
         {
-            var view = this.AttemptViewResolutionFor(viewModel.GetType(), contract);
+            var view = AttemptViewResolutionFor(viewModel.GetType(), contract);
 
-            if (view != null) {
+            if (view != null)
+            {
                 return view;
             }
 
-            view = this.AttemptViewResolutionFor(typeof(T), contract);
+            view = AttemptViewResolutionFor(typeof(T), contract);
 
-            if (view != null) {
+            if (view != null)
+            {
                 return view;
             }
 
-            view = this.AttemptViewResolutionFor(ToggleViewModelType(viewModel.GetType()), contract);
+            view = AttemptViewResolutionFor(ToggleViewModelType(viewModel.GetType()), contract);
 
-            if (view != null) {
+            if (view != null)
+            {
                 return view;
             }
 
-            view = this.AttemptViewResolutionFor(ToggleViewModelType(typeof(T)), contract);
+            view = AttemptViewResolutionFor(ToggleViewModelType(typeof(T)), contract);
 
-            if (view != null) {
+            if (view != null)
+            {
                 return view;
             }
 
@@ -129,19 +136,25 @@ namespace ReactiveUI
 
         private IViewFor AttemptViewResolutionFor(Type viewModelType, string contract)
         {
-            if (viewModelType == null) return null;
-            var viewModelTypeName = viewModelType.AssemblyQualifiedName;
-            var proposedViewTypeName = this.ViewModelToViewFunc(viewModelTypeName);
-            var view = this.AttemptViewResolution(proposedViewTypeName, contract);
+            if (viewModelType == null)
+            {
+                return null;
+            }
 
-            if (view != null) {
+            var viewModelTypeName = viewModelType.AssemblyQualifiedName;
+            var proposedViewTypeName = ViewModelToViewFunc(viewModelTypeName);
+            var view = AttemptViewResolution(proposedViewTypeName, contract);
+
+            if (view != null)
+            {
                 return view;
             }
 
             proposedViewTypeName = typeof(IViewFor<>).MakeGenericType(viewModelType).AssemblyQualifiedName;
-            view = this.AttemptViewResolution(proposedViewTypeName, contract);
+            view = AttemptViewResolution(proposedViewTypeName, contract);
 
-            if (view != null) {
+            if (view != null)
+            {
                 return view;
             }
 
@@ -150,30 +163,36 @@ namespace ReactiveUI
 
         private IViewFor AttemptViewResolution(string viewTypeName, string contract)
         {
-            try {
+            try
+            {
                 var viewType = Reflection.ReallyFindType(viewTypeName, throwOnFailure: false);
 
-                if (viewType == null) {
+                if (viewType == null)
+                {
                     this.Log().Debug("Failed to find type named '{0}'.", viewTypeName);
                     return null;
                 }
 
                 var service = Locator.Current.GetService(viewType, contract);
 
-                if (service == null) {
+                if (service == null)
+                {
                     this.Log().Debug("Failed to resolve service for type '{0}'.", viewType.FullName);
                     return null;
                 }
 
                 var view = service as IViewFor;
 
-                if (view == null) {
+                if (view == null)
+                {
                     this.Log().Debug("Resolve service type '{0}' does not implement '{1}'.", viewType.FullName, typeof(IViewFor).FullName);
                     return null;
                 }
 
                 return view;
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 this.Log().ErrorException("Exception occurred whilst attempting to resolve type '" + viewTypeName + "' into a view.", ex);
                 throw;
             }
@@ -183,13 +202,17 @@ namespace ReactiveUI
         {
             var viewModelTypeName = viewModelType.AssemblyQualifiedName;
 
-            if (viewModelType.GetTypeInfo().IsInterface) {
-                if (viewModelType.Name.StartsWith("I")) {
+            if (viewModelType.GetTypeInfo().IsInterface)
+            {
+                if (viewModelType.Name.StartsWith("I"))
+                {
                     var toggledTypeName = DeinterfaceifyTypeName(viewModelTypeName);
                     var toggledType = Reflection.ReallyFindType(toggledTypeName, throwOnFailure: false);
                     return toggledType;
                 }
-            } else {
+            }
+            else
+            {
                 var toggledTypeName = InterfaceifyTypeName(viewModelTypeName);
                 var toggledType = Reflection.ReallyFindType(toggledTypeName, throwOnFailure: false);
                 return toggledType;

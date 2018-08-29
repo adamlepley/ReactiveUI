@@ -19,68 +19,74 @@ namespace ReactiveUI.Tests
     public class TestFixture : ReactiveObject
     {
         [IgnoreDataMember]
-        string _IsNotNullString;
+        private string _IsNotNullString;
+
         [DataMember]
         public string IsNotNullString
         {
-            get { return _IsNotNullString; }
-            set { this.RaiseAndSetIfChanged(ref _IsNotNullString, value); }
+            get => _IsNotNullString;
+            set => this.RaiseAndSetIfChanged(ref _IsNotNullString, value);
         }
 
         [IgnoreDataMember]
-        string _IsOnlyOneWord;
+        private string _IsOnlyOneWord;
+
         [DataMember]
         public string IsOnlyOneWord
         {
-            get { return _IsOnlyOneWord; }
-            set { this.RaiseAndSetIfChanged(ref _IsOnlyOneWord, value); }
+            get => _IsOnlyOneWord;
+            set => this.RaiseAndSetIfChanged(ref _IsOnlyOneWord, value);
         }
 
         [IgnoreDataMember]
-        List<string> _StackOverflowTrigger;
+        private List<string> _StackOverflowTrigger;
+
         [DataMember]
         public List<string> StackOverflowTrigger
         {
-            get { return _StackOverflowTrigger; }
-            set { this.RaiseAndSetIfChanged(ref _StackOverflowTrigger, value.ToList()); }
+            get => _StackOverflowTrigger;
+            set => this.RaiseAndSetIfChanged(ref _StackOverflowTrigger, value.ToList());
         }
 
         [IgnoreDataMember]
-        string _UsesExprRaiseSet;
+        private string _UsesExprRaiseSet;
+
         [DataMember]
         public string UsesExprRaiseSet
         {
-            get { return _UsesExprRaiseSet; }
-            set { this.RaiseAndSetIfChanged(ref _UsesExprRaiseSet, value); }
+            get => _UsesExprRaiseSet;
+            set => this.RaiseAndSetIfChanged(ref _UsesExprRaiseSet, value);
         }
 
         [IgnoreDataMember]
-        string _PocoProperty;
+        private string _PocoProperty;
+
         [DataMember]
         public string PocoProperty
         {
-            get { return _PocoProperty; }
-            set { _PocoProperty = value; }
+            get => _PocoProperty;
+            set => _PocoProperty = value;
         }
 
         [DataMember]
         public ObservableCollectionExtended<int> TestCollection { get; protected set; }
 
-        string _NotSerialized;
+        private string _NotSerialized;
+
         public string NotSerialized
         {
-            get { return _NotSerialized; }
-            set { this.RaiseAndSetIfChanged(ref _NotSerialized, value); }
+            get => _NotSerialized;
+            set => this.RaiseAndSetIfChanged(ref _NotSerialized, value);
         }
 
         [IgnoreDataMember]
-        int? _nullableInt;
+        private int? _nullableInt;
 
         [DataMember]
         public int? NullableInt
         {
-            get { return _nullableInt; }
-            set { this.RaiseAndSetIfChanged(ref _nullableInt, value); }
+            get => _nullableInt;
+            set => this.RaiseAndSetIfChanged(ref _nullableInt, value);
         }
 
         public TestFixture()
@@ -92,12 +98,10 @@ namespace ReactiveUI.Tests
     public class OaphTestFixture : TestFixture
     {
         [IgnoreDataMember]
-        ObservableAsPropertyHelper<string> _FirstThreeLettersOfOneWord;
+        private readonly ObservableAsPropertyHelper<string> _FirstThreeLettersOfOneWord;
+
         [IgnoreDataMember]
-        public string FirstThreeLettersOfOneWord
-        {
-            get { return _FirstThreeLettersOfOneWord.Value; }
-        }
+        public string FirstThreeLettersOfOneWord => _FirstThreeLettersOfOneWord.Value;
 
         public OaphTestFixture()
         {
@@ -110,10 +114,10 @@ namespace ReactiveUI.Tests
     public class OaphNameOfTestFixture : TestFixture
     {
         [IgnoreDataMember]
-        ObservableAsPropertyHelper<string> _FirstThreeLettersOfOneWord;
+        private readonly ObservableAsPropertyHelper<string> _FirstThreeLettersOfOneWord;
 
         [IgnoreDataMember]
-        ObservableAsPropertyHelper<string> _LastThreeLettersOfOneWord;
+        private readonly ObservableAsPropertyHelper<string> _LastThreeLettersOfOneWord;
 
         [IgnoreDataMember]
         public string FirstThreeLettersOfOneWord => _FirstThreeLettersOfOneWord.Value;
@@ -127,7 +131,7 @@ namespace ReactiveUI.Tests
                 .Select(x => (x ?? "")).Select(x => x.Length >= 3 ? x.Substring(0, 3) : x)
                 .ToProperty(this, nameof(FirstThreeLettersOfOneWord), out _FirstThreeLettersOfOneWord);
 
-            this._LastThreeLettersOfOneWord = this.WhenAnyValue(x => x.IsOnlyOneWord)
+            _LastThreeLettersOfOneWord = this.WhenAnyValue(x => x.IsOnlyOneWord)
                 .Select(x => (x ?? "")).Select(x => x.Length >= 3 ? x.Substring(x.Length - 3, 3) : x)
                 .ToProperty(this, nameof(LastThreeLettersOfOneWord));
         }
@@ -187,13 +191,13 @@ namespace ReactiveUI.Tests
             Assert.Equal("UsesExprRaiseSet", output[0]);
         }
 
-
         [Fact]
         public void ObservableForPropertyUsingExpression()
         {
             var fixture = new TestFixture() { IsNotNullString = "Foo", IsOnlyOneWord = "Baz" };
             var output = new List<IObservedChange<TestFixture, string>>();
-            fixture.ObservableForProperty(x => x.IsNotNullString).Subscribe(x => {
+            fixture.ObservableForProperty(x => x.IsNotNullString).Subscribe(x =>
+            {
                 output.Add(x);
             });
 
@@ -223,8 +227,9 @@ namespace ReactiveUI.Tests
             var fixture = new TestFixture() { IsOnlyOneWord = before_set };
 
             var before_fired = false;
-            fixture.Changing.Subscribe(x => {
-                // XXX: The content of these asserts don't actually get 
+            fixture.Changing.Subscribe(x =>
+            {
+                // XXX: The content of these asserts don't actually get
                 // propagated back, it only prevents before_fired from
                 // being set - we have to enable 1st-chance exceptions
                 // to see the real error
@@ -234,7 +239,8 @@ namespace ReactiveUI.Tests
             });
 
             var after_fired = false;
-            fixture.Changed.Subscribe(x => {
+            fixture.Changed.Subscribe(x =>
+            {
                 Assert.Equal("IsOnlyOneWord", x.PropertyName);
                 Assert.Equal(fixture.IsOnlyOneWord, after_set);
                 after_fired = true;
