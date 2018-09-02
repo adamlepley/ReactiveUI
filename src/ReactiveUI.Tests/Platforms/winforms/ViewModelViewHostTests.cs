@@ -36,7 +36,7 @@ namespace ReactiveUI.Tests.Winforms
         public void ShouldDisposePreviousView()
         {
             var viewLocator = new FakeViewLocator { LocatorFunc = t => new FakeWinformsView() };
-            var target = new WinFormsViewModelViewHost()
+            var target = new WinFormsViewModelViewHost
             {
                 CacheViews = false
             };

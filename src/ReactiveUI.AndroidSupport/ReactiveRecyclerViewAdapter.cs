@@ -42,13 +42,16 @@ namespace ReactiveUI.AndroidSupport
                             .Subscribe();
         }
 
+        /// <inheritdoc/>
         public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
         {
             ((IViewFor)holder).ViewModel = _list.Items.ElementAt(position);
         }
 
+        /// <inheritdoc/>
         public override int ItemCount => _list.Count;
 
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -135,39 +138,46 @@ namespace ReactiveUI.AndroidSupport
         /// </summary>
         public IObservable<int> LongClicked { get; }
 
+        /// <inheritdoc/>
         public View View => ItemView;
 
-        private TViewModel _ViewModel;
+        private TViewModel _viewModel;
 
+        /// <inheritdoc/>
         public TViewModel ViewModel
         {
-            get => _ViewModel;
-            set => this.RaiseAndSetIfChanged(ref _ViewModel, value);
+            get => _viewModel;
+            set => this.RaiseAndSetIfChanged(ref _viewModel, value);
         }
 
+        /// <inheritdoc/>
         object IViewFor.ViewModel
         {
             get => ViewModel;
             set => ViewModel = (TViewModel)value;
         }
 
+        /// <inheritdoc/>
         public event PropertyChangingEventHandler PropertyChanging
         {
             add => PropertyChangingEventManager.AddHandler(this, value);
             remove => PropertyChangingEventManager.RemoveHandler(this, value);
         }
 
+        /// <inheritdoc/>
         void IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args)
         {
             PropertyChangingEventManager.DeliverEvent(this, args);
         }
 
+        /// <inheritdoc/>
         public event PropertyChangedEventHandler PropertyChanged
         {
             add => PropertyChangedEventManager.AddHandler(this, value);
             remove => PropertyChangedEventManager.RemoveHandler(this, value);
         }
 
+        /// <inheritdoc/>
         void IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args)
         {
             PropertyChangedEventManager.DeliverEvent(this, args);

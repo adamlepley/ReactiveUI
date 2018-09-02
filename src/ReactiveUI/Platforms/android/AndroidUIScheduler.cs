@@ -32,6 +32,7 @@ namespace ReactiveUI
             _looperId = threadIdAssociatedWithHandler ?? -1;
         }
 
+        /// <inheritdoc/>
         public IDisposable Schedule<TState>(TState state, Func<IScheduler, TState, IDisposable> action)
         {
             bool isCancelled = false;
@@ -57,12 +58,14 @@ namespace ReactiveUI
                 innerDisp);
         }
 
+        /// <inheritdoc/>
         public IDisposable Schedule<TState>(TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
         {
             bool isCancelled = false;
             var innerDisp = new SerialDisposable() { Disposable = Disposable.Empty };
 
-            _handler.PostDelayed(() =>
+            _handler.PostDelayed(
+                () =>
             {
                 if (isCancelled)
                 {
@@ -77,6 +80,7 @@ namespace ReactiveUI
                 innerDisp);
         }
 
+        /// <inheritdoc/>
         public IDisposable Schedule<TState>(TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
         {
             if (dueTime <= Now)
@@ -87,6 +91,7 @@ namespace ReactiveUI
             return Schedule(state, dueTime - Now, action);
         }
 
+        /// <inheritdoc/>
         public DateTimeOffset Now
         {
             get { return DateTimeOffset.Now; }

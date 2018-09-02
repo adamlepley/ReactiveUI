@@ -14,6 +14,7 @@ namespace ReactiveUI
 {
     public class DependencyObjectObservableForProperty : ICreatesObservableForProperty
     {
+        /// <inheritdoc/>
         public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged = false)
         {
             if (!typeof(DependencyObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
@@ -29,6 +30,7 @@ namespace ReactiveUI
             return 4;
         }
 
+        /// <inheritdoc/>
         public IObservable<IObservedChange<object, object>> GetNotificationForProperty(object sender, System.Linq.Expressions.Expression expression, string propertyName, bool beforeChanged = false)
         {
             Contract.Requires(sender != null && sender is DependencyObject);
@@ -37,7 +39,8 @@ namespace ReactiveUI
 
             if (depSender == null)
             {
-                this.Log().Warn("Tried to bind DP on a non-DependencyObject. Binding as POCO object",
+                this.Log().Warn(
+                    "Tried to bind DP on a non-DependencyObject. Binding as POCO object",
                     type.FullName, propertyName);
 
                 var ret = new POCOObservableForProperty();
@@ -46,7 +49,8 @@ namespace ReactiveUI
 
             if (beforeChanged == true)
             {
-                this.Log().Warn("Tried to bind DO {0}.{1}, but DPs can't do beforeChanged. Binding as POCO object",
+                this.Log().Warn(
+                    "Tried to bind DO {0}.{1}, but DPs can't do beforeChanged. Binding as POCO object",
                     type.FullName, propertyName);
 
                 var ret = new POCOObservableForProperty();
@@ -56,7 +60,8 @@ namespace ReactiveUI
             var dpFetcher = GetDependencyPropertyFetcher(type, propertyName);
             if (dpFetcher == null)
             {
-                this.Log().Warn("Tried to bind DO {0}.{1}, but DP doesn't exist. Binding as POCO object",
+                this.Log().Warn(
+                    "Tried to bind DO {0}.{1}, but DP doesn't exist. Binding as POCO object",
                     type.FullName, propertyName);
 
                 var ret = new POCOObservableForProperty();

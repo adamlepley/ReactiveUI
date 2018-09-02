@@ -28,14 +28,14 @@ namespace ReactiveUI
 
         public RoutingState Router
         {
-            get { return _router; }
-            set { this.RaiseAndSetIfChanged(ref _router, value); }
+            get => _router;
+            set => this.RaiseAndSetIfChanged(ref _router, value);
         }
 
         public IObservable<string> ViewContractObservable
         {
-            get { return _viewContractObservable; }
-            set { this.RaiseAndSetIfChanged(ref _viewContractObservable, value); }
+            get => _viewContractObservable;
+            set => this.RaiseAndSetIfChanged(ref _viewContractObservable, value);
         }
 
         public IViewLocator ViewLocator { get; set; }
@@ -117,6 +117,7 @@ namespace ReactiveUI
                 });
         }
 
+        /// <inheritdoc/>
         public override void PushViewController(NSViewController viewController, bool animated)
         {
             base.PushViewController(viewController, animated);
@@ -131,6 +132,7 @@ namespace ReactiveUI
             }
         }
 
+        /// <inheritdoc/>
         public override NSViewController PopViewController(bool animated)
         {
             if (!_routerInstigated)
@@ -188,28 +190,28 @@ namespace ReactiveUI
     [Obsolete("Use RoutedViewHost instead. This class will be removed in a later release.")]
     public class RoutedViewHostLegacy : ReactiveObject
     {
-        private RoutingState _Router;
+        private RoutingState _router;
 
         public RoutingState Router
         {
-            get { return _Router; }
-            set { this.RaiseAndSetIfChanged(ref _Router, value); }
+            get => _router;
+            set => this.RaiseAndSetIfChanged(ref _router, value);
         }
 
-        private IObservable<string> _ViewContractObservable;
+        private IObservable<string> _viewContractObservable;
 
         public IObservable<string> ViewContractObservable
         {
-            get { return _ViewContractObservable; }
-            set { this.RaiseAndSetIfChanged(ref _ViewContractObservable, value); }
+            get => _viewContractObservable;
+            set => this.RaiseAndSetIfChanged(ref _viewContractObservable, value);
         }
 
-        private NSViewController _DefaultContent;
+        private NSViewController _defaultContent;
 
         public NSViewController DefaultContent
         {
-            get { return _DefaultContent; }
-            set { this.RaiseAndSetIfChanged(ref _DefaultContent, value); }
+            get => _defaultContent;
+            set => this.RaiseAndSetIfChanged(ref _defaultContent, value);
         }
 
         public IViewLocator ViewLocator { get; set; }
@@ -225,7 +227,8 @@ namespace ReactiveUI
                 this.WhenAnyObservable(x => x.ViewContractObservable),
                 (vm, contract) => new { ViewModel = vm, Contract = contract, });
 
-            vmAndContract.Subscribe(x =>
+            vmAndContract.Subscribe(
+                x =>
             {
                 if (viewLastAdded != null)
                 {

@@ -18,9 +18,9 @@ namespace ReactiveUI
         /// <param name="context">The Context to bind the Service from.</param>
         /// <param name="intent">Identifies the service to connect to. The Intent may specify either an explicit component name, or a logical description (action, category, etc) to match an IntentFilter published by a service.</param>
         /// <param name="flags">Operation options for the binding. The default is Bind.None.</param>
-        public static IObservable<IBinder> ServiceBound (this Context context, Intent intent, Bind flags = Bind.None)
+        public static IObservable<IBinder> ServiceBound(this Context context, Intent intent, Bind flags = Bind.None)
         {
-            return ServiceBound<IBinder> (context, intent, flags);
+            return ServiceBound<IBinder>(context, intent, flags);
         }
 
         /// <summary>
@@ -31,24 +31,24 @@ namespace ReactiveUI
         /// <param name="intent">Identifies the service to connect to. The Intent may specify either an explicit component name, or a logical description (action, category, etc) to match an IntentFilter published by a service.</param>
         /// <param name="flags">Operation options for the binding. The default is Bind.None.</param>
         /// <typeparam name="TBinder">The type of the returned service binder.</typeparam>
-        public static IObservable<TBinder> ServiceBound<TBinder> (this Context context, Intent intent, Bind flags = Bind.None)
+        public static IObservable<TBinder> ServiceBound<TBinder>(this Context context, Intent intent, Bind flags = Bind.None)
         where TBinder
             : class,
             IBinder
         {
-            return Observable.Create<TBinder> (observer =>
+            return Observable.Create<TBinder>(observer =>
             {
-                var connection = new ServiceConnection<TBinder> (context, observer);
+                var connection = new ServiceConnection<TBinder>(context, observer);
                 try
                 {
-                    if (!context.BindService (intent, connection, flags))
+                    if (!context.BindService(intent, connection, flags))
                     {
-                        observer.OnError (new Exception ("Service bind failed!"));
+                        observer.OnError(new Exception("Service bind failed!"));
                     }
                 }
                 catch (Exception ex)
                 {
-                    observer.OnError (ex);
+                    observer.OnError(ex);
                 }
 
                 return connection;
@@ -58,7 +58,7 @@ namespace ReactiveUI
         /// <summary>
         /// A private implementation of IServiceConnection and IDisposable.
         /// </summary>
-        /// <typeparam name="TBinder"></typeparam>
+        /// <typeparam name="TBinder">The binder type.</typeparam>
         private class ServiceConnection<TBinder>
             : Java.Lang.Object,
             IServiceConnection
@@ -69,7 +69,7 @@ namespace ReactiveUI
             private readonly Context _context;
             private readonly IObserver<TBinder> _observer;
 
-            public ServiceConnection (Context context, IObserver<TBinder> observer)
+            public ServiceConnection(Context context, IObserver<TBinder> observer)
             {
                 _context = context;
                 _observer = observer;
@@ -77,15 +77,15 @@ namespace ReactiveUI
 
             #region IServiceConnection implemention
 
-            void IServiceConnection.OnServiceConnected (ComponentName name, IBinder binder)
+            void IServiceConnection.OnServiceConnected(ComponentName name, IBinder binder)
             {
-                _observer.OnNext ((TBinder)binder);
+                _observer.OnNext((TBinder)binder);
             }
 
-            void IServiceConnection.OnServiceDisconnected (ComponentName name)
+            void IServiceConnection.OnServiceDisconnected(ComponentName name)
             {
                 // lost connection to the remote service but it may be revived
-                _observer.OnNext (null);
+                _observer.OnNext(null);
             }
 
             #endregion
@@ -94,19 +94,19 @@ namespace ReactiveUI
 
             private bool _disposed;
 
-            protected override void Dispose (bool disposing)
+            protected override void Dispose(bool disposing)
             {
                 if (!_disposed)
                 {
                     if (disposing)
                     {
-                        _context.UnbindService (this);
+                        _context.UnbindService(this);
 
                         _disposed = true;
                     }
                 }
 
-                base.Dispose (disposing);
+                base.Dispose(disposing);
             }
 
             #endregion

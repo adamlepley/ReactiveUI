@@ -48,23 +48,27 @@ namespace ReactiveUI.Tests
 
     public class PropertyBindFakeControl : Control
     {
+
+        public static readonly DependencyProperty NullHatingStringProperty =
+            DependencyProperty.Register("NullHatingString", typeof(string), typeof(PropertyBindFakeControl), new PropertyMetadata(string.Empty));
+
+        public static readonly DependencyProperty NullableDoubleProperty =
+            DependencyProperty.Register("NullableDouble", typeof(double?), typeof(PropertyBindFakeControl), new PropertyMetadata(null));
+
+        public static readonly DependencyProperty JustADoubleProperty =
+            DependencyProperty.Register("JustADouble", typeof(double), typeof(PropertyBindFakeControl), new PropertyMetadata(0.0));
+
         public double? NullableDouble
         {
             get => (double?)GetValue(NullableDoubleProperty);
             set => SetValue(NullableDoubleProperty, value);
         }
 
-        public static readonly DependencyProperty NullableDoubleProperty =
-            DependencyProperty.Register("NullableDouble", typeof(double?), typeof(PropertyBindFakeControl), new PropertyMetadata(null));
-
         public double JustADouble
         {
             get => (double)GetValue(JustADoubleProperty);
             set => SetValue(JustADoubleProperty, value);
         }
-
-        public static readonly DependencyProperty JustADoubleProperty =
-            DependencyProperty.Register("JustADouble", typeof(double), typeof(PropertyBindFakeControl), new PropertyMetadata(0.0));
 
         public string NullHatingString
         {
@@ -79,8 +83,5 @@ namespace ReactiveUI.Tests
                 SetValue(NullHatingStringProperty, value);
             }
         }
-
-        public static readonly DependencyProperty NullHatingStringProperty =
-            DependencyProperty.Register("NullHatingString", typeof(string), typeof(PropertyBindFakeControl), new PropertyMetadata(""));
     }
 }

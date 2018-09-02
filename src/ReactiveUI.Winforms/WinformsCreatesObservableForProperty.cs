@@ -16,12 +16,14 @@ namespace ReactiveUI.Winforms
 {
     public class WinformsCreatesObservableForProperty : ICreatesObservableForProperty
     {
-        private static readonly MemoizingMRUCache<Tuple<Type, string>, EventInfo> eventInfoCache = new MemoizingMRUCache<Tuple<Type, string>, EventInfo>((pair, _) =>
+        private static readonly MemoizingMRUCache<Tuple<Type, string>, EventInfo> eventInfoCache = new MemoizingMRUCache<Tuple<Type, string>, EventInfo>(
+            (pair, _) =>
         {
             return pair.Item1.GetEvents(BindingFlags.FlattenHierarchy | BindingFlags.Instance | BindingFlags.Public)
                 .FirstOrDefault(x => x.Name == pair.Item2 + "Changed");
         }, RxApp.SmallCacheLimit);
 
+        /// <inheritdoc/>
         public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged = false)
         {
             bool supportsTypeBinding = typeof(Component).IsAssignableFrom(type);
@@ -33,10 +35,11 @@ namespace ReactiveUI.Winforms
             lock (eventInfoCache)
             {
                 var ei = eventInfoCache.Get(Tuple.Create(type, propertyName));
-                return (beforeChanged == false && ei != null) ?  8 : 0;
+                return beforeChanged == false && ei != null ? 8 : 0;
             }
         }
 
+        /// <inheritdoc/>
         public IObservable<IObservedChange<object, object>> GetNotificationForProperty(object sender, Expression expression, string propertyName, bool beforeChanged = false)
         {
             var ei = default(EventInfo);

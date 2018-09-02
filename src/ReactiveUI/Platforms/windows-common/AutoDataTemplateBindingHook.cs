@@ -43,6 +43,7 @@ namespace ReactiveUI
 #endif
         });
 
+        /// <inheritdoc/>
         public bool ExecuteHook(object source, object target, Func<IObservedChange<object, object>[]> getCurrentViewModelProperties, Func<IObservedChange<object, object>[]> getCurrentViewProperties, BindingDirection direction)
         {
             var viewProperties = getCurrentViewProperties();

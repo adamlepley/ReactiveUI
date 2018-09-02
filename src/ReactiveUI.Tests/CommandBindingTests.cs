@@ -228,7 +228,7 @@ namespace ReactiveUI.Tests
         public void CommandBindByNameWireup()
         {
             var vm = new CommandBindViewModel();
-            var view = new CommandBindView() { ViewModel = vm };
+            var view = new CommandBindView { ViewModel = vm };
 
             Assert.Null(view.Command1.Command);
 
@@ -246,7 +246,7 @@ namespace ReactiveUI.Tests
         [WpfFact]
         public void CommandBindNestedCommandWireup()
         {
-            var vm = new CommandBindViewModel()
+            var vm = new CommandBindViewModel
             {
                 NestedViewModel = new FakeNestedViewModel()
             };
@@ -262,7 +262,7 @@ namespace ReactiveUI.Tests
         public void CommandBindSetsInitialEnabledState_True()
         {
             var vm = new CommandBindViewModel();
-            var view = new CommandBindView() { ViewModel = vm };
+            var view = new CommandBindView { ViewModel = vm };
 
             var canExecute1 = new BehaviorSubject<bool>(true);
             var cmd1 = ReactiveCommand.Create(() => { }, canExecute1);
@@ -277,7 +277,7 @@ namespace ReactiveUI.Tests
         public void CommandBindSetsDisablesCommandWhenCanExecuteChanged()
         {
             var vm = new CommandBindViewModel();
-            var view = new CommandBindView() { ViewModel = vm };
+            var view = new CommandBindView { ViewModel = vm };
 
             var canExecute1 = new BehaviorSubject<bool>(true);
             var cmd1 = ReactiveCommand.Create(() => { }, canExecute1);
@@ -296,7 +296,7 @@ namespace ReactiveUI.Tests
         public void CommandBindSetsInitialEnabledState_False()
         {
             var vm = new CommandBindViewModel();
-            var view = new CommandBindView() { ViewModel = vm };
+            var view = new CommandBindView { ViewModel = vm };
 
             var canExecute1 = new BehaviorSubject<bool>(false);
             var cmd1 = ReactiveCommand.Create(() => { }, canExecute1);
@@ -311,7 +311,7 @@ namespace ReactiveUI.Tests
         public void CommandBindRaisesCanExecuteChangedOnBind()
         {
             var vm = new CommandBindViewModel();
-            var view = new CommandBindView() { ViewModel = vm };
+            var view = new CommandBindView { ViewModel = vm };
 
             var canExecute1 = new BehaviorSubject<bool>(true);
             var cmd1 = ReactiveCommand.Create(() => { }, canExecute1);
@@ -333,7 +333,7 @@ namespace ReactiveUI.Tests
         public void CommandBindToExplicitEventWireup()
         {
             var vm = new CommandBindViewModel();
-            var view = new CommandBindView() { ViewModel = vm };
+            var view = new CommandBindView { ViewModel = vm };
 
             var invokeCount = 0;
             vm.Command2.Subscribe(_ => invokeCount += 1);
@@ -352,7 +352,7 @@ namespace ReactiveUI.Tests
         public void CommandBindWithParameterExpression()
         {
             var vm = new CommandBindViewModel();
-            var view = new CommandBindView() { ViewModel = vm };
+            var view = new CommandBindView { ViewModel = vm };
 
             var received = 0;
             var cmd = ReactiveCommand.Create<int>(i => { received = i; });
@@ -419,7 +419,7 @@ namespace ReactiveUI.Tests
         public void CommandBindWithParameterObservable()
         {
             var vm = new CommandBindViewModel();
-            var view = new CommandBindView() { ViewModel = vm };
+            var view = new CommandBindView { ViewModel = vm };
 
             var received = 0;
             var cmd = ReactiveCommand.Create<int>(i => { received = i; });

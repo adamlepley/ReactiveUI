@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -17,11 +17,10 @@ namespace ReactiveUI
     /// </summary>
     public class NSRunloopScheduler : IScheduler
     {
-        public DateTimeOffset Now
-        {
-            get { return DateTimeOffset.Now; }
-        }
+        /// <inheritdoc/>
+        public DateTimeOffset Now => DateTimeOffset.Now;
 
+        /// <inheritdoc/>
         public IDisposable Schedule<TState>(TState state, Func<IScheduler, TState, IDisposable> action)
         {
             var innerDisp = new SingleAssignmentDisposable();
@@ -37,6 +36,7 @@ namespace ReactiveUI
             return innerDisp;
         }
 
+        /// <inheritdoc/>
         public IDisposable Schedule<TState>(TState state, DateTimeOffset dueTime, Func<IScheduler, TState, IDisposable> action)
         {
             if (dueTime <= Now)
@@ -47,6 +47,7 @@ namespace ReactiveUI
             return Schedule(state, dueTime - Now, action);
         }
 
+        /// <inheritdoc/>
         public IDisposable Schedule<TState>(TState state, TimeSpan dueTime, Func<IScheduler, TState, IDisposable> action)
         {
             var innerDisp = Disposable.Empty;

@@ -167,7 +167,8 @@ namespace ReactiveUI
         /// <returns>A Disposable that deactivates this registration.</returns>
         public static IDisposable WhenActivated(this IActivatable @this, Action<Action<IDisposable>> block, IViewFor view)
         {
-            return @this.WhenActivated(() =>
+            return @this.WhenActivated(
+                () =>
             {
                 var ret = new List<IDisposable>();
                 block(ret.Add);
@@ -193,7 +194,8 @@ namespace ReactiveUI
         /// <returns>A Disposable that deactivates this registration.</returns>
         public static IDisposable WhenActivated(this IActivatable @this, Action<CompositeDisposable> block, IViewFor view = null)
         {
-            return @this.WhenActivated(() =>
+            return @this.WhenActivated(
+                () =>
             {
                 var d = new CompositeDisposable();
                 block(d);
@@ -253,7 +255,8 @@ namespace ReactiveUI
         }
 
         private static readonly MemoizingMRUCache<Type, IActivationForViewFetcher> activationFetcherCache =
-            new MemoizingMRUCache<Type, IActivationForViewFetcher>((t, _) =>
+            new MemoizingMRUCache<Type, IActivationForViewFetcher>(
+                (t, _) =>
                 Locator.Current
                        .GetServices<IActivationForViewFetcher>()
                        .Aggregate(Tuple.Create(0, default(IActivationForViewFetcher)), (acc, x) =>

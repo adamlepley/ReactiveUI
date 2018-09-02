@@ -66,7 +66,7 @@ namespace ReactiveUI.Tests
             uc.RaiseEvent(loaded);
 
             // IsHitTestVisible still false
-            new bool[0].AssertAreEqual(activated);
+            Array.Empty<bool>().AssertAreEqual(activated);
 
             uc.IsHitTestVisible = true;
 

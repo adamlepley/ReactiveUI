@@ -21,6 +21,7 @@ namespace ReactiveUI
     [Preserve]
     public abstract class ObservableForPropertyBase : ICreatesObservableForProperty
     {
+        /// <inheritdoc/>
         public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged = false)
         {
             if (beforeChanged)
@@ -42,6 +43,7 @@ namespace ReactiveUI
             return match.Affinity;
         }
 
+        /// <inheritdoc/>
         public IObservable<IObservedChange<object, object>> GetNotificationForProperty(object sender, Expression expression, string propertyName, bool beforeChanged = false)
         {
             if (beforeChanged)

@@ -15,6 +15,7 @@ namespace ReactiveUI
     /// </summary>
     public class BundleSuspensionDriver : ISuspensionDriver
     {
+        /// <inheritdoc/>
         public IObservable<object> LoadState()
         {
             try
@@ -36,6 +37,7 @@ namespace ReactiveUI
             }
         }
 
+        /// <inheritdoc/>
         public IObservable<Unit> SaveState(object state)
         {
             try
@@ -52,11 +54,12 @@ namespace ReactiveUI
             }
         }
 
+        /// <inheritdoc/>
         public IObservable<Unit> InvalidateState()
         {
             try
             {
-                AutoSuspendHelper.LatestBundle.PutByteArray("__state", new byte[0]);
+                AutoSuspendHelper.LatestBundle.PutByteArray("__state", Array.Empty<byte>());
                 return Observables.Unit;
             }
             catch (Exception ex)

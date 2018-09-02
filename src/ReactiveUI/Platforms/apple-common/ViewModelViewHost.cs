@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -37,32 +37,32 @@ namespace ReactiveUI
 
         public IViewLocator ViewLocator
         {
-            get { return _viewLocator; }
-            set { this.RaiseAndSetIfChanged(ref _viewLocator, value); }
+            get => _viewLocator;
+            set => this.RaiseAndSetIfChanged(ref _viewLocator, value);
         }
 
         public NSViewController DefaultContent
         {
-            get { return _defaultContent; }
-            set { this.RaiseAndSetIfChanged(ref _defaultContent, value); }
+            get => _defaultContent;
+            set => this.RaiseAndSetIfChanged(ref _defaultContent, value);
         }
 
         public IReactiveObject ViewModel
         {
-            get { return _viewModel; }
-            set { this.RaiseAndSetIfChanged(ref _viewModel, value); }
+            get => _viewModel;
+            set => this.RaiseAndSetIfChanged(ref _viewModel, value);
         }
 
         public IObservable<string> ViewContractObservable
         {
-            get { return _viewContractObservable; }
-            set { this.RaiseAndSetIfChanged(ref _viewContractObservable, value); }
+            get => _viewContractObservable;
+            set => this.RaiseAndSetIfChanged(ref _viewContractObservable, value);
         }
 
         public string ViewContract
         {
-            get { return _viewContract.Value; }
-            set { ViewContractObservable = Observable.Return(value); }
+            get => _viewContract.Value;
+            set => ViewContractObservable = Observable.Return(value);
         }
 
         private void Initialize()
@@ -128,6 +128,7 @@ namespace ReactiveUI
                 .Subscribe(x => Adopt(this, x));
         }
 
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -194,11 +195,13 @@ namespace ReactiveUI
     [Obsolete("Use ViewModelViewHost instead. This class will be removed in a later release.")]
     public class ViewModelViewHostLegacy : ReactiveObject
     {
+#pragma warning disable 1584, 1711, 1572, 1581, 1580
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="ReactiveUI.Cocoa.ViewModelViewHost"/>
         /// will automatically create Auto Layout constraints tying the sub view to the parent view.
         /// </summary>
         /// <value><c>true</c> if add layout contraints to sub view; otherwise, <c>false</c>.</value>
+#pragma warning restore 1584, 1711, 1572, 1581, 1580
         public bool AddAutoLayoutConstraintsToSubView { get; set; }
 
         public ViewModelViewHostLegacy(NSView targetView)
@@ -287,28 +290,28 @@ namespace ReactiveUI
             parentView.AddConstraint(constraint);
         }
 
-        private NSViewController _DefaultContent;
+        private NSViewController _defaultContent;
 
         public NSViewController DefaultContent
         {
-            get { return _DefaultContent; }
-            set { this.RaiseAndSetIfChanged(ref _DefaultContent, value); }
+            get => _defaultContent;
+            set => this.RaiseAndSetIfChanged(ref _defaultContent, value);
         }
 
-        private IReactiveObject _ViewModel;
+        private IReactiveObject _viewModel;
 
         public IReactiveObject ViewModel
         {
-            get { return _ViewModel; }
-            set { this.RaiseAndSetIfChanged(ref _ViewModel, value); }
+            get => _viewModel;
+            set => this.RaiseAndSetIfChanged(ref _viewModel, value);
         }
 
-        private IObservable<string> _ViewContractObservable;
+        private IObservable<string> _viewContractObservable;
 
         public IObservable<string> ViewContractObservable
         {
-            get { return _ViewContractObservable; }
-            set { this.RaiseAndSetIfChanged(ref _ViewContractObservable, value); }
+            get => _viewContractObservable;
+            set => this.RaiseAndSetIfChanged(ref _viewContractObservable, value);
         }
 
         public IViewLocator ViewLocator { get; set; }

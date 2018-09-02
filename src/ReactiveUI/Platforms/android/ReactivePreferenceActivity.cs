@@ -20,29 +20,32 @@ namespace ReactiveUI
     /// This is an Activity that is both an Activity and has ReactiveObject powers
     /// (i.e. you can call RaiseAndSetIfChanged).
     /// </summary>
-    /// <typeparam name="TViewModel"></typeparam>
+    /// <typeparam name="TViewModel">The view model type.</typeparam>
     public class ReactivePreferenceActivity<TViewModel> : ReactivePreferenceActivity, IViewFor<TViewModel>, ICanActivate
         where TViewModel : class
     {
-        private TViewModel _ViewModel;
+        private TViewModel _viewModel;
 
+        /// <inheritdoc/>
         public TViewModel ViewModel
         {
-            get { return _ViewModel; }
-            set { this.RaiseAndSetIfChanged(ref _ViewModel, value); }
+            get { return _viewModel; }
+            set { this.RaiseAndSetIfChanged(ref _viewModel, value); }
         }
 
+        /// <inheritdoc/>
         object IViewFor.ViewModel
         {
-            get { return _ViewModel; }
-            set { _ViewModel = (TViewModel)value; }
+            get { return _viewModel; }
+            set { _viewModel = (TViewModel)value; }
         }
 
         protected ReactivePreferenceActivity()
         {
         }
 
-        protected ReactivePreferenceActivity(IntPtr handle, JniHandleOwnership ownership) : base(handle, ownership)
+        protected ReactivePreferenceActivity(IntPtr handle, JniHandleOwnership ownership)
+            : base(handle, ownership)
         {
         }
     }
@@ -53,23 +56,27 @@ namespace ReactiveUI
     /// </summary>
     public class ReactivePreferenceActivity : PreferenceActivity, IReactiveObject, IReactiveNotifyPropertyChanged<ReactivePreferenceActivity>, IHandleObservableErrors
     {
+        /// <inheritdoc/>
         public event PropertyChangingEventHandler PropertyChanging
         {
             add { PropertyChangingEventManager.AddHandler(this, value); }
             remove { PropertyChangingEventManager.RemoveHandler(this, value); }
         }
 
+        /// <inheritdoc/>
         void IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args)
         {
             PropertyChangingEventManager.DeliverEvent(this, args);
         }
 
+        /// <inheritdoc/>
         public event PropertyChangedEventHandler PropertyChanged
         {
             add { PropertyChangedEventManager.AddHandler(this, value); }
             remove { PropertyChangedEventManager.RemoveHandler(this, value); }
         }
 
+        /// <inheritdoc/>
         void IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args)
         {
             PropertyChangedEventManager.DeliverEvent(this, args);
@@ -96,7 +103,8 @@ namespace ReactiveUI
         {
         }
 
-        protected ReactivePreferenceActivity(IntPtr handle, JniHandleOwnership ownership) : base(handle, ownership)
+        protected ReactivePreferenceActivity(IntPtr handle, JniHandleOwnership ownership)
+            : base(handle, ownership)
         {
         }
 
@@ -112,6 +120,7 @@ namespace ReactiveUI
             return IReactiveObjectExtensions.SuppressChangeNotifications(this);
         }
 
+        /// <inheritdoc/>
         public IObservable<Exception> ThrownExceptions
         {
             get { return this.GetThrownExceptionsObservable(); }
@@ -131,12 +140,14 @@ namespace ReactiveUI
             get { return _deactivated.AsObservable(); }
         }
 
+        /// <inheritdoc/>
         protected override void OnPause()
         {
             base.OnPause();
             _deactivated.OnNext(Unit.Default);
         }
 
+        /// <inheritdoc/>
         protected override void OnResume()
         {
             base.OnResume();
@@ -150,6 +161,7 @@ namespace ReactiveUI
             get { return _activityResult.AsObservable(); }
         }
 
+        /// <inheritdoc/>
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
             base.OnActivityResult(requestCode, resultCode, data);

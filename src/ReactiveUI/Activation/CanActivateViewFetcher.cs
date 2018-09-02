@@ -23,11 +23,8 @@ namespace ReactiveUI
         /// A positive integer if <see cref="GetActivationForView(IActivatable)"/> is supported,
         /// zero otherwise.
         /// </returns>
-        public int GetAffinityForView(Type view)
-        {
-            return (typeof(ICanActivate).GetTypeInfo().IsAssignableFrom(view.GetTypeInfo())) ?
+        public int GetAffinityForView(Type view) => typeof(ICanActivate).GetTypeInfo().IsAssignableFrom(view.GetTypeInfo()) ?
                 10 : 0;
-        }
 
         /// <summary>
         /// Get an observable defining whether the view is active.

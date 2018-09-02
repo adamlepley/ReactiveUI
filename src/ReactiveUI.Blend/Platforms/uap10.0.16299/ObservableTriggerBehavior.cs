@@ -95,27 +95,29 @@ namespace ReactiveUI.Blend
 
         private static void OnObservableChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            ObservableTriggerBehavior This = (ObservableTriggerBehavior)sender;
+            ObservableTriggerBehavior @this = (ObservableTriggerBehavior)sender;
 
-            This._watcher.Disposable = ((IObservable<object>)e.NewValue).ObserveOn(RxApp.MainThreadScheduler).Subscribe(
-                x => Interaction.ExecuteActions(This._resolvedSource, This.Actions, x),
+            @this._watcher.Disposable = ((IObservable<object>)e.NewValue).ObserveOn(RxApp.MainThreadScheduler).Subscribe(
+                x => Interaction.ExecuteActions(@this._resolvedSource, @this.Actions, x),
                 ex =>
                 {
-                    if (!This.AutoResubscribeOnError)
+                    if (!@this.AutoResubscribeOnError)
                     {
                         return;
                     }
 
-                    OnObservableChanged(This, e);
+                    OnObservableChanged(@this, e);
                 });
         }
 
+        /// <inheritdoc/>
         protected override void OnAttached()
         {
             base.OnAttached();
             SetResolvedSource(ComputeResolvedSource());
         }
 
+        /// <inheritdoc/>
         protected override void OnDetaching()
         {
             SetResolvedSource(null);

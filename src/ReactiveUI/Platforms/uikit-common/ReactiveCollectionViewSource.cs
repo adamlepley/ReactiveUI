@@ -13,6 +13,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Foundation;
+using ReactiveUI.Legacy;
 using Splat;
 using UIKit;
 using NSAction = System.Action;
@@ -21,10 +22,13 @@ namespace ReactiveUI
 {
     public class CollectionViewSectionInformation<TSource> : ISectionInformation<TSource, UICollectionView, UICollectionViewCell>
     {
+        /// <inheritdoc/>
         public INotifyCollectionChanged Collection { get; protected set; }
 
+        /// <inheritdoc/>
         public Action<UICollectionViewCell> InitializeCellAction { get; protected set; }
 
+        /// <inheritdoc/>
         public Func<object, NSString> CellKeySelector { get; protected set; }
     }
 
@@ -60,10 +64,7 @@ namespace ReactiveUI
             _isReloadingData = new BehaviorSubject<bool>(false);
         }
 
-        public IObservable<bool> IsReloadingData
-        {
-            get { return _isReloadingData.AsObservable(); }
-        }
+        public IObservable<bool> IsReloadingData => _isReloadingData.AsObservable();
 
         public void ReloadData()
         {
@@ -163,7 +164,7 @@ namespace ReactiveUI
     /// on the contents of the list. The collection changes are buffered and
     /// View items are animated in and out as items are added.
     /// </summary>
-    /// <typeparam name="TSource"></typeparam>
+    /// <typeparam name="TSource">The source type.</typeparam>
     public class ReactiveCollectionViewSource<TSource> : UICollectionViewSource, IEnableLogger, IDisposable, IReactiveNotifyPropertyChanged<ReactiveCollectionViewSource<TSource>>, IHandleObservableErrors, IReactiveObject
     {
         private readonly CommonReactiveSource<TSource, UICollectionView, UICollectionViewCell, CollectionViewSectionInformation<TSource>> _commonSource;
@@ -193,14 +194,13 @@ namespace ReactiveUI
         /// Gets or sets the data that should be displayed by this
         /// <see cref="ReactiveCollectionViewSource"/>.  You should
         /// probably bind your view model to this property.
-        /// If the list implements <see cref="IReactiveNotifyCollectionChanged"/>,
+        /// If the list implements <see cref="IReactiveNotifyCollectionChanged{T}"/>,
         /// then the source will react to changes to the contents of the list as well.
         /// </summary>
         /// <value>The data.</value>
         public IReadOnlyList<CollectionViewSectionInformation<TSource>> Data
         {
-            get { return _commonSource.SectionInfo; }
-
+            get => _commonSource.SectionInfo;
             set
             {
                 if (_commonSource.SectionInfo == value)
@@ -208,35 +208,36 @@ namespace ReactiveUI
                     return;
                 }
 
-                this.raisePropertyChanging(nameof(Data));
+                this.RaisingPropertyChanging(nameof(Data));
                 _commonSource.SectionInfo = value;
-                this.raisePropertyChanged(nameof(Data));
+                this.RaisingPropertyChanged(nameof(Data));
             }
         }
 
         /// <summary>
         /// Gets an IObservable that is a hook to <see cref="ItemSelected"/> calls.
         /// </summary>
-        public IObservable<object> ElementSelected
-        {
-            get { return _elementSelected; }
-        }
+        public IObservable<object> ElementSelected => _elementSelected;
 
+        /// <inheritdoc/>
         public override UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath)
         {
             return _commonSource.GetCell(indexPath);
         }
 
+        /// <inheritdoc/>
         public override nint NumberOfSections(UICollectionView collectionView)
         {
             return _commonSource.NumberOfSections();
         }
 
+        /// <inheritdoc/>
         public override nint GetItemsCount(UICollectionView collectionView, nint section)
         {
             return _commonSource.RowsInSection((int)section);
         }
 
+        /// <inheritdoc/>
         public override void ItemSelected(UICollectionView collectionView, NSIndexPath indexPath)
         {
             _elementSelected.OnNext(_commonSource.ItemAt(indexPath));
@@ -247,6 +248,7 @@ namespace ReactiveUI
             return _commonSource.ItemAt(indexPath);
         }
 
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -257,23 +259,27 @@ namespace ReactiveUI
             base.Dispose(disposing);
         }
 
+        /// <inheritdoc/>
         public event PropertyChangingEventHandler PropertyChanging
         {
-            add { PropertyChangingEventManager.AddHandler(this, value); }
-            remove { PropertyChangingEventManager.RemoveHandler(this, value); }
+            add => PropertyChangingEventManager.AddHandler(this, value);
+            remove => PropertyChangingEventManager.RemoveHandler(this, value);
         }
 
+        /// <inheritdoc/>
         void IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args)
         {
             PropertyChangingEventManager.DeliverEvent(this, args);
         }
 
+        /// <inheritdoc/>
         public event PropertyChangedEventHandler PropertyChanged
         {
-            add { PropertyChangedEventManager.AddHandler(this, value); }
-            remove { PropertyChangedEventManager.RemoveHandler(this, value); }
+            add => PropertyChangedEventManager.AddHandler(this, value);
+            remove => PropertyChangedEventManager.RemoveHandler(this, value);
         }
 
+        /// <inheritdoc/>
         void IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args)
         {
             PropertyChangedEventManager.DeliverEvent(this, args);
@@ -283,23 +289,15 @@ namespace ReactiveUI
         /// Represents an Observable that fires *before* a property is about to
         /// be changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveCollectionViewSource<TSource>>> Changing
-        {
-            get { return this.GetChangingObservable(); }
-        }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveCollectionViewSource<TSource>>> Changing => this.GetChangingObservable();
 
         /// <summary>
         /// Represents an Observable that fires *after* a property has changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveCollectionViewSource<TSource>>> Changed
-        {
-            get { return this.GetChangedObservable(); }
-        }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveCollectionViewSource<TSource>>> Changed => this.GetChangedObservable();
 
-        public IObservable<Exception> ThrownExceptions
-        {
-            get { return this.GetThrownExceptionsObservable(); }
-        }
+        /// <inheritdoc/>
+        public IObservable<Exception> ThrownExceptions => this.GetThrownExceptionsObservable();
 
         private void SetupRxObj()
         {
@@ -336,7 +334,7 @@ namespace ReactiveUI
         /// <param name="collectionView">Collection view.</param>
         /// <param name="initSource">Optionally initializes some property of
         /// the <see cref="ReactiveCollectionViewSource"/>.</param>
-        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TSource">Type of the view source.</typeparam>
         /// <typeparam name="TCell">Type of the <see cref="UICollectionViewCell"/>.</typeparam>
         public static IDisposable BindTo<TSource, TCell>(
             this IObservable<IReadOnlyList<CollectionViewSectionInformation<TSource, TCell>>> sectionsObservable,
@@ -366,7 +364,7 @@ namespace ReactiveUI
         /// <param name="initializeCellAction">Initialize cell action.</param>
         /// <param name="initSource">Optionally initializes some property of
         /// the <see cref="ReactiveCollectionViewSource"/>.</param>
-        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TSource">Type of the source.</typeparam>
         /// <typeparam name="TCell">Type of the <see cref="UICollectionViewCell"/>.</typeparam>
         public static IDisposable BindTo<TSource, TCell>(
             this IObservable<INotifyCollectionChanged> sourceObservable,
@@ -400,7 +398,7 @@ namespace ReactiveUI
         /// <param name="initializeCellAction">Initialize cell action.</param>
         /// <param name="initSource">Optionally initializes some property of
         /// the <see cref="ReactiveCollectionViewSource"/>.</param>
-        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TSource">Type of the source.</typeparam>
         /// <typeparam name="TCell">Type of the <see cref="UICollectionViewCell"/>.</typeparam>
         public static IDisposable BindTo<TSource, TCell>(
             this IObservable<INotifyCollectionChanged> sourceObservable,

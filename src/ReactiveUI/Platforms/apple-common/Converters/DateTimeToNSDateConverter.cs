@@ -12,12 +12,14 @@ namespace ReactiveUI
     {
         internal static Lazy<DateTimeNSDateConverter> Instance = new Lazy<DateTimeNSDateConverter>();
 
+        /// <inheritdoc/>
         public int GetAffinityForObjects(Type fromType, Type toType)
         {
             return (fromType == typeof(DateTime) && toType == typeof(NSDate)) ||
                 (toType == typeof(DateTime) && fromType == typeof(NSDate)) ? 4 : -1;
         }
 
+        /// <inheritdoc/>
         public bool TryConvert(object val, Type toType, object conversionHint, out object result)
         {
             result = null;

@@ -23,23 +23,27 @@ namespace ReactiveUI
     IReactiveNotifyPropertyChanged<ReactiveSplitViewController>, IHandleObservableErrors, IReactiveObject, ICanActivate
     {
 #if UIKIT
-        protected ReactiveSplitViewController(string nibName, NSBundle bundle) : base(nibName, bundle)
+        protected ReactiveSplitViewController(string nibName, NSBundle bundle)
+            : base(nibName, bundle)
         {
             SetupRxObj();
         }
 
 #endif
-        protected ReactiveSplitViewController(IntPtr handle) : base(handle)
+        protected ReactiveSplitViewController(IntPtr handle)
+            : base(handle)
         {
             SetupRxObj();
         }
 
-        protected ReactiveSplitViewController(NSObjectFlag t) : base(t)
+        protected ReactiveSplitViewController(NSObjectFlag t)
+            : base(t)
         {
             SetupRxObj();
         }
 
-        protected ReactiveSplitViewController(NSCoder coder) : base(coder)
+        protected ReactiveSplitViewController(NSCoder coder)
+            : base(coder)
         {
             SetupRxObj();
         }
@@ -49,23 +53,27 @@ namespace ReactiveUI
             SetupRxObj();
         }
 
+        /// <inheritdoc/>
         public event PropertyChangingEventHandler PropertyChanging
         {
-            add { PropertyChangingEventManager.AddHandler(this, value); }
-            remove { PropertyChangingEventManager.RemoveHandler(this, value); }
+            add => PropertyChangingEventManager.AddHandler(this, value);
+            remove => PropertyChangingEventManager.RemoveHandler(this, value);
         }
 
+        /// <inheritdoc/>
         void IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args)
         {
             PropertyChangingEventManager.DeliverEvent(this, args);
         }
 
+        /// <inheritdoc/>
         public event PropertyChangedEventHandler PropertyChanged
         {
-            add { PropertyChangedEventManager.AddHandler(this, value); }
-            remove { PropertyChangedEventManager.RemoveHandler(this, value); }
+            add => PropertyChangedEventManager.AddHandler(this, value);
+            remove => PropertyChangedEventManager.RemoveHandler(this, value);
         }
 
+        /// <inheritdoc/>
         void IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args)
         {
             PropertyChangedEventManager.DeliverEvent(this, args);
@@ -75,23 +83,15 @@ namespace ReactiveUI
         /// Represents an Observable that fires *before* a property is about to
         /// be changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveSplitViewController>> Changing
-        {
-            get { return this.GetChangingObservable(); }
-        }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveSplitViewController>> Changing => this.GetChangingObservable();
 
         /// <summary>
         /// Represents an Observable that fires *after* a property has changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveSplitViewController>> Changed
-        {
-            get { return this.GetChangedObservable(); }
-        }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveSplitViewController>> Changed => this.GetChangedObservable();
 
-        public IObservable<Exception> ThrownExceptions
-        {
-            get { return this.GetThrownExceptionsObservable(); }
-        }
+        /// <inheritdoc/>
+        public IObservable<Exception> ThrownExceptions => this.GetThrownExceptionsObservable();
 
         private void SetupRxObj()
         {
@@ -111,19 +111,16 @@ namespace ReactiveUI
 
         private Subject<Unit> _activated = new Subject<Unit>();
 
-        public IObservable<Unit> Activated
-        {
-            get { return _activated.AsObservable(); }
-        }
+        /// <inheritdoc/>
+        public IObservable<Unit> Activated => _activated.AsObservable();
 
         private Subject<Unit> _deactivated = new Subject<Unit>();
 
-        public IObservable<Unit> Deactivated
-        {
-            get { return _deactivated.AsObservable(); }
-        }
+        /// <inheritdoc/>
+        public IObservable<Unit> Deactivated => _deactivated.AsObservable();
 
 #if UIKIT
+        /// <inheritdoc/>
         public override void ViewWillAppear(bool animated)
         {
             base.ViewWillAppear(animated);
@@ -131,6 +128,7 @@ namespace ReactiveUI
             this.ActivateSubviews(true);
         }
 
+        /// <inheritdoc/>
         public override void ViewDidDisappear(bool animated)
         {
             base.ViewDidDisappear(animated);
@@ -138,6 +136,7 @@ namespace ReactiveUI
             this.ActivateSubviews(false);
         }
 #else
+        /// <inheritdoc/>
         public override void ViewWillAppear()
         {
             base.ViewWillAppear();
@@ -145,6 +144,7 @@ namespace ReactiveUI
             this.ActivateSubviews(true);
         }
 
+        /// <inheritdoc/>
         public override void ViewDidDisappear()
         {
             base.ViewDidDisappear();
@@ -158,20 +158,24 @@ namespace ReactiveUI
         where TViewModel : class
     {
 #if UIKIT
-        protected ReactiveSplitViewController(string nibName, NSBundle bundle) : base(nibName, bundle)
+        protected ReactiveSplitViewController(string nibName, NSBundle bundle)
+            : base(nibName, bundle)
         {
         }
 
 #endif
-        protected ReactiveSplitViewController(IntPtr handle) : base(handle)
+        protected ReactiveSplitViewController(IntPtr handle)
+            : base(handle)
         {
         }
 
-        protected ReactiveSplitViewController(NSObjectFlag t) : base(t)
+        protected ReactiveSplitViewController(NSObjectFlag t)
+            : base(t)
         {
         }
 
-        protected ReactiveSplitViewController(NSCoder coder) : base(coder)
+        protected ReactiveSplitViewController(NSCoder coder)
+            : base(coder)
         {
         }
 
@@ -181,16 +185,18 @@ namespace ReactiveUI
 
         private TViewModel _viewModel;
 
+        /// <inheritdoc/>
         public TViewModel ViewModel
         {
-            get { return _viewModel; }
-            set { this.RaiseAndSetIfChanged(ref _viewModel, value); }
+            get => _viewModel;
+            set => this.RaiseAndSetIfChanged(ref _viewModel, value);
         }
 
+        /// <inheritdoc/>
         object IViewFor.ViewModel
         {
-            get { return ViewModel; }
-            set { ViewModel = (TViewModel)value; }
+            get => ViewModel;
+            set => ViewModel = (TViewModel)value;
         }
     }
 }

@@ -53,12 +53,14 @@ namespace ReactiveUI
                 typeof(ReactiveUserControl<TViewModel>),
                 new PropertyMetadata(null));
 
+        /// <inheritdoc/>
         public TViewModel ViewModel
         {
             get => (TViewModel)GetValue(ViewModelProperty);
             set => SetValue(ViewModelProperty, value);
         }
 
+        /// <inheritdoc/>
         object IViewFor.ViewModel
         {
             get => ViewModel;

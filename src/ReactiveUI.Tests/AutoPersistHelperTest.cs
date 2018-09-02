@@ -36,7 +36,7 @@ namespace ReactiveUI.Tests
         [Fact]
         public void AutoPersistHelperShouldntTriggerOnNonPersistableProperties()
         {
-            (new TestScheduler()).With(sched =>
+            new TestScheduler().With(sched =>
             {
                 var fixture = new TestFixture();
                 var manualSave = new Subject<Unit>();
@@ -46,7 +46,9 @@ namespace ReactiveUI.Tests
                 {
                     timesSaved++;
                     return Observables.Unit;
-                }, manualSave, TimeSpan.FromMilliseconds(100));
+                },
+                manualSave,
+                TimeSpan.FromMilliseconds(100));
 
                 // No changes = no saving
                 sched.AdvanceByMs(2 * 100);
@@ -62,7 +64,7 @@ namespace ReactiveUI.Tests
         [Fact]
         public void AutoPersistHelperSavesOnInterval()
         {
-            (new TestScheduler()).With(sched =>
+            new TestScheduler().With(sched =>
             {
                 var fixture = new TestFixture();
                 var manualSave = new Subject<Unit>();
@@ -72,7 +74,9 @@ namespace ReactiveUI.Tests
                 {
                     timesSaved++;
                     return Observables.Unit;
-                }, manualSave, TimeSpan.FromMilliseconds(100));
+                },
+                manualSave,
+                TimeSpan.FromMilliseconds(100));
 
                 // No changes = no saving
                 sched.AdvanceByMs(2 * 100);
@@ -100,7 +104,7 @@ namespace ReactiveUI.Tests
         [Fact]
         public void AutoPersistHelperDisconnects()
         {
-            (new TestScheduler()).With(sched =>
+            new TestScheduler().With(sched =>
             {
                 var fixture = new TestFixture();
                 var manualSave = new Subject<Unit>();
@@ -110,7 +114,9 @@ namespace ReactiveUI.Tests
                 {
                     timesSaved++;
                     return Observables.Unit;
-                }, manualSave, TimeSpan.FromMilliseconds(100));
+                },
+                manualSave,
+                TimeSpan.FromMilliseconds(100));
 
                 // No changes = no saving
                 sched.AdvanceByMs(2 * 100);
@@ -141,7 +147,7 @@ namespace ReactiveUI.Tests
         [Fact]
         public void AutoPersistCollectionSmokeTest()
         {
-            (new TestScheduler()).With(sched =>
+            new TestScheduler().With(sched =>
             {
                 var manualSave = new Subject<Unit>();
 
@@ -153,7 +159,9 @@ namespace ReactiveUI.Tests
                 {
                     timesSaved++;
                     return Observables.Unit;
-                }, manualSave, TimeSpan.FromMilliseconds(100));
+                },
+                manualSave,
+                TimeSpan.FromMilliseconds(100));
 
                 sched.AdvanceByMs(2 * 100);
                 Assert.Equal(0, timesSaved);
@@ -199,7 +207,7 @@ namespace ReactiveUI.Tests
         [Fact]
         public void AutoPersistCollectionDisconnectsOnDispose()
         {
-            (new TestScheduler()).With(sched =>
+            new TestScheduler().With(sched =>
             {
                 var manualSave = new Subject<Unit>();
 
@@ -211,7 +219,9 @@ namespace ReactiveUI.Tests
                 {
                     timesSaved++;
                     return Observables.Unit;
-                }, manualSave, TimeSpan.FromMilliseconds(100));
+                },
+                manualSave,
+                TimeSpan.FromMilliseconds(100));
 
                 sched.AdvanceByMs(2 * 100);
                 Assert.Equal(0, timesSaved);

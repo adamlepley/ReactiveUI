@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -23,9 +23,9 @@ namespace ReactiveUI
         private readonly Subject<Unit> _onPause = new Subject<Unit>();
         private readonly Subject<Bundle> _onSaveInstanceState = new Subject<Bundle>();
 
-        public static Bundle LatestBundle { get; set; }
-
         public static readonly Subject<Unit> untimelyDemise = new Subject<Unit>();
+
+        public static Bundle LatestBundle { get; set; }
 
         static AutoSuspendHelper()
         {
@@ -50,21 +50,21 @@ namespace ReactiveUI
 
         private class ObservableLifecycle : Java.Lang.Object, Application.IActivityLifecycleCallbacks
         {
-            private readonly AutoSuspendHelper _This;
+            private readonly AutoSuspendHelper _this;
 
             public ObservableLifecycle(AutoSuspendHelper @this)
             {
-                _This = @this;
+                _this = @this;
             }
 
             public void OnActivityCreated(Activity activity, Bundle savedInstanceState)
             {
-                _This._onCreate.OnNext(savedInstanceState);
+                _this._onCreate.OnNext(savedInstanceState);
             }
 
             public void OnActivityResumed(Activity activity)
             {
-                _This._onRestart.OnNext(Unit.Default);
+                _this._onRestart.OnNext(Unit.Default);
             }
 
             public void OnActivitySaveInstanceState(Activity activity, Bundle outState)
@@ -72,12 +72,12 @@ namespace ReactiveUI
                 // NB: This is so that we always have a bundle on OnCreate, so that
                 // we can tell the difference between created from scratch and resume.
                 outState.PutString("___dummy_value_please_create_a_bundle", "VeryYes");
-                _This._onSaveInstanceState.OnNext(outState);
+                _this._onSaveInstanceState.OnNext(outState);
             }
 
             public void OnActivityPaused(Activity activity)
             {
-                _This._onPause.OnNext(Unit.Default);
+                _this._onPause.OnNext(Unit.Default);
             }
 
             public void OnActivityDestroyed(Activity activity)

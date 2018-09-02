@@ -92,7 +92,7 @@ namespace ReactiveUI.Tests.Winforms
         public void CanBindViewModelToWinformControls()
         {
             var vm = new FakeWinformViewModel();
-            var view = new FakeWinformsView() { ViewModel = vm };
+            var view = new FakeWinformsView { ViewModel = vm };
 
             vm.SomeText = "Foo";
             Assert.NotEqual(vm.SomeText, view.Property3.Text);
@@ -114,7 +114,7 @@ namespace ReactiveUI.Tests.Winforms
         public void SmokeTestWinformControls()
         {
             var vm = new FakeWinformViewModel();
-            var view = new FakeWinformsView() { ViewModel = vm };
+            var view = new FakeWinformsView { ViewModel = vm };
 
             var disp = new CompositeDisposable(new[]
             {

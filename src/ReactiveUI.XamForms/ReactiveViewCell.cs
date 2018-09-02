@@ -18,18 +18,21 @@ namespace ReactiveUI.XamForms
             BindingMode.OneWay,
             propertyChanged: OnViewModelChanged);
 
+        /// <inheritdoc/>
         public TViewModel ViewModel
         {
             get => (TViewModel)GetValue(ViewModelProperty);
             set => SetValue(ViewModelProperty, value);
         }
 
+        /// <inheritdoc/>
         object IViewFor.ViewModel
         {
             get => ViewModel;
             set => ViewModel = (TViewModel)value;
         }
 
+        /// <inheritdoc/>
         protected override void OnBindingContextChanged()
         {
             base.OnBindingContextChanged();

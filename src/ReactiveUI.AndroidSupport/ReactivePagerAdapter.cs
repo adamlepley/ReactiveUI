@@ -31,9 +31,10 @@ namespace ReactiveUI.AndroidSupport
         private readonly Action<TViewModel, View> _viewInitializer;
         private IDisposable _inner;
 
-        public ReactivePagerAdapter(IObservable<IChangeSet<TViewModel>> changeSet,
-                                    Func<TViewModel, ViewGroup, View> viewCreator,
-                                    Action<TViewModel, View> viewInitializer = null)
+        public ReactivePagerAdapter(
+            IObservable<IChangeSet<TViewModel>> changeSet,
+            Func<TViewModel, ViewGroup, View> viewCreator,
+            Action<TViewModel, View> viewInitializer = null)
         {
             _list = new SourceList<TViewModel>(changeSet);
             _viewCreator = viewCreator;
@@ -42,11 +43,13 @@ namespace ReactiveUI.AndroidSupport
             _inner = _list.Connect().Subscribe(_ => NotifyDataSetChanged());
         }
 
+        /// <inheritdoc/>
         public override bool IsViewFromObject(View view, Object @object)
         {
-            return ((View)@object) == view;
+            return (View)@object == view;
         }
 
+        /// <inheritdoc/>
         public override Object InstantiateItem(ViewGroup container, int position)
         {
             var data = _list.Items.ElementAt(position);
@@ -69,14 +72,17 @@ namespace ReactiveUI.AndroidSupport
             return theView;
         }
 
+        /// <inheritdoc/>
         public override void DestroyItem(ViewGroup container, int position, Object @object)
         {
             var view = (View)@object;
             container.RemoveView(view);
         }
 
+        /// <inheritdoc/>
         public override int Count => _list.Count;
 
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -88,9 +94,10 @@ namespace ReactiveUI.AndroidSupport
         where TViewModel : class
         where TCollection : INotifyCollectionChanged, IEnumerable<TViewModel>
     {
-        public ReactivePagerAdapter(TCollection collection,
-                                    Func<TViewModel, ViewGroup, View> viewCreator,
-                                    Action<TViewModel, View> viewInitializer = null)
+        public ReactivePagerAdapter(
+            TCollection collection,
+            Func<TViewModel, ViewGroup, View> viewCreator,
+            Action<TViewModel, View> viewInitializer = null)
             : base(collection.ToObservableChangeSet<TCollection, TViewModel>(), viewCreator, viewInitializer)
         {
         }

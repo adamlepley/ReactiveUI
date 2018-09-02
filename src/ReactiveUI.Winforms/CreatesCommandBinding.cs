@@ -22,12 +22,13 @@ namespace ReactiveUI.Winforms
     public class CreatesWinformsCommandBinding : ICreatesCommandBinding
     {
         // NB: These are in priority order
-        private static readonly List<Tuple<string, Type>> defaultEventsToBind = new List<Tuple<string, Type>>()
+        private static readonly List<Tuple<string, Type>> defaultEventsToBind = new List<Tuple<string, Type>>
         {
             Tuple.Create("Click", typeof(EventArgs)),
             Tuple.Create("MouseUp", typeof(System.Windows.Forms.MouseEventArgs)),
         };
 
+        /// <inheritdoc/>
         public int GetAffinityForObject(Type type, bool hasEventTarget)
         {
             bool isWinformControl = typeof(Control).IsAssignableFrom(type);
@@ -49,6 +50,7 @@ namespace ReactiveUI.Winforms
             }) ? 4 : 0;
         }
 
+        /// <inheritdoc/>
         public IDisposable BindCommandToObject(ICommand command, object target, IObservable<object> commandParameter)
         {
             const BindingFlags bf = BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy;
@@ -69,6 +71,7 @@ namespace ReactiveUI.Winforms
             return (IDisposable)mi.Invoke(this, new[] { command, target, commandParameter, eventInfo.EventInfo.Name });
         }
 
+        /// <inheritdoc/>
         public IDisposable BindCommandToObject<TEventArgs>(ICommand command, object target, IObservable<object> commandParameter, string eventName)
         {
             var ret = new CompositeDisposable();

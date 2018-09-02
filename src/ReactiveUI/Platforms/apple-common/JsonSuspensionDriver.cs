@@ -13,6 +13,7 @@ namespace ReactiveUI
 {
     public class AppSupportJsonSuspensionDriver : ISuspensionDriver
     {
+        /// <inheritdoc/>
         public IObservable<object> LoadState()
         {
             try
@@ -34,6 +35,7 @@ namespace ReactiveUI
             }
         }
 
+        /// <inheritdoc/>
         public IObservable<Unit> SaveState(object state)
         {
             try
@@ -54,6 +56,7 @@ namespace ReactiveUI
             }
         }
 
+        /// <inheritdoc/>
         public IObservable<Unit> InvalidateState()
         {
             try

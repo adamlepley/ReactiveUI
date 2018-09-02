@@ -72,8 +72,8 @@ namespace ReactiveUI.Testing
         /// this to initialize objects that store the default scheduler (most
         /// RxXaml objects).
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="TRet"></typeparam>
+        /// <typeparam name="T">The scheduler type.</typeparam>
+        /// <typeparam name="TRet">The return type.</typeparam>
         /// <param name="sched">The scheduler to use.</param>
         /// <param name="block">The function to execute.</param>
         /// <returns>The return value of the function.</returns>
@@ -95,8 +95,8 @@ namespace ReactiveUI.Testing
         /// this to initialize objects that store the default scheduler (most
         /// RxXaml objects).
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="TRet"></typeparam>
+        /// <typeparam name="T">The type.</typeparam>
+        /// <typeparam name="TRet">The return type.</typeparam>
         /// <param name="sched">The scheduler to use.</param>
         /// <param name="block">The function to execute.</param>
         /// <returns>The return value of the function.</returns>
@@ -106,7 +106,7 @@ namespace ReactiveUI.Testing
             TRet ret;
             using (WithScheduler(sched))
             {
-                ret = await block(sched);
+                ret = await block(sched).ConfigureAwait(false);
             }
 
             return ret;
@@ -116,7 +116,7 @@ namespace ReactiveUI.Testing
         /// With is an extension method that uses the given scheduler as the
         /// default Deferred and Taskpool schedulers for the given Action.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">The type.</typeparam>
         /// <param name="sched">The scheduler to use.</param>
         /// <param name="block">The action to execute.</param>
         public static void With<T>(this T sched, Action<T> block)
@@ -133,16 +133,16 @@ namespace ReactiveUI.Testing
         /// With is an extension method that uses the given scheduler as the
         /// default Deferred and Taskpool schedulers for the given Action.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">The type.</typeparam>
         /// <param name="sched">The scheduler to use.</param>
         /// <param name="block">The action to execute.</param>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public static Task WithAsync<T>(this T sched, Func<T, Task> block)
             where T : IScheduler
         {
             return sched.WithAsync(async x =>
             {
-                await block(x);
+                await block(x).ConfigureAwait(false);
                 return 0;
             });
         }
@@ -150,7 +150,7 @@ namespace ReactiveUI.Testing
         /// <summary>
         /// Override the default Message Bus during the specified block.
         /// </summary>
-        /// <typeparam name="TRet"></typeparam>
+        /// <typeparam name="TRet">The return type.</typeparam>
         /// <param name="messageBus">The message bus to use for the block.</param>
         /// <param name="block">The function to execute.</param>
         /// <returns>The return value of the function.</returns>
@@ -204,7 +204,7 @@ namespace ReactiveUI.Testing
         /// OnNextAt is a method to help create simulated input Observables in
         /// conjunction with CreateHotObservable or CreateColdObservable.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">The type.</typeparam>
         /// <param name="sched">The scheduler to fire from.</param>
         /// <param name="milliseconds">The time offset to fire the notification
         /// on the recorded notification.</param>
@@ -222,7 +222,7 @@ namespace ReactiveUI.Testing
         /// OnErrorAt is a method to help create simulated input Observables in
         /// conjunction with CreateHotObservable or CreateColdObservable.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">The type.</typeparam>
         /// <param name="sched">The scheduler to fire from.</param>
         /// <param name="milliseconds">The time offset to fire the notification
         /// on the recorded notification.</param>
@@ -241,7 +241,7 @@ namespace ReactiveUI.Testing
         /// OnCompletedAt is a method to help create simulated input Observables in
         /// conjunction with CreateHotObservable or CreateColdObservable.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">The type.</typeparam>
         /// <param name="sched">The scheduler to fire from.</param>
         /// <param name="milliseconds">The time offset to fire the notification
         /// on the recorded notification.</param>

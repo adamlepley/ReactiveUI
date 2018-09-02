@@ -29,7 +29,8 @@ namespace ReactiveUI
         {
             var monotouchAssemblyName = typeof(NSObject).Assembly.FullName;
 
-            declaredInNSObject = new MemoizingMRUCache<Tuple<Type, string>, bool>((pair, _) =>
+            declaredInNSObject = new MemoizingMRUCache<Tuple<Type, string>, bool>(
+                (pair, _) =>
             {
                 var thisType = pair.Item1;
 
@@ -57,6 +58,7 @@ namespace ReactiveUI
             }, RxApp.BigCacheLimit);
         }
 
+        /// <inheritdoc/>
         public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged = false)
         {
             lock (declaredInNSObject)
@@ -65,6 +67,7 @@ namespace ReactiveUI
             }
         }
 
+        /// <inheritdoc/>
         public IObservable<IObservedChange<object, object>> GetNotificationForProperty(object sender, Expression expression, string propertyName, bool beforeChanged = false)
         {
             var obj = sender as NSObject;

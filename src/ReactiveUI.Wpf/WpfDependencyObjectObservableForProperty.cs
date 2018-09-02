@@ -18,6 +18,7 @@ namespace ReactiveUI
 {
     public class DependencyObjectObservableForProperty : ICreatesObservableForProperty
     {
+        /// <inheritdoc/>
         public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged = false)
         {
             if (!typeof(DependencyObject).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
@@ -28,6 +29,7 @@ namespace ReactiveUI
             return GetDependencyProperty(type, propertyName) != null ? 4 : 0;
         }
 
+        /// <inheritdoc/>
         public IObservable<IObservedChange<object, object>> GetNotificationForProperty(object sender, System.Linq.Expressions.Expression expression, string propertyName, bool beforeChanged = false)
         {
             var type = sender.GetType();

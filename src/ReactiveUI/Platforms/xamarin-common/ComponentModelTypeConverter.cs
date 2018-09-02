@@ -10,7 +10,8 @@ namespace ReactiveUI
 {
     public class ComponentModelTypeConverter : IBindingTypeConverter
     {
-        private readonly MemoizingMRUCache<Tuple<Type, Type>, TypeConverter> _typeConverterCache = new MemoizingMRUCache<Tuple<Type, Type>, TypeConverter>((types, _) =>
+        private readonly MemoizingMRUCache<Tuple<Type, Type>, TypeConverter> _typeConverterCache = new MemoizingMRUCache<Tuple<Type, Type>, TypeConverter>(
+            (types, _) =>
         {
             // NB: String is a Magical Type(tm) to TypeConverters. If we are
             // converting from string => int, we need the Int converter, not
@@ -24,12 +25,14 @@ namespace ReactiveUI
             return converter.CanConvertTo(types.Item2) ? converter : null;
         }, RxApp.SmallCacheLimit);
 
+        /// <inheritdoc/>
         public int GetAffinityForObjects(Type fromType, Type toType)
         {
             var converter = _typeConverterCache.Get(Tuple.Create(fromType, toType));
             return converter != null ? 10 : 0;
         }
 
+        /// <inheritdoc/>
         public bool TryConvert(object from, Type toType, object conversionHint, out object result)
         {
             if (from == null)

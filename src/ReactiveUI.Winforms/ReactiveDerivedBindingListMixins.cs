@@ -20,7 +20,7 @@ namespace ReactiveUI.Winforms.Legacy
     /// collection; this method is useful for creating ViewModel collections
     /// that are automatically updated when the respective Model collection is updated.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T">The type.</typeparam>
     [Obsolete("ReactiveList is no longer supported. We suggest replacing it with DynamicData https://github.com/rolandpheasant/dynamicdata")]
     public interface IReactiveDerivedBindingList<T> : IReactiveDerivedList<T>, IBindingList
     {
@@ -118,9 +118,9 @@ namespace ReactiveUI.Winforms.Legacy
         /// collection doesn't implement this, signalReset is the way to signal
         /// the derived collection to reorder/refilter itself.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="TNew"></typeparam>
-        /// <typeparam name="TDontCare"></typeparam>
+        /// <typeparam name="T">The type.</typeparam>
+        /// <typeparam name="TNew">The new type.</typeparam>
+        /// <typeparam name="TDontCare">The signal type.</typeparam>
         /// <param name="selector">A Select function that will be run on each
         /// item.</param>
         /// <param name="removed">An action that is called on each item when
@@ -168,9 +168,9 @@ namespace ReactiveUI.Winforms.Legacy
         /// collection doesn't implement this, signalReset is the way to signal
         /// the derived collection to reorder/refilter itself.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="TNew"></typeparam>
-        /// <typeparam name="TDontCare"></typeparam>
+        /// <typeparam name="T">The type.</typeparam>
+        /// <typeparam name="TNew">The new type.</typeparam>
+        /// <typeparam name="TDontCare">The signal type.</typeparam>
         /// <param name="selector">A Select function that will be run on each
         /// item.</param>
         /// <param name="filter">A filter to determine whether to exclude items
@@ -205,8 +205,8 @@ namespace ReactiveUI.Winforms.Legacy
         /// list changes but isn't a ReactiveList/ObservableCollection,
         /// you probably want to use the other overload.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="TNew"></typeparam>
+        /// <typeparam name="T">The type.</typeparam>
+        /// <typeparam name="TNew">The new type.</typeparam>
         /// <param name="selector">A Select function that will be run on each
         /// item.</param>
         /// <param name="removed">An action that is called on each item when
@@ -240,8 +240,8 @@ namespace ReactiveUI.Winforms.Legacy
         /// list changes but isn't a ReactiveList/ObservableCollection,
         /// you probably want to use the other overload.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="TNew"></typeparam>
+        /// <typeparam name="T">The type.</typeparam>
+        /// <typeparam name="TNew">The new type.</typeparam>
         /// <param name="selector">A Select function that will be run on each
         /// item.</param>
         /// <param name="filter">A filter to determine whether to exclude items

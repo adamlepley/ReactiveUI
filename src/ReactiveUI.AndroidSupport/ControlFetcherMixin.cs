@@ -55,11 +55,7 @@ namespace ReactiveUI.AndroidSupport
         /// <param name="propertyName">The property name.</param>
         /// <returns>Returns a view.</returns>
         public static T GetControl<T>(this AppCompatActivity @this, [CallerMemberName]string propertyName = null)
-            where T : View
-        {
-            return (T)GetCachedControl(propertyName, @this,
-                () => @this.FindViewById(controlIds[propertyName.ToLowerInvariant()]).JavaCast<T>());
-        }
+            where T : View => (T)GetCachedControl(propertyName, @this, () => @this.FindViewById(controlIds[propertyName.ToLowerInvariant()]).JavaCast<T>());
 
         /// <summary>
         ///
@@ -67,13 +63,9 @@ namespace ReactiveUI.AndroidSupport
         /// <typeparam name="T">The control type.</typeparam>
         /// <param name="this">The view.</param>
         /// <param name="propertyName">The property name.</param>
-        /// <returns></returns>
+        /// <returns>A <see cref="View"/>.</returns>
         public static T GetControl<T>(this View @this, [CallerMemberName]string propertyName = null)
-            where T : View
-        {
-            return (T)GetCachedControl(propertyName, @this,
-                () => @this.FindViewById(controlIds[propertyName.ToLowerInvariant()]).JavaCast<T>());
-        }
+            where T : View => (T)GetCachedControl(propertyName, @this, () => @this.FindViewById(controlIds[propertyName.ToLowerInvariant()]).JavaCast<T>());
 
         /// <summary>
         /// A helper method to automatically resolve properties in an <see cref="Android.Support.V4.App.Fragment"/> to their respective elements in the layout.
@@ -98,7 +90,8 @@ namespace ReactiveUI.AndroidSupport
                 }
                 catch (Exception ex)
                 {
-                    throw new MissingFieldException("Failed to wire up the Property "
+                    throw new MissingFieldException(
+                        "Failed to wire up the Property "
                         + m.Name + " to a View in your layout with a corresponding identifier", ex);
                 }
             });

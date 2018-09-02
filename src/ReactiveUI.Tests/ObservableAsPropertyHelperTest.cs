@@ -26,10 +26,11 @@ namespace ReactiveUI.Tests
             var input = new[] { 1, 2, 3, 3, 4 }.ToObservable();
             var output = new List<int>();
 
-            (new TestScheduler()).With(sched =>
+            new TestScheduler().With(sched =>
             {
                 var fixture = new ObservableAsPropertyHelper<int>(input,
-                    x => output.Add(x), -5);
+                    x => output.Add(x),
+                    -5);
 
                 sched.Start();
 
@@ -37,7 +38,7 @@ namespace ReactiveUI.Tests
 
                 // Note: Why doesn't the list match the above one? We're supposed
                 // to suppress duplicate notifications, of course :)
-                (new[] { -5, 1, 2, 3, 4 }).AssertAreEqual(output);
+                new[] { -5, 1, 2, 3, 4 }.AssertAreEqual(output);
             });
         }
 
@@ -47,16 +48,17 @@ namespace ReactiveUI.Tests
             var input = new[] { 1, 2, 3 }.ToObservable();
             var output = new List<int>();
 
-            (new TestScheduler()).With(sched =>
+            new TestScheduler().With(sched =>
             {
                 var fixture = new ObservableAsPropertyHelper<int>(input,
-                    x => output.Add(x), 1);
+                    x => output.Add(x),
+                    1);
 
                 sched.Start();
 
                 Assert.Equal(input.LastAsync().Wait(), fixture.Value);
 
-                (new[] { 1, 2, 3 }).AssertAreEqual(output);
+                new[] { 1, 2, 3 }.AssertAreEqual(output);
             });
         }
 
@@ -65,10 +67,11 @@ namespace ReactiveUI.Tests
         {
             var output = new List<int>();
 
-            (new TestScheduler()).With(sched =>
+            new TestScheduler().With(sched =>
             {
                 var fixture = new ObservableAsPropertyHelper<int>(Observable<int>.Never,
-                    x => output.Add(x), 32);
+                    x => output.Add(x),
+                    32);
 
                 Assert.Equal(32, fixture.Value);
             });
@@ -81,10 +84,12 @@ namespace ReactiveUI.Tests
             var input = new Subject<int>();
 
             var fixture = new ObservableAsPropertyHelper<int>(input,
-                _ => { }, -5, scheduler: sched);
+                _ => { },
+                -5,
+                scheduler: sched);
 
             Assert.Equal(-5, fixture.Value);
-            (new[] { 1, 2, 3, 4 }).Run(x => input.OnNext(x));
+            new[] { 1, 2, 3, 4 }.Run(x => input.OnNext(x));
 
             sched.Start();
             Assert.Equal(4, fixture.Value);
@@ -163,7 +168,7 @@ namespace ReactiveUI.Tests
             var errors = new List<Exception>();
 
             Assert.Equal(-5, fixture.Value);
-            (new[] { 1, 2, 3, 4 }).Run(x => input.OnNext(x));
+            new[] { 1, 2, 3, 4 }.Run(x => input.OnNext(x));
 
             fixture.ThrownExceptions.Subscribe(errors.Add);
 
@@ -182,13 +187,13 @@ namespace ReactiveUI.Tests
         [Fact]
         public void NoThrownExceptionsSubscriberEqualsOAPHDeath()
         {
-            (new TestScheduler()).With(sched =>
+            new TestScheduler().With(sched =>
             {
                 var input = new Subject<int>();
                 var fixture = new ObservableAsPropertyHelper<int>(input, _ => { }, -5);
 
                 Assert.Equal(-5, fixture.Value);
-                (new[] { 1, 2, 3, 4 }).Run(x => input.OnNext(x));
+                new[] { 1, 2, 3, 4 }.Run(x => input.OnNext(x));
 
                 input.OnError(new Exception("Die!"));
 
@@ -213,7 +218,7 @@ namespace ReactiveUI.Tests
             var fixture = new OaphTestFixture();
 
             // NB: This is a hack to connect up the OAPH
-            var dontcare = (fixture.FirstThreeLettersOfOneWord ?? "").Substring(0, 0);
+            var dontcare = (fixture.FirstThreeLettersOfOneWord ?? string.Empty).Substring(0, 0);
 
             fixture.ObservableForProperty(x => x.FirstThreeLettersOfOneWord, beforeChange: true)
                 .ToObservableChangeSet(ImmediateScheduler.Instance).Bind(out var resultChanging).Subscribe();
@@ -226,7 +231,7 @@ namespace ReactiveUI.Tests
             fixture.IsOnlyOneWord = "FooBar";
             Assert.Equal(1, resultChanging.Count);
             Assert.Equal(1, resultChanged.Count);
-            Assert.Equal("", resultChanging[0].Value);
+            Assert.Equal(string.Empty, resultChanging[0].Value);
             Assert.Equal("Foo", resultChanged[0].Value);
 
             fixture.IsOnlyOneWord = "Bazz";
@@ -284,8 +289,8 @@ namespace ReactiveUI.Tests
                 Assert.True(changing.All(x => x.Count == i + 1));
                 Assert.Equal(first3Letters[i], firstThreeChanged[i].Value);
                 Assert.Equal(last3Letters[i], lastThreeChanged[i].Value);
-                var firstChanging = i - 1 < 0 ? "" : first3Letters[i - 1];
-                var lastChanging = i - 1 < 0 ? "" : last3Letters[i - i];
+                var firstChanging = i - 1 < 0 ? string.Empty : first3Letters[i - 1];
+                var lastChanging = i - 1 < 0 ? string.Empty : last3Letters[i - i];
                 Assert.Equal(firstChanging, firstThreeChanging[i].Value);
                 Assert.Equal(lastChanging, lastThreeChanging[i].Value);
             }
@@ -334,7 +339,7 @@ namespace ReactiveUI.Tests
         [Fact]
         public void ToProperty_GivenIndexer_NotifiesOnExpectedPropertyName()
         {
-            (new TestScheduler()).With(sched =>
+            new TestScheduler().With(sched =>
             {
                 var fixture = new OAPHIndexerTestFixture();
                 var propertiesChanged = new List<string>();

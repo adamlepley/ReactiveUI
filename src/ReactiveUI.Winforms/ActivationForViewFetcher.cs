@@ -15,11 +15,13 @@ namespace ReactiveUI.Winforms
     {
         private bool? _isDesignModeCache;
 
+        /// <inheritdoc/>
         public int GetAffinityForView(Type view)
         {
-            return (typeof(Control).GetTypeInfo().IsAssignableFrom(view.GetTypeInfo())) ? 10 : 0;
+            return typeof(Control).GetTypeInfo().IsAssignableFrom(view.GetTypeInfo()) ? 10 : 0;
         }
 
+        /// <inheritdoc/>
         public IObservable<bool> GetActivationForView(IActivatable view)
         {
             // Startup: Control.HandleCreated > Control.BindingContextChanged > Form.Load > Control.VisibleChanged > Form.Activated > Form.Shown

@@ -25,15 +25,15 @@ namespace ReactiveUI
         /// <param name="device">The UsbDevice to request permission for.</param>
         public static IObservable<bool> PermissionRequested(this UsbManager manager, Context context, UsbDevice device)
         {
-            return Observable.Create<bool> (observer =>
+            return Observable.Create<bool>(observer =>
             {
-                var usbPermissionReceiver = new UsbDevicePermissionReceiver (observer, device);
-                context.RegisterReceiver (usbPermissionReceiver, new IntentFilter (ACTION_USB_PERMISSION));
+                var usbPermissionReceiver = new UsbDevicePermissionReceiver(observer, device);
+                context.RegisterReceiver(usbPermissionReceiver, new IntentFilter(ACTION_USB_PERMISSION));
 
-                var intent = PendingIntent.GetBroadcast (context, 0, new Intent (ACTION_USB_PERMISSION), 0);
-                manager.RequestPermission (device, intent);
+                var intent = PendingIntent.GetBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
+                manager.RequestPermission(device, intent);
 
-                return Disposable.Create (() => context.UnregisterReceiver (usbPermissionReceiver));
+                return Disposable.Create(() => context.UnregisterReceiver(usbPermissionReceiver));
             });
         }
 
@@ -47,15 +47,15 @@ namespace ReactiveUI
         /// <param name="accessory">The UsbAccessory to request permission for.</param>
         public static IObservable<bool> PermissionRequested(this UsbManager manager, Context context, UsbAccessory accessory)
         {
-            return Observable.Create<bool> (observer =>
+            return Observable.Create<bool>(observer =>
             {
-                var usbPermissionReceiver = new UsbAccessoryPermissionReceiver (observer, accessory);
-                context.RegisterReceiver (usbPermissionReceiver, new IntentFilter (ACTION_USB_PERMISSION));
+                var usbPermissionReceiver = new UsbAccessoryPermissionReceiver(observer, accessory);
+                context.RegisterReceiver(usbPermissionReceiver, new IntentFilter(ACTION_USB_PERMISSION));
 
-                var intent = PendingIntent.GetBroadcast (context, 0, new Intent (ACTION_USB_PERMISSION), 0);
-                manager.RequestPermission (accessory, intent);
+                var intent = PendingIntent.GetBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), 0);
+                manager.RequestPermission(accessory, intent);
 
-                return Disposable.Create (() => context.UnregisterReceiver (usbPermissionReceiver));
+                return Disposable.Create(() => context.UnregisterReceiver(usbPermissionReceiver));
             });
         }
 
@@ -68,13 +68,13 @@ namespace ReactiveUI
             private readonly IObserver<bool> _observer;
             private readonly UsbDevice _device;
 
-            public UsbDevicePermissionReceiver (IObserver<bool> observer, UsbDevice device)
+            public UsbDevicePermissionReceiver(IObserver<bool> observer, UsbDevice device)
             {
                 _observer = observer;
                 _device = device;
             }
 
-            public override void OnReceive (Context context, Intent intent)
+            public override void OnReceive(Context context, Intent intent)
             {
                 var extraDevice = intent.GetParcelableExtra(UsbManager.ExtraDevice) as UsbDevice;
                 if (_device.DeviceName != extraDevice.DeviceName)
@@ -82,9 +82,9 @@ namespace ReactiveUI
                     return;
                 }
 
-                var permissionGranted = intent.GetBooleanExtra (UsbManager.ExtraPermissionGranted, false);
-                _observer.OnNext (permissionGranted);
-                _observer.OnCompleted ();
+                var permissionGranted = intent.GetBooleanExtra(UsbManager.ExtraPermissionGranted, false);
+                _observer.OnNext(permissionGranted);
+                _observer.OnCompleted();
             }
         }
 
@@ -97,13 +97,13 @@ namespace ReactiveUI
             private readonly IObserver<bool> _observer;
             private readonly UsbAccessory _accessory;
 
-            public UsbAccessoryPermissionReceiver (IObserver<bool> observer, UsbAccessory accessory)
+            public UsbAccessoryPermissionReceiver(IObserver<bool> observer, UsbAccessory accessory)
             {
                 _observer = observer;
                 _accessory = accessory;
             }
 
-            public override void OnReceive (Context context, Intent intent)
+            public override void OnReceive(Context context, Intent intent)
             {
                 var extraAccessory = intent.GetParcelableExtra(UsbManager.ExtraAccessory) as UsbAccessory;
                 if (_accessory.Manufacturer != extraAccessory.Manufacturer || _accessory.Model != extraAccessory.Model)
@@ -111,9 +111,9 @@ namespace ReactiveUI
                     return;
                 }
 
-                var permissionGranted = intent.GetBooleanExtra (UsbManager.ExtraPermissionGranted, false);
-                _observer.OnNext (permissionGranted);
-                _observer.OnCompleted ();
+                var permissionGranted = intent.GetBooleanExtra(UsbManager.ExtraPermissionGranted, false);
+                _observer.OnNext(permissionGranted);
+                _observer.OnCompleted();
             }
         }
     }

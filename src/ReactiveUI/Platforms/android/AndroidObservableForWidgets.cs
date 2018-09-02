@@ -39,6 +39,7 @@ namespace ReactiveUI
             }.ToDictionary(k => Tuple.Create(k.Type, k.Property), v => v.Func);
         }
 
+        /// <inheritdoc/>
         public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged = false)
         {
             if (beforeChanged)
@@ -49,6 +50,7 @@ namespace ReactiveUI
             return dispatchTable.Keys.Any(x => x.Item1.IsAssignableFrom(type) && x.Item2 == propertyName) ? 5 : 0;
         }
 
+        /// <inheritdoc/>
         public IObservable<IObservedChange<object, object>> GetNotificationForProperty(object sender, Expression expression, string propertyName, bool beforeChanged = false)
         {
             var type = sender.GetType();
@@ -81,7 +83,7 @@ namespace ReactiveUI
                     var v = (AdapterView)x;
 
                     return Observable.Merge(
-                        Observable.FromEventPattern<AdapterView.ItemSelectedEventArgs>(h => v.ItemSelected += h, h => v.ItemSelected -=h)
+                        Observable.FromEventPattern<AdapterView.ItemSelectedEventArgs>(h => v.ItemSelected += h, h => v.ItemSelected -= h)
                             .Select(_ => new ObservedChange<object, object>(v, ex)),
                         Observable.FromEventPattern<AdapterView.NothingSelectedEventArgs>(h => v.NothingSelected += h, h => v.NothingSelected -= h)
                             .Select(_ => new ObservedChange<object, object>(v, ex)));

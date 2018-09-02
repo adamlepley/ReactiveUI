@@ -13,32 +13,38 @@ namespace ReactiveUI
 {
     public class ReactiveWindowController : NSWindowController, IReactiveNotifyPropertyChanged<ReactiveWindowController>, IHandleObservableErrors, IReactiveObject, ICanActivate
     {
-        protected ReactiveWindowController(NSWindow window) : base(window)
+        protected ReactiveWindowController(NSWindow window)
+            : base(window)
         {
             SetupRxObj();
         }
 
-        protected ReactiveWindowController(string windowNibName) : base(windowNibName)
+        protected ReactiveWindowController(string windowNibName)
+            : base(windowNibName)
         {
             SetupRxObj();
         }
 
-        protected ReactiveWindowController(string windowNibName, NSObject owner) : base(windowNibName, owner)
+        protected ReactiveWindowController(string windowNibName, NSObject owner)
+            : base(windowNibName, owner)
         {
             SetupRxObj();
         }
 
-        protected ReactiveWindowController(NSCoder coder) : base(coder)
+        protected ReactiveWindowController(NSCoder coder)
+            : base(coder)
         {
             SetupRxObj();
         }
 
-        protected ReactiveWindowController(NSObjectFlag t) : base(t)
+        protected ReactiveWindowController(NSObjectFlag t)
+            : base(t)
         {
             SetupRxObj();
         }
 
-        protected ReactiveWindowController(IntPtr handle) : base(handle)
+        protected ReactiveWindowController(IntPtr handle)
+            : base(handle)
         {
             SetupRxObj();
         }
@@ -48,8 +54,10 @@ namespace ReactiveUI
             SetupRxObj();
         }
 
+        /// <inheritdoc/>
         public event PropertyChangingEventHandler PropertyChanging;
 
+        /// <inheritdoc/>
         void IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args)
         {
             var handler = PropertyChanging;
@@ -59,8 +67,10 @@ namespace ReactiveUI
             }
         }
 
+        /// <inheritdoc/>
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <inheritdoc/>
         void IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args)
         {
             var handler = PropertyChanged;
@@ -87,6 +97,7 @@ namespace ReactiveUI
             get { return this.GetChangedObservable(); }
         }
 
+        /// <inheritdoc/>
         public IObservable<Exception> ThrownExceptions
         {
             get { return this.GetThrownExceptionsObservable(); }
@@ -110,6 +121,7 @@ namespace ReactiveUI
 
         private readonly Subject<Unit> _activated = new Subject<Unit>();
 
+        /// <inheritdoc/>
         public IObservable<Unit> Activated
         {
             get { return _activated; }
@@ -117,11 +129,13 @@ namespace ReactiveUI
 
         private readonly Subject<Unit> _deactivated = new Subject<Unit>();
 
+        /// <inheritdoc/>
         public IObservable<Unit> Deactivated
         {
             get { return _deactivated; }
         }
 
+        /// <inheritdoc/>
         public override void WindowDidLoad()
         {
             base.WindowDidLoad();

@@ -15,7 +15,7 @@ namespace ReactiveUI.Winforms
         ///     Transforms a NotifyCollectionChangedEventArgs into zero or more ListChangedEventArgs.
         /// </summary>
         /// <param name="ea">The event args.</param>
-        /// <returns></returns>
+        /// <returns>An enumerable of <see cref="ListChangedEventArgs"/>.</returns>
         internal static IEnumerable<ListChangedEventArgs> AsListChangedEventArgs(this NotifyCollectionChangedEventArgs ea)
         {
             if (ea == null)

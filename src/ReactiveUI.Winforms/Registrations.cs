@@ -11,6 +11,7 @@ namespace ReactiveUI.Winforms
 {
     public class Registrations : IWantsToRegisterStuff
     {
+        /// <inheritdoc/>
         public void Register(Action<Func<object>, Type> registerFunction)
         {
             registerFunction(() => new PlatformOperations(), typeof(IPlatformOperations));

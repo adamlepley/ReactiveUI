@@ -32,7 +32,7 @@ namespace ReactiveUI.AndroidSupport
     /// This is a Fragment that is both an Activity and has ReactiveObject powers
     /// (i.e. you can call RaiseAndSetIfChanged).
     /// </summary>
-    /// <typeparam name="TViewModel"></typeparam>
+    /// <typeparam name="TViewModel">The view model type.</typeparam>
     public class ReactiveFragment<TViewModel> : ReactiveFragment, IViewFor<TViewModel>, ICanActivate
         where TViewModel : class
     {
@@ -40,18 +40,20 @@ namespace ReactiveUI.AndroidSupport
         {
         }
 
-        private TViewModel _ViewModel;
+        private TViewModel _viewModel;
 
+        /// <inheritdoc/>
         public TViewModel ViewModel
         {
-            get => _ViewModel;
-            set => this.RaiseAndSetIfChanged(ref _ViewModel, value);
+            get => _viewModel;
+            set => this.RaiseAndSetIfChanged(ref _viewModel, value);
         }
 
+        /// <inheritdoc/>
         object IViewFor.ViewModel
         {
-            get => _ViewModel;
-            set => _ViewModel = (TViewModel)value;
+            get => _viewModel;
+            set => _viewModel = (TViewModel)value;
         }
     }
 
@@ -65,23 +67,27 @@ namespace ReactiveUI.AndroidSupport
         {
         }
 
+        /// <inheritdoc/>
         public event PropertyChangingEventHandler PropertyChanging
         {
             add => PropertyChangingEventManager.AddHandler(this, value);
             remove => PropertyChangingEventManager.RemoveHandler(this, value);
         }
 
+        /// <inheritdoc/>
         void IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args)
         {
             PropertyChangingEventManager.DeliverEvent(this, args);
         }
 
+        /// <inheritdoc/>
         public event PropertyChangedEventHandler PropertyChanged
         {
             add => PropertyChangedEventManager.AddHandler(this, value);
             remove => PropertyChangedEventManager.RemoveHandler(this, value);
         }
 
+        /// <inheritdoc/>
         void IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args)
         {
             PropertyChangedEventManager.DeliverEvent(this, args);
@@ -110,6 +116,7 @@ namespace ReactiveUI.AndroidSupport
             return IReactiveObjectExtensions.SuppressChangeNotifications(this);
         }
 
+        /// <inheritdoc/>
         public IObservable<Exception> ThrownExceptions => this.GetThrownExceptionsObservable();
 
         private readonly Subject<Unit> _activated = new Subject<Unit>();
@@ -120,12 +127,14 @@ namespace ReactiveUI.AndroidSupport
 
         public IObservable<Unit> Deactivated => _deactivated.AsObservable();
 
+        /// <inheritdoc/>
         public override void OnPause()
         {
             base.OnPause();
             _deactivated.OnNext(Unit.Default);
         }
 
+        /// <inheritdoc/>
         public override void OnResume()
         {
             base.OnResume();

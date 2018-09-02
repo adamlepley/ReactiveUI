@@ -15,7 +15,7 @@ namespace ReactiveUI.Fody
         public ModuleDefinition ModuleDefinition { get; set; }
 
         // Will log an MessageImportance.High message to MSBuild. OPTIONAL
-        public Action<string> LogInfo  { get; set; }
+        public Action<string> LogInfo { get; set; }
 
         public void Execute()
         {

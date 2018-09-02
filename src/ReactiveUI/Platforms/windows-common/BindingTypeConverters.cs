@@ -27,6 +27,7 @@ namespace ReactiveUI
     /// </summary>
     public class BooleanToVisibilityTypeConverter : IBindingTypeConverter
     {
+        /// <inheritdoc/>
         public int GetAffinityForObjects(Type fromType, Type toType)
         {
             if (fromType == typeof(bool) && toType == typeof(Visibility))
@@ -42,6 +43,7 @@ namespace ReactiveUI
             return 0;
         }
 
+        /// <inheritdoc/>
         public bool TryConvert(object from, Type toType, object conversionHint, out object result)
         {
             var hint = conversionHint is BooleanToVisibilityHint ?
@@ -50,7 +52,7 @@ namespace ReactiveUI
 
             if (toType == typeof(Visibility))
             {
-                var fromAsBool = hint.HasFlag(BooleanToVisibilityHint.Inverse) ? !((bool)from) : (bool)from;
+                var fromAsBool = hint.HasFlag(BooleanToVisibilityHint.Inverse) ? !(bool)@from : (bool)from;
 #if !NETFX_CORE
                 var notVisible = hint.HasFlag(BooleanToVisibilityHint.UseHidden) ? Visibility.Hidden : Visibility.Collapsed;
 #else
@@ -61,7 +63,7 @@ namespace ReactiveUI
             }
 
             var fromAsVis = (Visibility)from;
-            result = (fromAsVis == Visibility.Visible) ^ (!hint.HasFlag(BooleanToVisibilityHint.Inverse));
+            result = fromAsVis == Visibility.Visible ^ !hint.HasFlag(BooleanToVisibilityHint.Inverse);
 
             return true;
         }

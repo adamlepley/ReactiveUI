@@ -12,6 +12,7 @@ namespace ReactiveUI.Blend
     public class Behavior<T> : DependencyObject, IBehavior
         where T : DependencyObject
     {
+        /// <inheritdoc/>
         public virtual void Attach(DependencyObject associatedObject)
         {
             if (associatedObject == AssociatedObject || DesignMode.DesignModeEnabled)
@@ -28,6 +29,7 @@ namespace ReactiveUI.Blend
             OnAttached();
         }
 
+        /// <inheritdoc/>
         public virtual void Detach()
         {
             OnDetaching();
@@ -43,6 +45,7 @@ namespace ReactiveUI.Blend
 
         public T AssociatedObject { get; private set; }
 
+        /// <inheritdoc/>
         DependencyObject IBehavior.AssociatedObject
         {
             get { return AssociatedObject; }

@@ -18,11 +18,11 @@ namespace ReactiveUI
         /// <param name="sharedPreferences">The shared preferences to get the changes from.</param>
         public static IObservable<string> PreferenceChanged(this ISharedPreferences sharedPreferences)
         {
-            return Observable.Create<string> (observer =>
+            return Observable.Create<string>(observer =>
             {
                 var listener = new OnSharedPreferenceChangeListener(observer);
                 sharedPreferences.RegisterOnSharedPreferenceChangeListener(listener);
-                return Disposable.Create (() => sharedPreferences.UnregisterOnSharedPreferenceChangeListener (listener));
+                return Disposable.Create(() => sharedPreferences.UnregisterOnSharedPreferenceChangeListener(listener));
             });
         }
 
@@ -40,9 +40,9 @@ namespace ReactiveUI
                 _observer = observer;
             }
 
-            void ISharedPreferencesOnSharedPreferenceChangeListener.OnSharedPreferenceChanged (ISharedPreferences sharedPreferences, string key)
+            void ISharedPreferencesOnSharedPreferenceChangeListener.OnSharedPreferenceChanged(ISharedPreferences sharedPreferences, string key)
             {
-                _observer.OnNext (key);
+                _observer.OnNext(key);
             }
         }
     }

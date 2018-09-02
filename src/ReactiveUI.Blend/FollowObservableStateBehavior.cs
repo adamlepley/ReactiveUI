@@ -55,6 +55,7 @@ namespace ReactiveUI.Blend
 
         private IDisposable _watcher;
 
+        /// <inheritdoc/>
         protected override void OnDetaching()
         {
             if (_watcher != null)
@@ -68,17 +69,17 @@ namespace ReactiveUI.Blend
 
         protected static void OnStateObservableChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var This = (FollowObservableStateBehavior)sender;
-            if (This._watcher != null)
+            var @this = (FollowObservableStateBehavior)sender;
+            if (@this._watcher != null)
             {
-                This._watcher.Dispose();
-                This._watcher = null;
+                @this._watcher.Dispose();
+                @this._watcher = null;
             }
 
-            This._watcher = ((IObservable<string>)e.NewValue).ObserveOn(RxApp.MainThreadScheduler).Subscribe(
+            @this._watcher = ((IObservable<string>)e.NewValue).ObserveOn(RxApp.MainThreadScheduler).Subscribe(
                 x =>
                 {
-                    var target = This.TargetObject ?? This.AssociatedObject;
+                    var target = @this.TargetObject ?? @this.AssociatedObject;
 #if NETFX_CORE
                     VisualStateManager.GoToState(target, x, true);
 #else
@@ -94,12 +95,12 @@ namespace ReactiveUI.Blend
                 },
                 ex =>
                 {
-                    if (!This.AutoResubscribeOnError)
+                    if (!@this.AutoResubscribeOnError)
                     {
                         return;
                     }
 
-                    OnStateObservableChanged(This, e);
+                    OnStateObservableChanged(@this, e);
                 });
         }
     }

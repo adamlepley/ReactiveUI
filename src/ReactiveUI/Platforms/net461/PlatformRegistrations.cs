@@ -9,6 +9,7 @@ namespace ReactiveUI
 {
     public class PlatformRegistrations : IWantsToRegisterStuff
     {
+        /// <inheritdoc/>
         public void Register(Action<Func<object>, Type> registerFunction)
         {
             registerFunction(() => new ComponentModelTypeConverter(), typeof(IBindingTypeConverter));

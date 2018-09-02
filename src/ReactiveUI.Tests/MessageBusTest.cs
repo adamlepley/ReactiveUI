@@ -21,7 +21,7 @@ namespace ReactiveUI.Tests
         {
             var input = new[] { 1, 2, 3, 4 };
 
-            var result = (new TestScheduler()).With(sched =>
+            var result = new TestScheduler().With(sched =>
             {
                 var source = new Subject<int>();
                 var fixture = new MessageBus();

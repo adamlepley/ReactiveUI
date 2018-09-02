@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -30,39 +30,47 @@ namespace ReactiveUI
         {
         }
 
-        protected ReactiveViewController(NSCoder c) : base(c)
+        protected ReactiveViewController(NSCoder c)
+            : base(c)
         {
         }
 
-        protected ReactiveViewController(NSObjectFlag f) : base(f)
+        protected ReactiveViewController(NSObjectFlag f)
+            : base(f)
         {
         }
 
-        protected ReactiveViewController(IntPtr handle) : base(handle)
+        protected ReactiveViewController(IntPtr handle)
+            : base(handle)
         {
         }
 
-        protected ReactiveViewController(string nibNameOrNull, NSBundle nibBundleOrNull) : base(nibNameOrNull, nibBundleOrNull)
+        protected ReactiveViewController(string nibNameOrNull, NSBundle nibBundleOrNull)
+            : base(nibNameOrNull, nibBundleOrNull)
         {
         }
 
+        /// <inheritdoc/>
         public event PropertyChangingEventHandler PropertyChanging
         {
-            add { PropertyChangingEventManager.AddHandler(this, value); }
-            remove { PropertyChangingEventManager.RemoveHandler(this, value); }
+            add => PropertyChangingEventManager.AddHandler(this, value);
+            remove => PropertyChangingEventManager.RemoveHandler(this, value);
         }
 
+        /// <inheritdoc/>
         void IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args)
         {
             PropertyChangingEventManager.DeliverEvent(this, args);
         }
 
+        /// <inheritdoc/>
         public event PropertyChangedEventHandler PropertyChanged
         {
-            add { PropertyChangedEventManager.AddHandler(this, value); }
-            remove { PropertyChangedEventManager.RemoveHandler(this, value); }
+            add => PropertyChangedEventManager.AddHandler(this, value);
+            remove => PropertyChangedEventManager.RemoveHandler(this, value);
         }
 
+        /// <inheritdoc/>
         void IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args)
         {
             PropertyChangedEventManager.DeliverEvent(this, args);
@@ -72,23 +80,15 @@ namespace ReactiveUI
         /// Represents an Observable that fires *before* a property is about to
         /// be changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveViewController>> Changing
-        {
-            get { return this.GetChangingObservable(); }
-        }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveViewController>> Changing => this.GetChangingObservable();
 
         /// <summary>
         /// Represents an Observable that fires *after* a property has changed.
         /// </summary>
-        public IObservable<IReactivePropertyChangedEventArgs<ReactiveViewController>> Changed
-        {
-            get { return this.GetChangedObservable(); }
-        }
+        public IObservable<IReactivePropertyChangedEventArgs<ReactiveViewController>> Changed => this.GetChangedObservable();
 
-        public IObservable<Exception> ThrownExceptions
-        {
-            get { return this.GetThrownExceptionsObservable(); }
-        }
+        /// <inheritdoc/>
+        public IObservable<Exception> ThrownExceptions => this.GetThrownExceptionsObservable();
 
         /// <summary>
         /// When this method is called, an object will not fire change
@@ -104,19 +104,16 @@ namespace ReactiveUI
 
         private Subject<Unit> _activated = new Subject<Unit>();
 
-        public IObservable<Unit> Activated
-        {
-            get { return _activated.AsObservable(); }
-        }
+        /// <inheritdoc/>
+        public IObservable<Unit> Activated => _activated.AsObservable();
 
         private Subject<Unit> _deactivated = new Subject<Unit>();
 
-        public IObservable<Unit> Deactivated
-        {
-            get { return _deactivated.AsObservable(); }
-        }
+        /// <inheritdoc/>
+        public IObservable<Unit> Deactivated => _deactivated.AsObservable();
 
 #if UIKIT
+        /// <inheritdoc/>
         public override void ViewWillAppear(bool animated)
         {
             base.ViewWillAppear(animated);
@@ -124,6 +121,7 @@ namespace ReactiveUI
             this.ActivateSubviews(true);
         }
 
+        /// <inheritdoc/>
         public override void ViewDidDisappear(bool animated)
         {
             base.ViewDidDisappear(animated);
@@ -131,6 +129,7 @@ namespace ReactiveUI
             this.ActivateSubviews(false);
         }
 #else
+        /// <inheritdoc/>
         public override void ViewWillAppear()
         {
             base.ViewWillAppear();
@@ -138,6 +137,7 @@ namespace ReactiveUI
             this.ActivateSubviews(true);
         }
 
+        /// <inheritdoc/>
         public override void ViewDidDisappear()
         {
             base.ViewDidDisappear();
@@ -154,34 +154,40 @@ namespace ReactiveUI
         {
         }
 
-        protected ReactiveViewController(NSCoder c) : base(c)
+        protected ReactiveViewController(NSCoder c)
+            : base(c)
         {
         }
 
-        protected ReactiveViewController(NSObjectFlag f) : base(f)
+        protected ReactiveViewController(NSObjectFlag f)
+            : base(f)
         {
         }
 
-        protected ReactiveViewController(IntPtr handle) : base(handle)
+        protected ReactiveViewController(IntPtr handle)
+            : base(handle)
         {
         }
 
-        protected ReactiveViewController(string nibNameOrNull, NSBundle nibBundleOrNull) : base(nibNameOrNull, nibBundleOrNull)
+        protected ReactiveViewController(string nibNameOrNull, NSBundle nibBundleOrNull)
+            : base(nibNameOrNull, nibBundleOrNull)
         {
         }
 
         private TViewModel _viewModel;
 
+        /// <inheritdoc/>
         public TViewModel ViewModel
         {
-            get { return _viewModel; }
-            set { this.RaiseAndSetIfChanged(ref _viewModel, value); }
+            get => _viewModel;
+            set => this.RaiseAndSetIfChanged(ref _viewModel, value);
         }
 
+        /// <inheritdoc/>
         object IViewFor.ViewModel
         {
-            get { return ViewModel; }
-            set { ViewModel = (TViewModel)value; }
+            get => ViewModel;
+            set => ViewModel = (TViewModel)value;
         }
     }
 

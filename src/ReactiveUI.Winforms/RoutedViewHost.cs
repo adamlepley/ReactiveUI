@@ -14,7 +14,7 @@ namespace ReactiveUI.Winforms
     public partial class RoutedControlHost : UserControl, IReactiveObject
     {
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
-        private RoutingState _Router;
+        private RoutingState _router;
         private Control _defaultContent;
         private IObservable<string> _viewContractObservable;
 
@@ -35,11 +35,13 @@ namespace ReactiveUI.Winforms
 
             var vmAndContract =
                 this.WhenAnyObservable(x => x.Router.CurrentViewModel)
-                    .CombineLatest(this.WhenAnyObservable(x => x.ViewContractObservable),
+                    .CombineLatest(
+                        this.WhenAnyObservable(x => x.ViewContractObservable),
                         (vm, contract) => new { ViewModel = vm, Contract = contract });
 
             Control viewLastAdded = null;
-            _disposables.Add(vmAndContract.Subscribe(x =>
+            _disposables.Add(vmAndContract.Subscribe(
+                x =>
             {
                 // clear all hosted controls (view or default content)
                 Controls.Clear();
@@ -69,23 +71,27 @@ namespace ReactiveUI.Winforms
             }, RxApp.DefaultExceptionHandler.OnNext));
         }
 
+        /// <inheritdoc/>
         public event PropertyChangingEventHandler PropertyChanging
         {
             add => PropertyChangingEventManager.AddHandler(this, value);
             remove => PropertyChangingEventManager.RemoveHandler(this, value);
         }
 
+        /// <inheritdoc/>
         void IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args)
         {
             PropertyChangingEventManager.DeliverEvent(this, args);
         }
 
+        /// <inheritdoc/>
         public event PropertyChangedEventHandler PropertyChanged
         {
             add => PropertyChangedEventManager.AddHandler(this, value);
             remove => PropertyChangedEventManager.RemoveHandler(this, value);
         }
 
+        /// <inheritdoc/>
         void IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args)
         {
             PropertyChangedEventManager.DeliverEvent(this, args);
@@ -103,8 +109,8 @@ namespace ReactiveUI.Winforms
         [Description("The router.")]
         public RoutingState Router
         {
-            get => _Router;
-            set => this.RaiseAndSetIfChanged(ref _Router, value);
+            get => _router;
+            set => this.RaiseAndSetIfChanged(ref _router, value);
         }
 
         [Browsable(false)]
@@ -123,7 +129,7 @@ namespace ReactiveUI.Winforms
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing && components != null)
             {
                 components.Dispose();
                 _disposables.Dispose();

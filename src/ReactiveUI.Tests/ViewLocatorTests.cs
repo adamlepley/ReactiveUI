@@ -81,11 +81,11 @@ namespace ReactiveUI.Tests
         public IFooViewModel ViewModel { get; set; }
     }
 
-    public interface StrangeInterfaceNotFollowingConvention
+    public interface IStrangeInterfaceNotFollowingConvention
     {
     }
 
-    public class StrangeClassNotFollowingConvention : StrangeInterfaceNotFollowingConvention
+    public class StrangeClassNotFollowingConvention : IStrangeInterfaceNotFollowingConvention
     {
     }
 
@@ -400,7 +400,7 @@ namespace ReactiveUI.Tests
 
                 var vm = new StrangeClassNotFollowingConvention();
 
-                fixture.ResolveView((StrangeInterfaceNotFollowingConvention)vm);
+                fixture.ResolveView((IStrangeInterfaceNotFollowingConvention)vm);
             }
         }
 

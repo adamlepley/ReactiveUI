@@ -4,24 +4,23 @@
 
 using System;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
+using DynamicData;
+using Microsoft.Reactive.Testing;
 using Xunit;
 
 namespace ReactiveUI.Routing.Tests
 {
-    using System.Reactive.Concurrency;
-    using System.Threading.Tasks;
-    using DynamicData;
-    using Microsoft.Reactive.Testing;
-
     public class TestViewModel : ReactiveObject, IRoutableViewModel
     {
-        private string _SomeProp;
+        private string _someProp;
 
         public string SomeProp
         {
-            get => _SomeProp;
-            set => this.RaiseAndSetIfChanged(ref _SomeProp, value);
+            get => _someProp;
+            set => this.RaiseAndSetIfChanged(ref _someProp, value);
         }
 
         public string UrlPathSegment => "Test";
@@ -31,12 +30,12 @@ namespace ReactiveUI.Routing.Tests
 
     public class TestScreen : ReactiveObject, IScreen
     {
-        private RoutingState _Router;
+        private RoutingState _router;
 
         public RoutingState Router
         {
-            get => _Router;
-            set => this.RaiseAndSetIfChanged(ref _Router, value);
+            get => _router;
+            set => this.RaiseAndSetIfChanged(ref _router, value);
         }
     }
 
@@ -45,7 +44,7 @@ namespace ReactiveUI.Routing.Tests
         [Fact]
         public async Task NavigationPushPopTest()
         {
-            var input = new TestViewModel() { SomeProp = "Foo" };
+            var input = new TestViewModel { SomeProp = "Foo" };
             var fixture = new RoutingState();
 
             Assert.False(await fixture.NavigateBack.CanExecute.FirstAsync());
@@ -72,10 +71,10 @@ namespace ReactiveUI.Routing.Tests
 
             Assert.Equal(1, output.Count);
 
-            fixture.Navigate.Execute(new TestViewModel() { SomeProp = "A" });
+            fixture.Navigate.Execute(new TestViewModel { SomeProp = "A" });
             Assert.Equal(2, output.Count);
 
-            fixture.Navigate.Execute(new TestViewModel() { SomeProp = "B" });
+            fixture.Navigate.Execute(new TestViewModel { SomeProp = "B" });
             Assert.Equal(3, output.Count);
             Assert.Equal("B", ((TestViewModel)output.Last()).SomeProp);
 
@@ -93,10 +92,10 @@ namespace ReactiveUI.Routing.Tests
 
             Assert.Equal(1, output.Count);
 
-            fixture.Router.Navigate.Execute(new TestViewModel() { SomeProp = "A" });
+            fixture.Router.Navigate.Execute(new TestViewModel { SomeProp = "A" });
             Assert.Equal(2, output.Count);
 
-            fixture.Router.Navigate.Execute(new TestViewModel() { SomeProp = "B" });
+            fixture.Router.Navigate.Execute(new TestViewModel { SomeProp = "B" });
             Assert.Equal(3, output.Count);
             Assert.Equal("B", ((TestViewModel)output.Last()).SomeProp);
 

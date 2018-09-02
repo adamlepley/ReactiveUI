@@ -28,21 +28,13 @@ namespace ReactiveUI
             _isDuplicate = isDuplicate;
         }
 
-        public UpdateType Type
-        {
-            get { return _type; }
-        }
+        public UpdateType Type => _type;
 
-        public int Index
-        {
-            get { return _index; }
-        }
+        public int Index => _index;
 
-        public bool IsDuplicate
-        {
-            get { return _isDuplicate; }
-        }
+        public bool IsDuplicate => _isDuplicate;
 
+        /// <inheritdoc/>
         public override string ToString()
         {
             return _type.ToString()[0] + _index.ToString();

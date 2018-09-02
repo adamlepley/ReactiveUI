@@ -48,6 +48,7 @@ namespace ReactiveUI
 #endif
         }
 
+        /// <inheritdoc/>
         public int GetAffinityForObject(Type type, bool hasEventTarget)
         {
             if (!_validTypes.Any(x => x.IsAssignableFrom(type)))
@@ -58,6 +59,7 @@ namespace ReactiveUI
             return !hasEventTarget ? 4 : 0;
         }
 
+        /// <inheritdoc/>
         public IDisposable BindCommandToObject(ICommand command, object target, IObservable<object> commandParameter)
         {
             commandParameter = commandParameter ?? Observable.Return(target);
@@ -129,6 +131,7 @@ namespace ReactiveUI
 #endif
         }
 
+        /// <inheritdoc/>
         public IDisposable BindCommandToObject<TEventArgs>(ICommand command, object target, IObservable<object> commandParameter, string eventName)
             where TEventArgs : EventArgs
         {

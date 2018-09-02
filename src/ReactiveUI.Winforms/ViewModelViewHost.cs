@@ -66,10 +66,12 @@ namespace ReactiveUI.Winforms
 
             var vmAndContract =
                 this.WhenAny(x => x.ViewModel, x => x.Value)
-                    .CombineLatest(this.WhenAnyObservable(x => x.ViewContractObservable),
+                    .CombineLatest(
+                        this.WhenAnyObservable(x => x.ViewContractObservable),
                         (vm, contract) => new { ViewModel = vm, Contract = contract });
 
-            yield return vmAndContract.Subscribe(x =>
+            yield return vmAndContract.Subscribe(
+                x =>
             {
                 // set content to default when viewmodel is null
                 if (ViewModel == null)
@@ -105,23 +107,27 @@ namespace ReactiveUI.Winforms
             }, RxApp.DefaultExceptionHandler.OnNext);
         }
 
+        /// <inheritdoc/>
         public event PropertyChangingEventHandler PropertyChanging
         {
             add => PropertyChangingEventManager.AddHandler(this, value);
             remove => PropertyChangingEventManager.RemoveHandler(this, value);
         }
 
+        /// <inheritdoc/>
         void IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args)
         {
             PropertyChangingEventManager.DeliverEvent(this, args);
         }
 
+        /// <inheritdoc/>
         public event PropertyChangedEventHandler PropertyChanged
         {
             add => PropertyChangedEventManager.AddHandler(this, value);
             remove => PropertyChangedEventManager.RemoveHandler(this, value);
         }
 
+        /// <inheritdoc/>
         void IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args)
         {
             PropertyChangedEventManager.DeliverEvent(this, args);
@@ -147,6 +153,7 @@ namespace ReactiveUI.Winforms
         [Browsable(false)]
         public IViewLocator ViewLocator { get; set; }
 
+        /// <inheritdoc/>
         [Category("ReactiveUI")]
         [Description("The viewmodel to host.")]
         [Bindable(true)]
@@ -185,7 +192,7 @@ namespace ReactiveUI.Winforms
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing && components != null)
             {
                 components.Dispose();
                 _disposables.Dispose();

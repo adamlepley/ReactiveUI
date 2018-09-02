@@ -11,31 +11,31 @@ using Splat;
 
 namespace ReactiveUI
 {
-    /*
-     * N.B. Why we have this evil global class
-     *
-     * In a WPF or UWP application, most commands must have the Dispatcher
-     * scheduler set, because notifications will end up being run on another thread;
-     * this happens most often in a CanExecute observable. Unfortunately, in a Unit
-     * Test framework, while the MS Test Unit runner will *set* the Dispatcher (so
-     * we can't even use the lack of its presence to determine whether we're in a
-     * test runner or not), none of the items queued to it will ever be executed
-     * during the unit test.
-     *
-     * Initially, I tried to plumb the ability to set the scheduler throughout the
-     * classes, but when you start building applications on top of that, having to
-     * have *every single* class have a default Scheduler property is really
-     * irritating, with either default making life difficult.
-     *
-     * This class also initializes a whole bunch of other stuff, including the IoC container,
-     * logging and error handling.
-     */
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <remarks>
+    /// N.B. Why we have this evil global class
+    /// In a WPF or UWP application, most commands must have the Dispatcher
+    /// scheduler set, because notifications will end up being run on another thread;
+    /// this happens most often in a CanExecute observable.Unfortunately, in a Unit
+    /// Test framework, while the MS Test Unit runner will *set* the Dispatcher (so
+    /// we can't even use the lack of its presence to determine whether we're in a
+    /// test runner or not), none of the items queued to it will ever be executed
+    /// during the unit test.
+    /// Initially, I tried to plumb the ability to set the scheduler throughout the
+    /// lasses, but when you start building applications on top of that, having to
+    /// have *every single * class have a default Scheduler property is really
+    /// irritating, with either default making life difficult.
+    /// This class also initializes a whole bunch of other stuff, including the IoC container,
+    /// logging and error handling.
+    /// </remarks>
     public static class RxApp
     {
         static RxApp()
         {
 #if !PORTABLE
-            _TaskpoolScheduler = TaskPoolScheduler.Default;
+            _taskpoolScheduler = TaskPoolScheduler.Default;
 #endif
 
             // Initialize this to false as most platforms do not support
@@ -82,22 +82,23 @@ namespace ReactiveUI
                 LogHost.Default.Warn("ReactiveUI acts differently under a test runner, see the docs\n");
                 LogHost.Default.Warn("for more info about what to expect");
 
-                _MainThreadScheduler = CurrentThreadScheduler.Instance;
+                _mainThreadScheduler = CurrentThreadScheduler.Instance;
                 return;
             }
 
             LogHost.Default.Info("Initializing to normal mode");
 
-            if (_MainThreadScheduler == null)
+            if (_mainThreadScheduler == null)
             {
-                _MainThreadScheduler = DefaultScheduler.Instance;
+                _mainThreadScheduler = DefaultScheduler.Instance;
             }
 
             SuspensionHost = new SuspensionHost();
         }
 
-        [ThreadStatic] private static IScheduler _UnitTestMainThreadScheduler;
-        private static IScheduler _MainThreadScheduler;
+        [ThreadStatic]
+        private static IScheduler _unitTestMainThreadScheduler;
+        private static IScheduler _mainThreadScheduler;
 
         /// <summary>
         /// MainThreadScheduler is the scheduler used to schedule work items that
@@ -107,7 +108,7 @@ namespace ReactiveUI
         /// </summary>
         public static IScheduler MainThreadScheduler
         {
-            get => _UnitTestMainThreadScheduler ?? _MainThreadScheduler;
+            get => _unitTestMainThreadScheduler ?? _mainThreadScheduler;
             set
             {
                 // N.B. The ThreadStatic dance here is for the unit test case -
@@ -117,18 +118,19 @@ namespace ReactiveUI
                 // then pass when you rerun them.
                 if (ModeDetector.InUnitTestRunner())
                 {
-                    _UnitTestMainThreadScheduler = value;
-                    _MainThreadScheduler = _MainThreadScheduler ?? value;
+                    _unitTestMainThreadScheduler = value;
+                    _mainThreadScheduler = _mainThreadScheduler ?? value;
                 }
                 else
                 {
-                    _MainThreadScheduler = value;
+                    _mainThreadScheduler = value;
                 }
             }
         }
 
-        [ThreadStatic] private static IScheduler _UnitTestTaskpoolScheduler;
-        private static IScheduler _TaskpoolScheduler;
+        [ThreadStatic]
+        private static IScheduler _unitTestTaskpoolScheduler;
+        private static IScheduler _taskpoolScheduler;
 
         /// <summary>
         /// TaskpoolScheduler is the scheduler used to schedule work items to
@@ -137,22 +139,22 @@ namespace ReactiveUI
         /// </summary>
         public static IScheduler TaskpoolScheduler
         {
-            get => _UnitTestTaskpoolScheduler ?? _TaskpoolScheduler;
+            get => _unitTestTaskpoolScheduler ?? _taskpoolScheduler;
             set
             {
                 if (ModeDetector.InUnitTestRunner())
                 {
-                    _UnitTestTaskpoolScheduler = value;
-                    _TaskpoolScheduler = _TaskpoolScheduler ?? value;
+                    _unitTestTaskpoolScheduler = value;
+                    _taskpoolScheduler = _taskpoolScheduler ?? value;
                 }
                 else
                 {
-                    _TaskpoolScheduler = value;
+                    _taskpoolScheduler = value;
                 }
             }
         }
 
-        private static IObserver<Exception> _DefaultExceptionHandler;
+        private static IObserver<Exception> _defaultExceptionHandler;
 
         /// <summary>
         /// This Observer is signalled whenever an object that has a
@@ -162,12 +164,13 @@ namespace ReactiveUI
         /// </summary>
         public static IObserver<Exception> DefaultExceptionHandler
         {
-            get => _DefaultExceptionHandler;
-            set => _DefaultExceptionHandler = value;
+            get => _defaultExceptionHandler;
+            set => _defaultExceptionHandler = value;
         }
 
-        [ThreadStatic] private static ISuspensionHost _UnitTestSuspensionHost;
-        private static ISuspensionHost _SuspensionHost;
+        [ThreadStatic]
+        private static ISuspensionHost _unitTestSuspensionHost;
+        private static ISuspensionHost _suspensionHost;
 
         /// <summary>
         /// This returns / allows you to override the current SuspensionHost, a
@@ -178,7 +181,7 @@ namespace ReactiveUI
         {
             get
             {
-                var host = _UnitTestSuspensionHost ?? _SuspensionHost;
+                var host = _unitTestSuspensionHost ?? _suspensionHost;
                 return host;
             }
 
@@ -186,18 +189,19 @@ namespace ReactiveUI
             {
                 if (ModeDetector.InUnitTestRunner())
                 {
-                    _UnitTestSuspensionHost = value;
-                    _SuspensionHost = _SuspensionHost ?? value;
+                    _unitTestSuspensionHost = value;
+                    _suspensionHost = _suspensionHost ?? value;
                 }
                 else
                 {
-                    _SuspensionHost = value;
+                    _suspensionHost = value;
                 }
             }
         }
 
-        [ThreadStatic] private static bool? _UnitTestSupportsRangeNotifications;
-        private static bool _SupportsRangeNotifications;
+        [ThreadStatic]
+        private static bool? _unitTestSupportsRangeNotifications;
+        private static bool _supportsRangeNotifications;
 
         /// <summary>
         /// Returns whether your UI framework is brain-dead or not and will blow
@@ -205,7 +209,7 @@ namespace ReactiveUI
         /// </summary>
         public static bool SupportsRangeNotifications
         {
-            get => _UnitTestSupportsRangeNotifications ?? _SupportsRangeNotifications;
+            get => _unitTestSupportsRangeNotifications ?? _supportsRangeNotifications;
             set
             {
                 // N.B. The ThreadStatic dance here is for the unit test case -
@@ -215,12 +219,12 @@ namespace ReactiveUI
                 // then pass when you rerun them.
                 if (ModeDetector.InUnitTestRunner())
                 {
-                    _UnitTestSupportsRangeNotifications = value;
-                    _SupportsRangeNotifications = value;
+                    _unitTestSupportsRangeNotifications = value;
+                    _supportsRangeNotifications = value;
                 }
                 else
                 {
-                    _SupportsRangeNotifications = value;
+                    _supportsRangeNotifications = value;
                 }
             }
         }

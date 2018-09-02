@@ -24,8 +24,8 @@ namespace ReactiveUI
     /// Interface used to extract a common API between <see cref="UIKit.UITableView"/>
     /// and <see cref="UIKit.UICollectionView"/>.
     /// </summary>
-    /// <typeparam name="TUIView"></typeparam>
-    /// <typeparam name="TUIViewCell"></typeparam>
+    /// <typeparam name="TUIView">The ui view type.</typeparam>
+    /// <typeparam name="TUIViewCell">The ui view call type.</typeparam>
     internal interface IUICollViewAdapter<TUIView, TUIViewCell>
     {
         IObservable<bool> IsReloadingData { get; }
@@ -95,7 +95,7 @@ namespace ReactiveUI
             _sectionInfoDisposable = new SerialDisposable();
             _mainDisposables.Add(_sectionInfoDisposable);
             _pendingChanges = new List<Tuple<int, PendingChange>>();
-            _sectionInfo = new TSectionInfo[0];
+            _sectionInfo = Array.Empty<TSectionInfo>();
 
             _mainDisposables.Add(
                 this
@@ -115,15 +115,12 @@ namespace ReactiveUI
                     ex => this.Log().ErrorException("Error occurred when SectionInfo changed.", ex)));
         }
 
-        private bool IsDebugEnabled
-        {
-            get { return this.Log().Level <= LogLevel.Debug; }
-        }
+        private bool IsDebugEnabled => this.Log().Level <= LogLevel.Debug;
 
         public IReadOnlyList<TSectionInfo> SectionInfo
         {
-            get { return _sectionInfo; }
-            set { this.RaiseAndSetIfChanged(ref _sectionInfo, value); }
+            get => _sectionInfo;
+            set => this.RaiseAndSetIfChanged(ref _sectionInfo, value);
         }
 
         public int NumberOfSections()
@@ -286,7 +283,8 @@ namespace ReactiveUI
                             _ => isReloading,
                             _ => Observable<Unit>.Empty,
                             (reloading, changeDetails) => new { Change = changeDetails.Change, Section = changeDetails.Section })
-                        .Subscribe(y =>
+                        .Subscribe(
+                            y =>
                         {
                             VerifyOnMainThread();
 
@@ -502,30 +500,15 @@ namespace ReactiveUI
                 _newStartingIndex = ea.NewStartingIndex;
             }
 
-            public NotifyCollectionChangedAction Action
-            {
-                get { return _action; }
-            }
+            public NotifyCollectionChangedAction Action => _action;
 
-            public IList OldItems
-            {
-                get { return _oldItems; }
-            }
+            public IList OldItems => _oldItems;
 
-            public IList NewItems
-            {
-                get { return _newItems; }
-            }
+            public IList NewItems => _newItems;
 
-            public int OldStartingIndex
-            {
-                get { return _oldStartingIndex; }
-            }
+            public int OldStartingIndex => _oldStartingIndex;
 
-            public int NewStartingIndex
-            {
-                get { return _newStartingIndex; }
-            }
+            public int NewStartingIndex => _newStartingIndex;
         }
     }
 }

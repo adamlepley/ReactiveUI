@@ -171,13 +171,13 @@ namespace ReactiveUI.Tests.Winforms
         public void CommandBindByNameWireup()
         {
             var vm = new WinformCommandBindViewModel();
-            var view = new WinformCommandBindView() { ViewModel = vm };
+            var view = new WinformCommandBindView { ViewModel = vm };
             var fixture = new CommandBinderImplementation();
 
             var invokeCount = 0;
             vm.Command1.Subscribe(_ => invokeCount += 1);
 
-            var disp = fixture.BindCommand(vm, view, x => x.Command1, x=>x.Command1);
+            var disp = fixture.BindCommand(vm, view, x => x.Command1, x => x.Command1);
 
             view.Command1.PerformClick();
 
@@ -196,7 +196,7 @@ namespace ReactiveUI.Tests.Winforms
         public void CommandBindToExplicitEventWireup()
         {
             var vm = new WinformCommandBindViewModel();
-            var view = new WinformCommandBindView() { ViewModel = vm };
+            var view = new WinformCommandBindView { ViewModel = vm };
             var fixture = new CommandBinderImplementation();
 
             var invokeCount = 0;
@@ -244,20 +244,20 @@ namespace ReactiveUI.Tests.Winforms
 
     public class WinformCommandBindViewModel : ReactiveObject
     {
-        private ReactiveCommand<Unit, Unit> _Command1;
+        private ReactiveCommand<Unit, Unit> _command1;
 
         public ReactiveCommand<Unit, Unit> Command1
         {
-            get => _Command1;
-            set => this.RaiseAndSetIfChanged(ref _Command1, value);
+            get => _command1;
+            set => this.RaiseAndSetIfChanged(ref _command1, value);
         }
 
-        private ReactiveCommand<Unit, Unit> _Command2;
+        private ReactiveCommand<Unit, Unit> _command2;
 
         public ReactiveCommand<Unit, Unit> Command2
         {
-            get => _Command2;
-            set => this.RaiseAndSetIfChanged(ref _Command2, value);
+            get => _command2;
+            set => this.RaiseAndSetIfChanged(ref _command2, value);
         }
 
         public WinformCommandBindViewModel()

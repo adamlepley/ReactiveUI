@@ -82,7 +82,7 @@ namespace ReactiveUI.Tests
         [Fact]
         public void HandlersAreExecutedOnHandlerScheduler()
         {
-            (new TestScheduler()).With(sched =>
+            new TestScheduler().With(sched =>
             {
                 var interaction = new Interaction<Unit, string>(sched);
 

@@ -10,6 +10,7 @@ using System.Reflection;
 using Splat;
 using Xamarin.Forms;
 
+#pragma warning disable RCS1090 // Call 'ConfigureAwait(false)'.
 namespace ReactiveUI.XamForms
 {
     public class RoutedViewHost : NavigationPage, IActivatable
@@ -35,7 +36,7 @@ namespace ReactiveUI.XamForms
                 bool popToRootPending = false;
                 bool userInstigated = false;
 
-                d (this.WhenAnyObservable (x => x.Router.NavigationChanged)
+                d(this.WhenAnyObservable(x => x.Router.NavigationChanged)
                     .Where(_ => Router.NavigationStack.Count == 0)
                     .Select(x =>
                     {
@@ -45,12 +46,12 @@ namespace ReactiveUI.XamForms
                         popToRootPending = true;
                         return x;
                     })
-                    .Subscribe ());
+                    .Subscribe());
 
                 var previousCount = this.WhenAnyObservable(x => x.Router.NavigationChanged).CountChanged().Select(_ => this.Router.NavigationStack.Count).StartWith(this.Router.NavigationStack.Count);
                 var currentCount = previousCount.Skip(1);
 
-                d (Observable.Zip(previousCount, currentCount, (previous, current) => new { Delta = previous - current, Current = current })
+                d(Observable.Zip(previousCount, currentCount, (previous, current) => new { Delta = previous - current, Current = current })
                     .Where(_ => !userInstigated)
                     .Where(x => x.Delta > 0)
                     .SelectMany(
@@ -190,3 +191,4 @@ namespace ReactiveUI.XamForms
         }
     }
 }
+#pragma warning restore RCS1090 // Call 'ConfigureAwait(false)'.

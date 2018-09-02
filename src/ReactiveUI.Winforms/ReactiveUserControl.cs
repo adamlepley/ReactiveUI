@@ -15,12 +15,14 @@ namespace ReactiveUI.Winforms
             InitializeComponent();
         }
 
+        /// <inheritdoc/>
         [Category("ReactiveUI")]
         [Description("The ViewModel.")]
         [Bindable(true)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public TViewModel ViewModel { get; set; }
 
+        /// <inheritdoc/>
         object IViewFor.ViewModel
         {
             get => ViewModel;
@@ -33,7 +35,7 @@ namespace ReactiveUI.Winforms
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing && components != null)
             {
                 components.Dispose();
             }

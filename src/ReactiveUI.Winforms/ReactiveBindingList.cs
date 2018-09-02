@@ -18,20 +18,24 @@ namespace ReactiveUI.Winforms.Legacy
         ICollection, IEnumerable, IList, IBindingList,
         ICancelAddNew, IRaiseItemChangedEvents
     {
-        public ReactiveBindingList() : this(null)
+        public ReactiveBindingList()
+            : this(null)
         {
         }
 
+        /// <inheritdoc/>
         public void CancelNew(int itemIndex)
         {
             // throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public void EndNew(int itemIndex)
         {
             // throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public bool RaisesItemChangedEvents => ChangeTrackingEnabled;
 
         /// <summary>
@@ -43,6 +47,7 @@ namespace ReactiveUI.Winforms.Legacy
         {
         }
 
+        /// <inheritdoc/>
         protected override void RaiseCollectionChanged(NotifyCollectionChangedEventArgs e)
         {
             base.RaiseCollectionChanged(e);
@@ -52,54 +57,70 @@ namespace ReactiveUI.Winforms.Legacy
             }
         }
 
+        /// <inheritdoc/>
         public object AddNew()
         {
             return Activator.CreateInstance<T>();
         }
 
+        /// <inheritdoc/>
         public void AddIndex(PropertyDescriptor property)
         {
             throw new NotSupportedException();
         }
 
+        /// <inheritdoc/>
         public void ApplySort(PropertyDescriptor property, ListSortDirection direction)
         {
             throw new NotSupportedException();
         }
 
+        /// <inheritdoc/>
         public int Find(PropertyDescriptor property, object key)
         {
             throw new NotSupportedException();
         }
 
+        /// <inheritdoc/>
         public void RemoveIndex(PropertyDescriptor property)
         {
             throw new NotSupportedException();
         }
 
+        /// <inheritdoc/>
         public void RemoveSort()
         {
             throw new NotSupportedException();
         }
 
+        /// <inheritdoc/>
         public bool AllowNew => true;
 
+        /// <inheritdoc/>
         public bool AllowEdit => true;
 
+        /// <inheritdoc/>
         public bool AllowRemove => true;
 
+        /// <inheritdoc/>
         public bool SupportsChangeNotification => true;
 
+        /// <inheritdoc/>
         public bool SupportsSearching => false;
 
+        /// <inheritdoc/>
         public bool SupportsSorting => false;
 
+        /// <inheritdoc/>
         public bool IsSorted => false;
 
+        /// <inheritdoc/>
         public PropertyDescriptor SortProperty => null;
 
+        /// <inheritdoc/>
         public ListSortDirection SortDirection => ListSortDirection.Ascending;
 
+        /// <inheritdoc/>
         public event ListChangedEventHandler ListChanged;
     }
 }

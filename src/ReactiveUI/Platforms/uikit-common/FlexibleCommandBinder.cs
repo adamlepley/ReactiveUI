@@ -15,6 +15,7 @@ namespace ReactiveUI
 {
     public abstract class FlexibleCommandBinder : ICreatesCommandBinding
     {
+        /// <inheritdoc/>
         public int GetAffinityForObject(Type type, bool hasEventTarget)
         {
             if (hasEventTarget)
@@ -36,6 +37,7 @@ namespace ReactiveUI
             return typeProperties.Affinity;
         }
 
+        /// <inheritdoc/>
         public IDisposable BindCommandToObject(ICommand command, object target, IObservable<object> commandParameter)
         {
             var type = target.GetType();
@@ -55,6 +57,7 @@ namespace ReactiveUI
             return typeProperties.CreateBinding(command, target, commandParameter);
         }
 
+        /// <inheritdoc/>
         public IDisposable BindCommandToObject<TEventArgs>(ICommand command, object target, IObservable<object> commandParameter, string eventName)
             where TEventArgs : EventArgs
         {

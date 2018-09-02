@@ -2,15 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using ReactiveUI;
+using ReactiveUI.Tests;
+using Splat;
+
+using Xunit;
+
 namespace ReactiveUI.Tests
 {
-    using Splat;
-    using TestViewModels;
-    using TestViews;
-    using Xunit;
-
-    namespace TestViewModels
-    {
         public class ExampleViewModel : ReactiveObject
         {
         }
@@ -30,11 +29,6 @@ namespace ReactiveUI.Tests
         public class ViewModelWithWeirdName : ReactiveObject
         {
         }
-    }
-
-    namespace TestViews
-    {
-        using TestViewModels;
 
         public class ExampleView : ReactiveUserControl<ExampleViewModel>
         {
@@ -65,10 +59,7 @@ namespace ReactiveUI.Tests
         {
             public static int Instances;
 
-            public SingleInstanceExampleView()
-            {
-                Instances++;
-            }
+            public SingleInstanceExampleView() { Instances++; }
         }
 
         [ViewContract("contract")]
@@ -77,108 +68,104 @@ namespace ReactiveUI.Tests
         {
             public static int Instances;
 
-            public SingleInstanceWithContractExampleView()
-            {
-                Instances++;
-            }
+            public SingleInstanceWithContractExampleView() { Instances++; }
         }
 
         public class ViewWithoutMatchingName : ReactiveUserControl<ViewModelWithWeirdName>
         {
         }
-    }
 
-    public class DependencyResolverTests
-    {
-        private readonly IMutableDependencyResolver _resolver;
-
-        public DependencyResolverTests()
+        public class DependencyResolverTests
         {
-            _resolver = new ModernDependencyResolver();
-            _resolver.InitializeSplat();
-            _resolver.InitializeReactiveUI();
-            _resolver.RegisterViewsForViewModels(GetType().Assembly);
-        }
+            private readonly IMutableDependencyResolver _resolver;
 
-        [WpfFact]
-        public void RegisterViewsForViewModelShouldRegisterAllViews()
-        {
-            using (_resolver.WithResolver())
+            public DependencyResolverTests()
             {
-                Assert.Single(_resolver.GetServices<IViewFor<ExampleViewModel>>());
-                Assert.Single(_resolver.GetServices<IViewFor<AnotherViewModel>>());
-                Assert.Single(_resolver.GetServices<IViewFor<ViewModelWithWeirdName>>());
+                _resolver = new ModernDependencyResolver();
+                _resolver.InitializeSplat();
+                _resolver.InitializeReactiveUI();
+                _resolver.RegisterViewsForViewModels(GetType().Assembly);
             }
-        }
 
-        [WpfFact]
-        public void RegisterViewsForViewModelShouldIncludeContracts()
-        {
-            using (_resolver.WithResolver())
+            [WpfFact]
+            public void RegisterViewsForViewModelShouldRegisterAllViews()
             {
-                Assert.Single(_resolver.GetServices(typeof(IViewFor<ExampleViewModel>), "contract"));
+                using (_resolver.WithResolver())
+                {
+                    Assert.Single(_resolver.GetServices<IViewFor<ExampleViewModel>>());
+                    Assert.Single(_resolver.GetServices<IViewFor<AnotherViewModel>>());
+                    Assert.Single(_resolver.GetServices<IViewFor<ViewModelWithWeirdName>>());
+                }
             }
-        }
 
-        [WpfFact]
-        public void NonContractRegistrationsShouldResolveCorrectly()
-        {
-            using (_resolver.WithResolver())
+            [WpfFact]
+            public void RegisterViewsForViewModelShouldIncludeContracts()
             {
-                Assert.IsType<AnotherView>(_resolver.GetService<IViewFor<AnotherViewModel>>());
+                using (_resolver.WithResolver())
+                {
+                    Assert.Single(_resolver.GetServices(typeof(IViewFor<ExampleViewModel>), "contract"));
+                }
             }
-        }
 
-        [WpfFact]
-        public void ContractRegistrationsShouldResolveCorrectly()
-        {
-            using (_resolver.WithResolver())
+            [WpfFact]
+            public void NonContractRegistrationsShouldResolveCorrectly()
             {
-                Assert.IsType<ContractExampleView>(_resolver.GetService(typeof(IViewFor<ExampleViewModel>), "contract"));
+                using (_resolver.WithResolver())
+                {
+                    Assert.IsType<AnotherView>(_resolver.GetService<IViewFor<AnotherViewModel>>());
+                }
             }
-        }
 
-        [Fact]
-        public void SingleInstanceViewsShouldOnlyBeInstantiatedWhenRequested()
-        {
-            using (_resolver.WithResolver())
+            [WpfFact]
+            public void ContractRegistrationsShouldResolveCorrectly()
             {
-                Assert.Equal(0, NeverUsedView.Instances);
+                using (_resolver.WithResolver())
+                {
+                    Assert.IsType<ContractExampleView>(_resolver.GetService(typeof(IViewFor<ExampleViewModel>), "contract"));
+                }
             }
-        }
 
-        [WpfFact]
-        public void SingleInstanceViewsShouldOnlyBeInstantiatedOnce()
-        {
-            using (_resolver.WithResolver())
+            [Fact]
+            public void SingleInstanceViewsShouldOnlyBeInstantiatedWhenRequested()
             {
-                Assert.Equal(0, SingleInstanceExampleView.Instances);
-
-                var instance = _resolver.GetService(typeof(IViewFor<SingleInstanceExampleViewModel>));
-                Assert.Equal(1, SingleInstanceExampleView.Instances);
-
-                var instance2 = _resolver.GetService(typeof(IViewFor<SingleInstanceExampleViewModel>));
-                Assert.Equal(1, SingleInstanceExampleView.Instances);
-
-                Assert.Same(instance, instance2);
+                using (_resolver.WithResolver())
+                {
+                    Assert.Equal(0, NeverUsedView.Instances);
+                }
             }
-        }
 
-        [WpfFact]
-        public void SingleInstanceViewsWithContractShouldResolveCorrectly()
-        {
-            using (_resolver.WithResolver())
+            [WpfFact]
+            public void SingleInstanceViewsShouldOnlyBeInstantiatedOnce()
             {
-                Assert.Equal(0, SingleInstanceWithContractExampleView.Instances);
+                using (_resolver.WithResolver())
+                {
+                    Assert.Equal(0, SingleInstanceExampleView.Instances);
 
-                var instance = _resolver.GetService(typeof(IViewFor<SingleInstanceExampleViewModel>), "contract");
-                Assert.Equal(1, SingleInstanceWithContractExampleView.Instances);
+                    var instance = _resolver.GetService(typeof(IViewFor<SingleInstanceExampleViewModel>));
+                    Assert.Equal(1, SingleInstanceExampleView.Instances);
 
-                var instance2 = _resolver.GetService(typeof(IViewFor<SingleInstanceExampleViewModel>), "contract");
-                Assert.Equal(1, SingleInstanceWithContractExampleView.Instances);
+                    var instance2 = _resolver.GetService(typeof(IViewFor<SingleInstanceExampleViewModel>));
+                    Assert.Equal(1, SingleInstanceExampleView.Instances);
 
-                Assert.Same(instance, instance2);
+                    Assert.Same(instance, instance2);
+                }
             }
-        }
+
+            [WpfFact]
+            public void SingleInstanceViewsWithContractShouldResolveCorrectly()
+            {
+                using (_resolver.WithResolver())
+                {
+                    Assert.Equal(0, SingleInstanceWithContractExampleView.Instances);
+
+                    var instance = _resolver.GetService(typeof(IViewFor<SingleInstanceExampleViewModel>), "contract");
+                    Assert.Equal(1, SingleInstanceWithContractExampleView.Instances);
+
+                    var instance2 = _resolver.GetService(typeof(IViewFor<SingleInstanceExampleViewModel>), "contract");
+                    Assert.Equal(1, SingleInstanceWithContractExampleView.Instances);
+
+                    Assert.Same(instance, instance2);
+                }
+            }
     }
 }

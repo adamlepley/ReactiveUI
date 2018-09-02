@@ -12,15 +12,17 @@ namespace ReactiveUI.XamForms
 {
     public class ActivationForViewFetcher : IActivationForViewFetcher
     {
+        /// <inheritdoc/>
         public int GetAffinityForView(Type view)
         {
             return
-                (typeof(Page).GetTypeInfo().IsAssignableFrom(view.GetTypeInfo())) ||
-                (typeof(View).GetTypeInfo().IsAssignableFrom(view.GetTypeInfo())) ||
-                (typeof(Cell).GetTypeInfo().IsAssignableFrom(view.GetTypeInfo()))
+                typeof(Page).GetTypeInfo().IsAssignableFrom(view.GetTypeInfo()) ||
+                typeof(View).GetTypeInfo().IsAssignableFrom(view.GetTypeInfo()) ||
+                typeof(Cell).GetTypeInfo().IsAssignableFrom(view.GetTypeInfo())
                 ? 10 : 0;
         }
 
+        /// <inheritdoc/>
         public IObservable<bool> GetActivationForView(IActivatable view)
         {
             var activation =

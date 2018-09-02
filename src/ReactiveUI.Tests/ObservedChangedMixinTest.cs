@@ -21,10 +21,10 @@ namespace ReactiveUI.Tests
         [Fact]
         public void GetValueShouldActuallyReturnTheValue()
         {
-            var input = new[] { "Foo", "Bar", "Baz"};
+            var input = new[] { "Foo", "Bar", "Baz" };
             var output = new List<string>();
 
-            (new TestScheduler()).With(sched =>
+            new TestScheduler().With(sched =>
             {
                 var fixture = new TestFixture();
 
@@ -48,9 +48,9 @@ namespace ReactiveUI.Tests
         [Fact]
         public void GetValueShouldReturnTheValueFromAPath()
         {
-            var input = new HostTestFixture()
+            var input = new HostTestFixture
             {
-                Child = new TestFixture() { IsNotNullString = "Foo"},
+                Child = new TestFixture { IsNotNullString = "Foo" },
             };
 
             Expression<Func<HostTestFixture, string>> expression = x => x.Child.IsNotNullString;
@@ -62,13 +62,13 @@ namespace ReactiveUI.Tests
         [Fact]
         public void SetValuePathSmokeTest()
         {
-            var output = new HostTestFixture()
+            var output = new HostTestFixture
             {
-                Child = new TestFixture() { IsNotNullString = "Foo"},
+                Child = new TestFixture { IsNotNullString = "Foo" },
             };
 
             Expression<Func<TestFixture, string>> expression = x => x.IsOnlyOneWord;
-            var fixture = new ObservedChange<TestFixture, string>(new TestFixture() { IsOnlyOneWord = "Bar" }, expression.Body);
+            var fixture = new ObservedChange<TestFixture, string>(new TestFixture { IsOnlyOneWord = "Bar" }, expression.Body);
 
             fixture.SetValueToProperty(output, x => x.Child.IsNotNullString);
             Assert.Equal("Bar", output.Child.IsNotNullString);
@@ -77,10 +77,10 @@ namespace ReactiveUI.Tests
         [Fact]
         public void BindToSmokeTest()
         {
-            (new TestScheduler()).With(sched =>
+            new TestScheduler().With(sched =>
             {
                 var input = new ScheduledSubject<string>(sched);
-                var fixture = new HostTestFixture() { Child = new TestFixture() };
+                var fixture = new HostTestFixture { Child = new TestFixture() };
 
                 input.BindTo(fixture, x => x.Child.IsNotNullString);
 
@@ -99,10 +99,10 @@ namespace ReactiveUI.Tests
         [Fact]
         public void DisposingDisconnectsTheBindTo()
         {
-            (new TestScheduler()).With(sched =>
+            new TestScheduler().With(sched =>
             {
                 var input = new ScheduledSubject<string>(sched);
-                var fixture = new HostTestFixture() { Child = new TestFixture() };
+                var fixture = new HostTestFixture { Child = new TestFixture() };
 
                 var subscription = input.BindTo(fixture, x => x.Child.IsNotNullString);
 
@@ -123,10 +123,10 @@ namespace ReactiveUI.Tests
         [Fact]
         public void BindToIsNotFooledByIntermediateObjectSwitching()
         {
-            (new TestScheduler()).With(sched =>
+            new TestScheduler().With(sched =>
             {
                 var input = new ScheduledSubject<string>(sched);
-                var fixture = new HostTestFixture() { Child = new TestFixture() };
+                var fixture = new HostTestFixture { Child = new TestFixture() };
 
                 input.BindTo(fixture, x => x.Child.IsNotNullString);
 
@@ -157,7 +157,7 @@ namespace ReactiveUI.Tests
             //
             // If this test executes through without hanging then
             // the problem has been fixed.
-            (new TestScheduler()).With(sched =>
+            new TestScheduler().With(sched =>
             {
                 var fixturea = new TestFixture();
                 var fixtureb = new TestFixture();
@@ -229,7 +229,8 @@ namespace ReactiveUI.Tests
                 canStart);
 
             RemovePlayer = ReactiveCommand.Create<string>(player => Players.Remove(player));
-            var canAddPlayer = this.WhenAnyValue(x => x.Players.Count, x => x.NewPlayerName,
+            var canAddPlayer = this.WhenAnyValue(x => x.Players.Count,
+                x => x.NewPlayerName,
                 (count, newPlayerName) => count < 7 && !string.IsNullOrWhiteSpace(newPlayerName) && !Players.Contains(newPlayerName));
             AddPlayer = ReactiveCommand.Create(() =>
             {

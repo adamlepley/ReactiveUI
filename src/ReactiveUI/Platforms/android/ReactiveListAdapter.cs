@@ -33,26 +33,31 @@ namespace ReactiveUI.Legacy
             _inner = _list.Changed.Subscribe(_ => NotifyDataSetChanged());
         }
 
+        /// <inheritdoc/>
         public override TViewModel this[int index]
         {
             get { return _list[index]; }
         }
 
+        /// <inheritdoc/>
         public override long GetItemId(int position)
         {
             return _list[position].GetHashCode();
         }
 
+        /// <inheritdoc/>
         public override bool HasStableIds
         {
             get { return true; }
         }
 
+        /// <inheritdoc/>
         public override int Count
         {
             get { return _list.Count; }
         }
 
+        /// <inheritdoc/>
         public override View GetView(int position, View convertView, ViewGroup parent)
         {
             View theView = convertView;
@@ -77,6 +82,7 @@ namespace ReactiveUI.Legacy
             return theView;
         }
 
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);

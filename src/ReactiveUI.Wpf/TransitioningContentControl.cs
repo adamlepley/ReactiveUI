@@ -27,14 +27,18 @@ namespace ReactiveUI
         /// <see cref="DependencyProperty"/> for the <see cref="Transition"/> property.
         /// </summary>
         public static readonly DependencyProperty TransitionProperty = DependencyProperty.RegisterAttached(
-            "Transition", typeof(TransitionType), typeof(TransitioningContentControl),
+            "Transition",
+            typeof(TransitionType),
+            typeof(TransitioningContentControl),
             new PropertyMetadata(TransitionType.Fade, OnTransitionChanged));
 
         /// <summary>
         /// <see cref="DependencyProperty"/> for the <see cref="TransitionPart"/> property.
         /// </summary>
         public static readonly DependencyProperty TransitionPartProperty =
-            DependencyProperty.RegisterAttached("TransitionPart", typeof(TransitionPartType),
+            DependencyProperty.RegisterAttached(
+                "TransitionPart",
+                typeof(TransitionPartType),
                 typeof(TransitioningContentControl),
                 new PropertyMetadata(TransitionPartType.OutIn, OnTransitionPartChanged));
 
@@ -156,10 +160,10 @@ namespace ReactiveUI
         }
 
         /// <summary>
-        /// Called when the value of the <see cref="P:System.Windows.Controls.ContentControl.Content"/> property changes.
+        /// Called when the value of the <see cref="ContentControl.Content"/> property changes.
         /// </summary>
-        /// <param name="oldContent">The old value of the <see cref="P:System.Windows.Controls.ContentControl.Content"/> property.</param>
-        /// <param name="newContent">The new value of the <see cref="P:System.Windows.Controls.ContentControl.Content"/> property.</param>
+        /// <param name="oldContent">The old value of the <see cref="ContentControl.Content"/> property.</param>
+        /// <param name="newContent">The new value of the <see cref="ContentControl.Content"/> property.</param>
         protected override void OnContentChanged(object oldContent, object newContent)
         {
             QueueTransition(oldContent, newContent);
@@ -171,7 +175,8 @@ namespace ReactiveUI
             var transitioningContentControl = (TransitioningContentControl)d;
             var transition = (TransitionType)e.NewValue;
 
-            transitioningContentControl._canSplitTransition = VerifyCanSplitTransition(transition,
+            transitioningContentControl._canSplitTransition = VerifyCanSplitTransition(
+                transition,
                 transitioningContentControl.TransitionPart);
         }
 
@@ -257,8 +262,7 @@ namespace ReactiveUI
                         // Wire up the first transition to start the second transition when it's complete.
                         startingTransitionName = Transition + "Transition_" + TransitionPartType.Out;
                         var transitionOut = GetTransitionStoryboardByName(startingTransitionName);
-                        transitionOut.Completed +=
-                            delegate { VisualStateManager.GoToState(this, transitionInName, false); };
+                        transitionOut.Completed += (sender, args) => VisualStateManager.GoToState(this, transitionInName, false);
                         StartingTransition = transitionOut;
                     }
                     else
@@ -304,6 +308,7 @@ namespace ReactiveUI
             return transition;
         }
 
+        /// <inheritdoc/>
         public override void OnApplyTemplate()
         {
             // Wire up all of the various control parts.
